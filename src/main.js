@@ -1,68 +1,111 @@
-import ready from 'document-ready'
+import docReady from 'document-ready';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import KML from 'ol/format/KML';
 import {  Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
 import BingMaps from 'ol/source/BingMaps.js';
 import VectorSource from 'ol/source/Vector.js';
+import Style from 'ol/style/Style';
+import Stroke from 'ol/style/Stroke';
+import { children as projetos } from '../data-src/projetos'; // para atualizar data-src/projetos.jso e colocalizados.json -> 'npm run files'
+import * as colocalizados from  '../data-src/colocalizados' 
+import Fill from 'ol/style/Fill';
+import { isNumber } from 'util';
 
-import { children as projetos } from '../data-src/projetos' // para atualizar data-src/projetos.json -> 'npm run files'
+docReady(() => {
 
-ready(() => {
+	/*
+	navigation
+	*/
+	function createList(){
+		let cleanList = [] 
+		let list = "<option value='0'>-- Escolha --</option>"
 
-// // Creating a variable with initial value:
-// var v = new Reactive(20);
+		for (let projeto of Object.values(colocalizados)){ 
+			if(isNumber(projeto.id)){
+				cleanList.push(projeto)
+			}
+		}
 
-// // Snapshot the value using 'get':
-// console.log("v:", v.get()); // prints 20
+		cleanList.forEach( item => {
+			list += '<option '+ "class='nav-projeto' " +"value='" +  item.id + "'>" + item.nome + '</option>'
+		})
+		let projetos = document.getElementById('projetos')
+		projetos.innerHTML = list
+	}
 
-// // Update the value using 'set':
-// v.set(10);
+	function chooseFromlist(){
+		document.getElementById("projetos").onchange = () => {
+			let selObj = document.getElementById("projetos")
+			let idprojeto = selObj.options[selObj.selectedIndex].value
+			console.log(idprojeto) // id do projeto
+		}
+	}
 
-// console.log("v:", v.get()); // now prints 10
+	/*
+	map
+	*/
+	function returnLayers(){
+		try{
+			const app_url = process.env.APP_URL 
+			let kmlLayers = []
 
+			projetos.forEach(projeto => { 
+				const files = projeto.children
+				files.forEach( file => {
 
-	const app_url = process.env.APP_URL 
-	let kmlLayers = []
+					const source = new VectorSource({
+						url: app_url + file.path,
+						format: new KML({ extractStyles: false })
+					})
 
-	projetos.forEach(projeto => { 
-		const files = projeto.children
-		files.forEach( file => {
-			if(file.extension === '.kml'){
-				kmlLayers.push({
-					files: files,
-					layer: new VectorLayer({ 
-						source: new VectorSource({
-							url: app_url + file.path,
-							format: new KML()
+					const style = new Style({
+						stroke: new Stroke({
+							color: setRandomColor(),
+							width: 1.5
+						}),
+						fill: new Fill({
+							color: [255, 255, 255, 0.25]
 						})
 					})
+
+					if(file.extension === '.kml'){
+						kmlLayers.push({
+							files: files,
+							layer: new VectorLayer({ 
+								source: source,
+								style: style
+							})
+						})
+					}
 				})
-			}
-		})
-	})	
+			})
 
-	const layers = kmlLayers.map(vector => vector.layer)
+			const layers = kmlLayers.map(vector => vector.layer)
 
-	const bing = new TileLayer({
-		source: new BingMaps({
-		imagerySet: 'AerialWithLabels',
-		key: process.env.BING_API_KEY
-		})
-	});
+			// base layer
+			const bing = new TileLayer({
+				source: new BingMaps({
+				imagerySet: 'CanvasGray',
+				culture: 'pt-BR',
+				key: process.env.BING_API_KEY
+				})
+			});
+			layers.push(bing)
 
-	layers.push(bing)
+			return layers.reverse()
+		}
+		catch (error) { console.error(error) } 
+	}
 
-	let map = new Map({
-		layers: layers.reverse(),
-		target: document.getElementById('map'),
-		view: new View({
-			center: [ -5193050.487352, -2693402.011056 ],
-			projection: 'EPSG:3857',
-			zoom: 13
-		})
-	})
-
+	function setRandomColor() {
+		let letters = '0123456789ABCDEF';
+		let color = '#';
+		for (var i = 0; i < 6; i++) {
+			color += letters[Math.floor(Math.random() * 16)]
+		}
+			return color
+	}
 
 	function displayFeatureInfo(pixel) {
 		let features = [];
@@ -72,7 +115,6 @@ ready(() => {
 			let info = [];
 			features.forEach(feature => { 
 				info.push(feature.get('Layer')) 
-				// console.log(feature)
 			})
 
 			document.getElementById('info').innerHTML = info.join(', ') || '(unknown)';
@@ -81,22 +123,41 @@ ready(() => {
 			document.getElementById('info').innerHTML = '&nbsp;';
 			map.getTarget().style.cursor = '';
 		}
-	};
+	}
+
+	/*
+	render map
+	*/
+
+	let map = new Map({
+		layers: returnLayers(),
+		target: document.getElementById('map'),
+		view: new View({
+			center: [ -5193050.487352, -2693402.011056 ],
+			projection: 'EPSG:3857',
+			zoom: 13
+		})
+	})
 
 	map.on('pointermove', function(evt) {
 		if (evt.dragging) {
-			// console.log('dragging:')
-			// console.log(evt.coordinate)
 			return;
 		}
 		let pixel = map.getEventPixel(evt.originalEvent);
-			// console.log(evt.coordinate)
 			displayFeatureInfo(pixel);
 	});
 
-	map.on('click', function(evt) {
+	map.on('click', evt => {
 		console.log('clicked: ')
+		console.log(evt)	
 		displayFeatureInfo(evt.pixel);
 	})
+
+
+	/*
+	render/watch navigation 
+	*/
+	createList()
+	chooseFromlist()
 
 })

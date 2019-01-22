@@ -7,7 +7,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /tests/
-
+/data-src/projetos/*/**
+*.xlsx
+projetos.json
+colocalizados.json
 
 # Runtime data
 pids

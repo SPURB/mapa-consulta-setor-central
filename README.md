@@ -7,8 +7,8 @@ npm install
 
 2. Inclua a chave do bing maps e o host de deste repositório no arquivo `.env`:
 ```
-BING_API_KEY=`chave-bing-mapas`
-APP_URL='http://seu-host/ouc-mapa/'
+BING_API_KEY=chave-bing-mapas
+APP_URL=levantamento-operacao-urbana-centro  
 ```
 
 3. Inclua os arquivos em `data-src/projetos/nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
