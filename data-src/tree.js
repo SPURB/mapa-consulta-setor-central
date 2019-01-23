@@ -6,18 +6,18 @@ import XLSX from 'xlsx'
 projetos.json
 */
 function createProjetosFromFolder(){
-    const files = JSON.stringify( directoryTree('./data-src/projetos',{ normalizePath: true }) )
+    const files = JSON.stringify( directoryTree('./data-src/projetos',{ normalizePath: true,  extensions: /\.(jpg|gif|png|kml)$/ }) )
     const output= './data-src/projetos.json'
     
     fs.writeFile(output, files, 'utf8', err => { 
-        if(err) console.log(err)
+        if(err) console.error(err)
         else console.log(output, 'atualizado')
     })
 }
 
 
 /*
-info.json
+colocalizados.json
 */
 function createJsFromExcel(inputExcel, tableName, outputJS){
 	var worksheet = XLSX.readFile(inputExcel).Sheets[tableName];
