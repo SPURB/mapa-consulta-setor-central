@@ -1,21 +1,38 @@
-import docReady from 'document-ready';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import KML from 'ol/format/KML';
-import {  Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
-import BingMaps from 'ol/source/BingMaps.js';
-import VectorSource from 'ol/source/Vector.js';
-import Style from 'ol/style/Style';
-import Stroke from 'ol/style/Stroke';
-import { click } from 'ol/events/condition'
-import { children as projetos } from '../data-src/projetos'; // para atualizar data-src/projetos.jso e colocalizados.json -> 'npm run files'
-import * as colocalizados from  '../data-src/colocalizados' 
-import Fill from 'ol/style/Fill';
-import { isNumber } from 'util';
-import { async } from 'q';
+import docReady from 'document-ready'
+import { isNumber } from 'util'
 
-/*
-create navigation options
+import Map from 'ol/Map'
+import View from 'ol/View'
+import KML from 'ol/format/KML'
+import {  Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js'
+// import BingMaps from 'ol/source/BingMaps.js'
+import VectorSource from 'ol/source/Vector.js'
+import Style from 'ol/style/Style'
+import Stroke from 'ol/style/Stroke'
+import Fill from 'ol/style/Fill'
+import { containsExtent } from 'ol/extent'
+
+/**
+* content from data-src
+*/
+import { children as projetos } from '../data-src/projetos' // para atualizar data-src/projetos.jso e colocalizados.json -> 'npm run files'
+import * as colocalizados from  '../data-src/colocalizados'
+
+/**
+* Render a template to the DOM
+* @param {Node} template The element
+* @param {Node} selector The element to inject
+*/
+function renderElement(template, selector) {
+	var node = document.querySelector(selector);
+	if (!node) return
+	node.innerHTML = template
+}
+
+/**
+* Create navigation options from data source (colocalizados.json)
+* @param { Object } obj The colocalizados.json data
+* @returns { Node } the <options> rendered in "#projetos"
 */
 function createList(obj){
 	let cleanList = [] 
@@ -26,16 +43,17 @@ function createList(obj){
 			cleanList.push(projeto)
 		}
 	}
-
 	cleanList.forEach( item => {
 		list += '<option '+ "class='nav-projeto' " +"value='" +  item.id + "'>" + item.nome + '</option>'
 	})
-	let projetos = document.getElementById('projetos')
-	projetos.innerHTML = list
+	renderElement(list, '#projetos')
 }
 
-/*
-set id from choosed option and call fitToId
+/**
+* Set id from choosed option and call fitToId()
+* @param { Node } element to watch changes
+* @param { Object } view an instance of View (new View) from open layers
+* @param { Array } layers an array of layers (new Layer's) from open layers
 */
 function getFromSelect(element, view, layers){
 	element.onchange = () => {
@@ -51,12 +69,16 @@ function getFromSelect(element, view, layers){
 	}
 }
 
-/*
-fit to id
+
+/** 
+Fit to id. Change current view fitting to a id
+* @param { Object } view Instance of View (new View) from open layers
+* @param  { Array } layers An array of layers (new Layer's) from open layers
+* @param { Number } id An project id to fit in (injected in returnLayers() as projectId)
 */
 function fitToId(view, layers, id){
 	try {
-		const layerToFit = layers.find( layer => layer.values_.projectId === id) // layer.values_.projectId -> para obter valor injetado "projectId" em returnLayers()
+		const layerToFit = layers.find( layer => layer.values_.projectId === id) 
 
 		view.fit(layerToFit.getSource().getExtent(), {
 			duration: 1500
@@ -67,9 +89,11 @@ function fitToId(view, layers, id){
 	}
 }
 
-
-/*
-open layer itens
+/**
+* Create all layers for app
+* @param { Array } projetos Array of objects from projetos.json 
+* @param { String } app_url Url of this app (not attached to this app)
+* @return { Array } Array of New Layers's (from Open Layers) instances with idprojeto setted (layers[index].values_.projectId)
 */
 function returnLayers(projetos, app_url){
 	try{
@@ -94,20 +118,19 @@ function returnLayers(projetos, app_url){
 						const style = new Style({
 							stroke: new Stroke({
 								color: setRandomColor(),
-								width: 1.5
+								width: 2
 							}),
 							fill: new Fill({
-								color: [255, 255, 255, 0.25]
+								color: [255, 255, 255, 0]
 							})
 						})
-
 
 						kmlLayers.push({
 							layer: new VectorLayer({
 								source: source,
 								style: style, 
 								projectId: projectId // set id from the folder name 
-							}), 
+							}) 
 						})
 					}
 				})
@@ -145,21 +168,26 @@ function returnLayers(projetos, app_url){
 			}
 		})
 		const layers = kmlLayers.map(vector => vector.layer)
-		// Mapa base
-		const bingMaps = new TileLayer({
-			source: new BingMaps({
-			imagerySet: 'CanvasGray',
-			culture: 'pt-BR',
-			key: process.env.BING_API_KEY
-			})
-		})
-		layers.unshift(bingMaps)
+
+		// // Mapa base
+		// const bingMaps = new TileLayer({
+		// 	source: new BingMaps({
+		// 	imagerySet: 'CanvasGray',
+		// 	culture: 'pt-BR',
+		// 	key: process.env.BING_API_KEY
+		// 	})
+		// })
+		// layers.unshift(bingMaps)
 
 		return layers
 	}
 	catch (error) { console.error(error) } 
 }
 
+/**
+* Random color
+* @return { String } A random HEX string 
+*/
 function setRandomColor() {
 	const letters = '0123456789ABCDEF';
 	let color = '#';
@@ -169,51 +197,38 @@ function setRandomColor() {
 		return color
 }
 
-function displayFeatureInfo(pixel, map) {
-	let features = [];
-	map.forEachFeatureAtPixel(pixel, feature => features.push(feature))
-
-	if (features.length > 0) {
-		let info = [];
-		features.forEach(feature => { 
-			info.push(feature.get('Layer')) 
-		})
-
-		document.getElementById('info').innerHTML = info.join(', ') || '(unknown)';
-			map.getTarget().style.cursor = 'pointer';
-	} else {
-		document.getElementById('info').innerHTML = '&nbsp;';
-		map.getTarget().style.cursor = '';
+/**
+* Return the project name
+* @param { Number } id The project id
+* @param { Object } colocalizados  The colocalizados.json data
+* @return { String } The project name
+*/
+function getProjectName(id, colocalizados){
+	let output = false
+	for (let projeto in colocalizados){
+		if (colocalizados[projeto].id === id) { 
+			output = colocalizados[projeto].nome 
+		}
 	}
+	return output
 }
 
+/**
+* Return the smaller extent from a Array of extents
+* @param { Array } extents An array of coordinates arrays. Ex. -> [[x, y], [x1, y1]]
+* @return { Array } Single array
+*/
+function smallerExtent(extents) {
+	let dontContain = extents[0]
+	extents.forEach( extent => {
+		if( dontContain !== extent ) { 
+			containsExtent(dontContain, extent) 
+			if (containsExtent(dontContain, extent)) { dontContain = extent }
+		}
+	})
+	return dontContain
+}
 
-// var changeInteraction = function() {
-// 	if (select !== null) {
-// 		map.removeInteraction(select);
-// 	}
-// 	var value = selectElement.value;
-// 		if (value == 'singleclick') {
-// 	select = selectSingleClick;
-// 		} else if (value == 'click') {
-// 	select = selectClick;
-// 		} else if (value == 'pointermove') {
-// 	select = selectPointerMove;
-// 		} else if (value == 'altclick') {
-// 	select = selectAltClick;
-// 		} else {
-// 	select = null;
-// 	}
-// 	if (select !== null) {
-// 		map.addInteraction(select);
-// 		select.on('select', function(e) {
-// 		document.getElementById('status').innerHTML = '&nbsp;' +
-// 			e.target.getFeatures().getLength() +
-// 			' selected features (last operation selected ' + e.selected.length +
-// 			' and deselected ' + e.deselected.length + ' features)';
-// 		});
-// 	}
-// };
 
 docReady(() => {
 	/*
@@ -235,22 +250,17 @@ docReady(() => {
 		view: view
 	})
 
-
-	/* 
-	mouse events
-	*/
-	map.on('pointermove', evt => {
-		if (evt.dragging) {
-			return;
-		}
-		let pixel = map.getEventPixel(evt.originalEvent);
-			displayFeatureInfo(pixel, map);
-	});
-
-	map.on('click', evt => {
-		console.log(evt)
-		
-		displayFeatureInfo(evt.pixel, map);
+ 	map.on('singleclick', evt => {
+		let extents = []
+		map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+			const projectjId = layer.values_.projectId  
+			if(projectjId !== 0) { // exclui a base
+				extents.push(layer.getSource().getExtent())
+			}
+		})
+		view.fit(smallerExtent(extents), {
+			duration: 1000
+		})
 	})
 
 
@@ -258,7 +268,9 @@ docReady(() => {
 	init app
 	*/
 	let fitToBaseLayer = new Promise( (resolve) => {
-		setTimeout(() => fitToId(view, thisMapLayers, 0), 500 )
+		// map.on('postrender', evt => {
+			setTimeout(() => fitToId(view, thisMapLayers, 0), 1500 )
+		// })
 	})
 
 	Promise.all([

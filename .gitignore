@@ -7,10 +7,18 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /tests/
-/data-src/projetos/*/**
-*.xlsx
+/data-src/projetos/*
+!/data-src/projetos/00_piu-central
+!/data-src/projetos/1_largo-do-arouche
+!/data-src/projetos/2_minhocao-fase-1-mp
 projetos.json
 colocalizados.json
+
+*.xlsx
+!/data-src/Colocalizados.sample.xlsx
+
+Thumbs.db
+*.db
 
 # Runtime data
 pids

@@ -9,11 +9,9 @@
     "build": "parcel build --public-url . index.html",
     "files": "node data-src/start.js"
   },
-  "dependencies": {
-    "document-ready": "^2.0.2",
-    "ol": "^5.1.2"
-  },
   "devDependencies": {
+    "document-ready": "^2.0.2",
+    "ol": "^5.1.2",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "directory-tree": "^2.2.1",
