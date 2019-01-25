@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Levantamento de projetos no perímetro da Operação Urbana Centro",
   "scripts": {
-    "tests": "parcel tests/*.html",
     "start": "parcel ./index.html",
     "watch": "parcel watch ./index.html",
     "build": "parcel build --public-url . index.html",
@@ -18,5 +17,8 @@
     "node-sass": "^4.11.0",
     "parcel-bundler": "^1.9.4",
     "xlsx": "^0.14.1"
+  },
+  "dependencies": {
+    "model": "^6.0.1"
   }
 }

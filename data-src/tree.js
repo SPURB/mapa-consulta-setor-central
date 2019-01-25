@@ -2,11 +2,12 @@ import fs from 'fs';
 import directoryTree from 'directory-tree';
 import XLSX from 'xlsx'
 
-/*
-projetos.json
+/**
+* Creates ./projetos.json
+* @return { File } A json file from the folders directory tree 
 */
 function createProjetosFromFolder(){
-    const files = JSON.stringify( directoryTree('./data-src/projetos',{ normalizePath: true,  extensions: /\.(jpg|gif|png|kml)$/ }) )
+    const files = JSON.stringify( directoryTree('./data-src/projetos', { normalizePath: true, extensions: /\.(jpg|gif|png|kml)$/ }) )
     const output= './data-src/projetos.json'
     
     fs.writeFile(output, files, 'utf8', err => { 
@@ -16,8 +17,12 @@ function createProjetosFromFolder(){
 }
 
 
-/*
-colocalizados.json
+/**
+* Creates ./colocalizados.json
+* @param { String } inputExcel The excel file location
+* @param { String } tableName The excel file table name to read
+* @param { String } tableName The path with file name of the output file
+* @return { File } A json file from the folders directory tree 
 */
 function createJsFromExcel(inputExcel, tableName, outputJS){
 	var worksheet = XLSX.readFile(inputExcel).Sheets[tableName];
