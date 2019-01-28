@@ -5,7 +5,6 @@ import KML from 'ol/format/KML'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
-import { containsExtent } from 'ol/extent'
 
 /**
 * Create all layers for app
@@ -34,7 +33,7 @@ function returnLayers(projetos, app_url){
 
 						const style = new Style({
 							stroke: new Stroke({
-								color: setRandomColor(),
+								color: setRandomColor(projectId),
 								width: 2
 							}),
 							fill: new Fill({
@@ -86,7 +85,7 @@ function returnLayers(projetos, app_url){
 		})
 		const layers = kmlLayers.map(vector => vector.layer)
 
-		// Mapa base
+		// // Mapa base
 		const bingMaps = new TileLayer({
 			source: new BingMaps({
 			imagerySet: 'CanvasGray',
@@ -102,16 +101,25 @@ function returnLayers(projetos, app_url){
 }
 
 /**
+* @return { Object } Setted by setRandomColor(id) to associate id and random colors
+*/
+let layerColors = {  }
+
+/**
 * Random color
 * @return { String } A random HEX string 
 */
-function setRandomColor() {
+function setRandomColor(id) {
+
 	const letters = '0123456789ABCDEF';
 	let color = '#';
 	for (var i = 0; i < 6; i++) {
 		color += letters[Math.floor(Math.random() * 16)]
 	}
-		return color
+
+	layerColors[id] = color
+
+	return color
 }
 
 /**
@@ -130,24 +138,8 @@ function getProjectName(id, colocalizados){
 	return output
 }
 
-/**
-* Return the smaller extent from a Array of extents
-* @param { Array } extents An array of coordinates arrays. Ex. -> [[x, y], [x1, y1]]
-* @return { Array } Single array
-*/
-function smallerExtent(extents) {
-	let dontContain = extents[0]
-	extents.forEach( extent => {
-		if( dontContain !== extent ) { 
-			containsExtent(dontContain, extent) 
-			if (containsExtent(dontContain, extent)) { dontContain = extent }
-		}
-	})
-	return dontContain
-}
-
 export {
     returnLayers, 
 	getProjectName,
-	smallerExtent
+	layerColors
 }

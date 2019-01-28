@@ -1,9 +1,11 @@
+"use strict";
 import { isNumber } from 'util'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { projetos, colocalizados  } from './model'
-import {  returnLayers,  getProjectName, smallerExtent } from './controllers'
+import {  returnLayers,  layerColors } from './presenter'
+import { containsExtent } from 'ol/extent'
 
 /**
 * Render a template to the DOM
@@ -23,37 +25,41 @@ function renderElement(template, selector) {
 */
 function createList(obj){
 	let cleanList = [] 
-	let list = "<option value='0'>-- Escolha --</option>"
+	let list = ""
 
 	for (let projeto of Object.values(obj)){ 
-		if(isNumber(projeto.id)){
+		if(isNumber(projeto.ID)){
 			cleanList.push(projeto)
 		}
 	}
 	cleanList.forEach( item => {
-		list += '<option '+ "class='nav-projeto' " +"value='" +  item.id + "'>" + item.nome + '</option>'
+		if(layerColors[item.ID] === undefined){
+			list += '<li '+">" + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + ">" + '</li>'
+		}
+		else{
+			list += '<li style="border-color:'+ layerColors[item.ID] +'">' + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + ">" + '</li>'
+		}
 	})
 	renderElement(list, '#projetos')
 }
 
 /**
-* Set id from choosed option and call fitToId()
+* Set eventLestener to run fitToId for menu list items
 * @param { Node } element to watch changes
 * @param { Object } view an instance of View (new View) from open layers
-* @param { Array } layers an array of layers (new Layer's) from open layers
+* @param { Array } layers an instance of layers (new Layers) from open layers
 */
-function getFromSelect(element, view, layers){
-	element.onchange = () => {
-		let idprojeto = element.options[element.selectedIndex].value	 // value tag from the DOM
-		idprojeto = parseInt(idprojeto)
+function setListActions(element, view, layers){ 
+	const parseHTMLlist = Array.from(element.children)
+	parseHTMLlist.forEach( item => {
+		const idprojeto = parseInt(item.firstChild.getAttribute("inputid"))
 
-		try {
+		item.firstChild.onclick = () => {
 			fitToId(view, layers, idprojeto)
+			parseHTMLlist.forEach(item=> item.classList.remove("clicked")) // Reset all itens
+			item.classList.add('clicked')
 		}
-		catch {
-			return idprojeto + 'sem arquivos'
-		} 
-	}
+	})
 }
 
 /** 
@@ -65,15 +71,53 @@ Fit to id. Change current view fitting to a id
 function fitToId(view, layers, id){
 	try {
 		const layerToFit = layers.find( layer => layer.values_.projectId === id) 
-
 		view.fit(layerToFit.getSource().getExtent(), {
 			duration: 1500
 		})
 	}
 	catch (error) {
 		console.error(error)
+		console.log(id)
 	}
 }
+
+/**
+* Return the smaller extent from a Array of extents
+* @param { Array } extents An array of coordinates arrays. Ex. -> [[x, y], [x1, y1]]
+* @return { Array } Single array
+*/
+function smallerExtent(extents) {
+	let dontContain = extents[0]
+	extents.forEach( extent => {
+		if( dontContain !== extent ) { 
+			containsExtent(dontContain, extent) 
+			if (containsExtent(dontContain, extent)) { dontContain = extent }
+		}
+	})
+	return dontContain
+}
+
+
+/**
+* Add event listeners to toggle 'open' class to an element to hide 
+* @param { Node } triggers The element from DOM to listen event click
+* @param { Node } toHide The element to hide 
+*/ 
+function menuEvents (triggers, toHide){
+	const normalizedHTMLArr = Array.from(triggers)
+	normalizedHTMLArr[0].addEventListener('click', event =>{
+		toHide.classList.toggle('open')
+		normalizedHTMLArr[1].classList.remove('hide')
+		event.target.classList.add('hide')
+	})
+	normalizedHTMLArr[1].addEventListener('click', event =>{
+		toHide.classList.toggle('open')
+		normalizedHTMLArr[0].classList.remove('hide')
+		event.target.classList.add('hide')
+	})
+
+}
+
 
 
 docReady(() => {
@@ -103,9 +147,11 @@ docReady(() => {
 				extents.push(layer.getSource().getExtent())
 			}
 		})
-		view.fit(smallerExtent(extents), { // fit to smaller extent 
-			duration: 1000
-		})
+		if(extents.length >= 1) {
+			view.fit(smallerExtent(extents), { // fit to smaller extent 
+				duration: 1000
+			})
+		}
 	})
 
 	/*
@@ -117,9 +163,12 @@ docReady(() => {
 		}, 1500 )
 	})
 
+	const panel = document.getElementById("panel")
+
 	Promise.all([
-		createList(colocalizados), 
-		getFromSelect(document.getElementById("projetos"), view, thisMapLayers)
+		createList(colocalizados),
+		setListActions(document.getElementById("projetos"), view, thisMapLayers),
+		menuEvents(document.getElementsByClassName('menu-display'), panel)
 	])
 	.then( () => fitToBaseLayer )
 	.catch( error => console.error(error) )

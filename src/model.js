@@ -4,4 +4,8 @@
  */
 import { children as projetos } from '../data-src/projetos' 
 import * as colocalizados from  '../data-src/colocalizados'
-export { projetos, colocalizados  }
+
+
+export { projetos, colocalizados }
+
+// extended colocalizados 

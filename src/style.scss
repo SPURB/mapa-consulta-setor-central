@@ -1,30 +1,70 @@
-* {
-    box-sizing: border-box;
-}
+@import 'vendor/reset';
 
 html, body {
-    margin: 0;
-    height: 100%;
-}
-#info {
-    position: absolute;
-    top: 0;
-    height: 10%;
-    width: 100%;
-    background-color: rgba(255,255,255,0.5);
-    z-index: 10
+	margin: 0;
+	height: 100%;
+	overflow: hidden;
+	font-family: sans-serif
 }
 
-#nav {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 100
+.menu-display {
+	z-index: 10;
+
+	&#open{
+		position: absolute;
+		top: 1em;
+		left: 1em;
+	}
+	&.hide{ display: none }
+	&#close{
+		position: unset;
+		float: right;
+	}
+}
+
+
+#panel{
+	overflow-x: hidden;
+	z-index: 100;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -100%;
+	background-color:rgba(255,255,255, 0.5);
+	padding: 1em;
+	transition: left 0.35s ease-in-out
+}
+
+#panel.open{
+	left: 0;
+}
+
+.title{
+	font-size: 2em;
+	margin: 0.5rem 0 1rem;
+}
+
+#projetos li{
+	padding-left: 3px;
+	border-left-width: 2px;
+	border-left-style: solid;
+	margin-bottom: 3px;
+	margin-top: 3px;
+}
+
+#info{
+	z-index: 100;
+	position: absolute;
+	bottom:1em;
+	right: 1em;
+	padding:1em;
+	background-color:rgba(255,255,255, 0.5)
 }
 
 #map {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    background-color: grey}
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: grey
+}
