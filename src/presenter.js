@@ -5,6 +5,7 @@ import KML from 'ol/format/KML'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
+// import Select from 'ol/interaction/Select'
 
 /**
 * Create all layers for app
@@ -31,13 +32,15 @@ function returnLayers(projetos, app_url){
 							format: new KML({ extractStyles: false })
 						})
 
+						const baseColor = setRandomColor(projectId)
+
 						const style = new Style({
 							stroke: new Stroke({
-								color: setRandomColor(projectId),
+								color: baseColor,
 								width: 2
 							}),
 							fill: new Fill({
-								color: [255, 255, 255, 0]
+								color: [255, 255, 255, .1]
 							})
 						})
 
@@ -85,7 +88,7 @@ function returnLayers(projetos, app_url){
 		})
 		const layers = kmlLayers.map(vector => vector.layer)
 
-		// // Mapa base
+		// Mapa base
 		const bingMaps = new TileLayer({
 			source: new BingMaps({
 			imagerySet: 'CanvasGray',
@@ -123,16 +126,16 @@ function setRandomColor(id) {
 }
 
 /**
-* Return the project name
+* Return the project data
 * @param { Number } id The project id
 * @param { Object } colocalizados  The colocalizados.json data
-* @return { String } The project name
+* @return { Object } The project data
 */
-function getProjectName(id, colocalizados){
+function getProjectData(id, colocalizados){
 	let output = false
 	for (let projeto in colocalizados){
-		if (colocalizados[projeto].id === id) { 
-			output = colocalizados[projeto].nome 
+		if (colocalizados[projeto].ID === id) { 
+			output = colocalizados[projeto] 
 		}
 	}
 	return output
@@ -140,6 +143,6 @@ function getProjectName(id, colocalizados){
 
 export {
     returnLayers, 
-	getProjectName,
+	getProjectData,
 	layerColors
 }

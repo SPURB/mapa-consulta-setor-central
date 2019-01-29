@@ -4,13 +4,14 @@ import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { projetos, colocalizados  } from './model'
-import {  returnLayers,  layerColors } from './presenter'
+import {  returnLayers,  layerColors, getProjectData } from './presenter'
 import { containsExtent } from 'ol/extent'
+
 
 /**
 * Render a template to the DOM
-* @param {Node} template The element
-* @param {Node} selector The element to inject
+* @param { String } template The element
+* @param { String } selector The element to inject
 */
 function renderElement(template, selector) {
 	var node = document.querySelector(selector);
@@ -34,7 +35,7 @@ function createList(obj){
 	}
 	cleanList.forEach( item => {
 		if(layerColors[item.ID] === undefined){
-			list += '<li '+">" + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + ">" + '</li>'
+			list += '<li '+">" + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + " disabled>" + '</li>'
 		}
 		else{
 			list += '<li style="border-color:'+ layerColors[item.ID] +'">' + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + ">" + '</li>'
@@ -74,6 +75,7 @@ function fitToId(view, layers, id){
 		view.fit(layerToFit.getSource().getExtent(), {
 			duration: 1500
 		})
+
 	}
 	catch (error) {
 		console.error(error)
@@ -97,7 +99,6 @@ function smallerExtent(extents) {
 	return dontContain
 }
 
-
 /**
 * Add event listeners to toggle 'open' class to an element to hide 
 * @param { Node } triggers The element from DOM to listen event click
@@ -118,6 +119,23 @@ function menuEvents (triggers, toHide){
 
 }
 
+/**
+* Create info box
+* @param { Object } data colocalizados.json item 
+*/ 
+function createInfo(data){
+	let contatenation = ""
+	for(let val in data){
+		switch(val) {
+			case 'NOME': contatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
+			case 'DESCRIÇÃO': contatenation += "<p class='description'>" +  data[val] + "</p>"; break
+			case 'ANO': contatenation += "<p class='ano'>" +  data[val] + "</p>"; break
+			case 'SECRETARIA': contatenation += "<p class='secretaria'>" +  data[val] + "</p>"; break
+			case 'STATUS': contatenation += "<p class='status'>" +  data[val] + "</p>"; break
+		}
+	}
+	renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
+}
 
 
 docReady(() => {
@@ -137,22 +155,49 @@ docReady(() => {
 	})
 
 	/*
-	render map
+	* map events
 	*/
 	map.on('singleclick', evt => {
-		let extents = []
+		let idAndextents = []
 		map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-			const projectjId = layer.values_.projectId  
+			const projectjId = layer.values_.projectId
 			if(projectjId !== 0) { // exclui a base
-				extents.push(layer.getSource().getExtent())
+				idAndextents.push(
+				{
+					id: projectjId,
+					extent: layer.getSource().getExtent()
+				})
 			}
 		})
-		if(extents.length >= 1) {
-			view.fit(smallerExtent(extents), { // fit to smaller extent 
+		if(idAndextents.length >= 1) {
+			const smaller = smallerExtent(idAndextents)
+			view.fit(smaller.extent, { // fit to smaller extent 
 				duration: 1000
 			})
+
+			const info = document.getElementById("info")
+			info.classList.remove("hidden")
+
+
+			if(getProjectData(smaller.id, colocalizados)){
+				const data = getProjectData(smaller.id, colocalizados) // get data from colocalizados.json
+				createInfo(data)
+				// let contatenation = ""
+				// for(let val in data){
+				// 	switch(val) {
+				// 		case 'NOME': contatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
+				// 		case 'DESCRIÇÃO': contatenation += "<p class='description'>" +  data[val] + "</p>"; break
+				// 		case 'ANO': contatenation += "<p class='ano'>" +  data[val] + "</p>"; break
+				// 		case 'SECRETARIA': contatenation += "<p class='secretaria'>" +  data[val] + "</p>"; break
+				// 		case 'STATUS': contatenation += "<p class='status'>" +  data[val] + "</p>"; break
+				// 	}
+				// }
+				// renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
+			}
+			else { renderElement("<p>ERRO. Checar id: " + smaller.id + "</p>", "#info") }
 		}
 	})
+
 
 	/*
 	after render, initiate app
@@ -163,12 +208,11 @@ docReady(() => {
 		}, 1500 )
 	})
 
-	const panel = document.getElementById("panel")
-
 	Promise.all([
 		createList(colocalizados),
 		setListActions(document.getElementById("projetos"), view, thisMapLayers),
-		menuEvents(document.getElementsByClassName('menu-display'), panel)
+		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
+		// menuEvents(document.getElementsByClassName('info-display'), document.getElementById("info"))
 	])
 	.then( () => fitToBaseLayer )
 	.catch( error => console.error(error) )

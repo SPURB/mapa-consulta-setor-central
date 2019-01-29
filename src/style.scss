@@ -7,7 +7,7 @@ html, body {
 	font-family: sans-serif
 }
 
-.menu-display {
+.btn {
 	z-index: 10;
 
 	&#open{
@@ -15,12 +15,21 @@ html, body {
 		top: 1em;
 		left: 1em;
 	}
-	&.hide{ display: none }
 	&#close{
 		position: unset;
 		float: right;
 	}
+
+	// &#open-info{
+	// }
+
+	// &#close-info{
+	// }
+
+	&.hide{ display: none }
+
 }
+
 
 
 #panel{
@@ -55,10 +64,28 @@ html, body {
 #info{
 	z-index: 100;
 	position: absolute;
+	width: 25vw;
 	bottom:1em;
 	right: 1em;
 	padding:1em;
-	background-color:rgba(255,255,255, 0.5)
+	opacity: 1;
+	background-color:rgba(255,255,255, 0.5);
+	transition: 1s ease-in opacity;
+	&.hidden {
+		opacity: 0;
+	}
+	.project-title {
+		font-weight: 700;
+		margin: .25rem 0
+	}
+	p {
+		margin: .35rem 0;
+		line-height: 1.2
+	}
+}
+
+#close-info{
+
 }
 
 #map {
