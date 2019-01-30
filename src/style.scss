@@ -55,7 +55,7 @@ html, body {
 
 #projetos li{
 	padding-left: 3px;
-	border-left-width: 2px;
+	border-left-width: 20px;
 	border-left-style: solid;
 	margin-bottom: 3px;
 	margin-top: 3px;
@@ -73,6 +73,11 @@ html, body {
 	transition: 1s ease-in opacity;
 	&.hidden {
 		opacity: 0;
+	}
+	.info-legend{
+		height: 20px;
+		margin-bottom: 1rem;
+		background-color: grey;
 	}
 	.project-title {
 		font-weight: 700;

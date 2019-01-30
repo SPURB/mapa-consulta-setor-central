@@ -1,11 +1,11 @@
-"use strict"
+"use strict";
 import { isNumber } from 'util'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
-import { containsExtent } from 'ol/extent'
 import { projetos, colocalizados  } from './model'
 import {  returnLayers,  layerColors, getProjectData } from './presenter'
+import { containsExtent } from 'ol/extent'
 
 /**
 * Render a template to the DOM
@@ -20,14 +20,14 @@ function renderElement(template, selector) {
 
 /**
 * Create navigation options from data source (colocalizados.json)
-* @param { Object } obj The colocalizados.json data
+* @param { Object } colocalizados The colocalizados.json data
 * @returns { Node } the <options> rendered in "#projetos"
 */
-function createList(obj){
+function createList(colocalizados){
 	let cleanList = [] 
 	let list = ""
 
-	for (let projeto of Object.values(obj)){ 
+	for (let projeto of Object.values(colocalizados)){ 
 		if(isNumber(projeto.ID)){
 			cleanList.push(projeto)
 		}
@@ -37,14 +37,19 @@ function createList(obj){
 			list += '<li '+">" + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + " disabled>" + '</li>'
 		}
 		else{
-			list += '<li style="border-color:'+ layerColors[item.ID] +'">' + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + ">" + '</li>'
+			list += '<li style="border-color:rgba('
+				+ layerColors[item.ID][0]+','
+				+layerColors[item.ID][1]+','
+				+layerColors[item.ID][2]+','
+				+layerColors[item.ID][3]
+				+')">' + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + ">" + '</li>'
 		}
 	})
 	renderElement(list, '#projetos')
 }
 
 /**
-* Set eventListener to run fitToId for menu list items
+* Set eventLestener to run fitToId for menu list items
 * @param { Node } element to watch changes
 * @param { Object } view an instance of View (new View) from open layers
 * @param { Array } layers an instance of layers (new Layers) from open layers
@@ -59,7 +64,8 @@ function setListActions(element, view, layers){
 
 			// !!!CLEAN THIS FUNCTION!!!
 			const data = getProjectData(idprojeto, colocalizados)
-			createInfo(data)
+			const images = getFiles(idprojeto, projetos)
+			createInfo(data, layerColors[idprojeto], images)
 			document.getElementById("info").classList.remove("hidden")
 			// !!!CLEAN THIS FUNCTION!!!
 
@@ -132,31 +138,39 @@ function menuEvents (triggers, toHide){
 * @return { Object } { hero, images }
 */
 function getFiles(id, projetos){
-    const idsFromNames = projetos.filter(projeto => {
+	const idsFromNames = projetos.filter(projeto => {
         let substId =  projeto.name.substring(0,3) 
         substId = substId.replace(/[^\d]/g, '') 
         substId = parseInt(substId)
-
         if(substId === id){
             return projeto
         }
     })
-    const files = idsFromNames[0].children
-    const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' )
+	const files = idsFromNames[0].children
+    const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
     const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
-    return {
-        images: images.map(image => image.path),
-        hero: hero[0].path
-    }
-}
 
+	if(images.length > 0){
+		return {
+			images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+			hero: hero[0].path
+		}
+	}
+	else return false
+}
 
 /**
 * Create info box
 * @param { Object } data colocalizados.json item 
+* @param { String } projectColor rgba color string
 */ 
-function createInfo(data){
-	let contatenation = ""
+function createInfo(data, projectColor, images){
+
+	images ? console.log(images) : null 
+
+	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
+	let contatenation = "<div class='info-legend' style='"+ concatColor +"'></div>"
+
 	for(let val in data){
 		switch(val) {
 			case 'NOME': contatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
@@ -166,7 +180,7 @@ function createInfo(data){
 			case 'STATUS': contatenation += "<p class='status'>" +  data[val] + "</p>"; break
 		}
 	}
-	renderElement(contatenation, "#info") // render DOM
+	renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
 }
 
 
@@ -208,15 +222,13 @@ docReady(() => {
 			})
 
 			const info = document.getElementById("info")
-
-			// const data = getProjectData(smaller.id, colocalizados)
-			// createInfo(data)
-
 			info.classList.remove("hidden")
 
-			if(getProjectData(smaller.id, colocalizados)){ 
+			if(getProjectData(smaller.id, colocalizados)){
 				const data = getProjectData(smaller.id, colocalizados) // get data from colocalizados.json
-				createInfo(data)
+				const images = getFiles(smaller.id, projetos)
+
+				createInfo(data, layerColors[smaller.id], images)
 			}
 			else { renderElement("<p>ERRO. Checar id: " + smaller.id + "</p>", "#info") }
 		}
@@ -241,3 +253,4 @@ docReady(() => {
 	.then( () => fitToBaseLayer )
 	.catch( error => console.error(error) )
 })
+

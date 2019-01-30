@@ -32,15 +32,22 @@ function returnLayers(projetos, app_url){
 							format: new KML({ extractStyles: false })
 						})
 
-						const baseColor = setRandomColor(projectId)
+						const red = getRandomInt(0,255)
+						const green = getRandomInt(0,255)
+						const blue = getRandomInt(0,255)
+
+						setLayerColors(projectId,[red, green, blue], .25)
+						// const baseColor =  [ red, green, blue, .3 ] // setRandomColor(projectId)
+
+						// const baseColor = setRandomColor(projectId)
 
 						const style = new Style({
 							stroke: new Stroke({
-								color: baseColor,
+								color: [red, green, blue, 0.25],//baseColor,
 								width: 2
 							}),
 							fill: new Fill({
-								color: [255, 255, 255, .1]
+								color: [red, green, blue, 0.25]
 							})
 						})
 
@@ -106,24 +113,31 @@ function returnLayers(projetos, app_url){
 /**
 * @return { Object } Setted by setRandomColor(id) to associate id and random colors
 */
-let layerColors = {  }
+let layerColors = {}
 
 /**
-* Random color
-* @return { String } A random HEX string 
+* Get random int number
+* @param { Number } min Minimun value
+* @param { Number } max Max value
+* @return { Number } A random number between min and max 
 */
-function setRandomColor(id) {
-
-	const letters = '0123456789ABCDEF';
-	let color = '#';
-	for (var i = 0; i < 6; i++) {
-		color += letters[Math.floor(Math.random() * 16)]
-	}
-
-	layerColors[id] = color
-
-	return color
+function getRandomInt(min, max) {
+	min = Math.ceil(min)
+	max = Math.floor(max)
+	return Math.floor(Math.random() * (max - min)) + min
 }
+
+/**
+* Set layerColors
+* @param { Number } id Project id
+* @param { Array } rgb Numbers representing the rgb value. Ex -> [red, green, blue]
+* @param { Number } alpha Float number representing the opacity
+* @return { Object } { "id": [r, g, b, a]}
+*/
+function setLayerColors( id, rgb, alpha) {
+	layerColors[id] = [ rgb[0], rgb[1], rgb[2], alpha ]
+}
+
 
 /**
 * Return the project data
