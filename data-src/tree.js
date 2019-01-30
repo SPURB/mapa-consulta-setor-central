@@ -4,11 +4,12 @@ import XLSX from 'xlsx'
 
 /**
 * Creates ./projetos.json
+* @param { String } input The folder to crawl
+* @param { String } output The json file location
 * @return { File } A json file from the folders directory tree 
 */
-function createProjetosFromFolder(){
-    const files = JSON.stringify( directoryTree('./data-src/projetos', { normalizePath: true, extensions: /\.(jpg|gif|png|kml)$/ }) )
-    const output= './data-src/projetos.json'
+function createProjetosFromFolder(input, output){
+    const files = JSON.stringify( directoryTree(input, { normalizePath: true, extensions: /\.(jpg|gif|png|kml)$/ }) )
     
     fs.writeFile(output, files, 'utf8', err => { 
         if(err) console.error(err)
@@ -21,7 +22,7 @@ function createProjetosFromFolder(){
 * Creates ./colocalizados.json
 * @param { String } inputExcel The excel file location
 * @param { String } tableName The excel file table name to read
-* @param { String } tableName The path with file name of the output file
+* @param { String } outputJS The path with file name of the output file
 * @return { File } A json file from the folders directory tree 
 */
 function createJsFromExcel(inputExcel, tableName, outputJS){
@@ -38,7 +39,7 @@ function createJsFromExcel(inputExcel, tableName, outputJS){
 				output[index[0]] = index[1];
 			}
 		});
-		outputJson.push(output);
+		if(output !== {}) { outputJson.push(output)}
 	})
 
 	const json = JSON.stringify(outputJson);
@@ -52,5 +53,5 @@ function createJsFromExcel(inputExcel, tableName, outputJS){
 	console.log(filePath + ' atualizado')
 }
 
-createProjetosFromFolder()
+createProjetosFromFolder('./data-src/projetos', './data-src/projetos.json')
 createJsFromExcel('./data-src/Colocalizados.xlsx','output', './data-src/colocalizados')

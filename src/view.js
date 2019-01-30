@@ -1,12 +1,11 @@
-"use strict";
+"use strict"
 import { isNumber } from 'util'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
+import { containsExtent } from 'ol/extent'
 import { projetos, colocalizados  } from './model'
 import {  returnLayers,  layerColors, getProjectData } from './presenter'
-import { containsExtent } from 'ol/extent'
-
 
 /**
 * Render a template to the DOM
@@ -45,7 +44,7 @@ function createList(obj){
 }
 
 /**
-* Set eventLestener to run fitToId for menu list items
+* Set eventListener to run fitToId for menu list items
 * @param { Node } element to watch changes
 * @param { Object } view an instance of View (new View) from open layers
 * @param { Array } layers an instance of layers (new Layers) from open layers
@@ -57,7 +56,14 @@ function setListActions(element, view, layers){
 
 		item.firstChild.onclick = () => {
 			fitToId(view, layers, idprojeto)
-			parseHTMLlist.forEach(item=> item.classList.remove("clicked")) // Reset all itens
+
+			// !!!CLEAN THIS FUNCTION!!!
+			const data = getProjectData(idprojeto, colocalizados)
+			createInfo(data)
+			document.getElementById("info").classList.remove("hidden")
+			// !!!CLEAN THIS FUNCTION!!!
+
+			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
 			item.classList.add('clicked')
 		}
 	})
@@ -120,6 +126,32 @@ function menuEvents (triggers, toHide){
 }
 
 /**
+* Return the files from each projetos.json
+* @param { Number } id The prject id
+* @param { Object } projetos The projetos.json data
+* @return { Object } { hero, images }
+*/
+function getFiles(id, projetos){
+    const idsFromNames = projetos.filter(projeto => {
+        let substId =  projeto.name.substring(0,3) 
+        substId = substId.replace(/[^\d]/g, '') 
+        substId = parseInt(substId)
+
+        if(substId === id){
+            return projeto
+        }
+    })
+    const files = idsFromNames[0].children
+    const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' )
+    const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
+    return {
+        images: images.map(image => image.path),
+        hero: hero[0].path
+    }
+}
+
+
+/**
 * Create info box
 * @param { Object } data colocalizados.json item 
 */ 
@@ -134,7 +166,7 @@ function createInfo(data){
 			case 'STATUS': contatenation += "<p class='status'>" +  data[val] + "</p>"; break
 		}
 	}
-	renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
+	renderElement(contatenation, "#info") // render DOM
 }
 
 
@@ -176,23 +208,15 @@ docReady(() => {
 			})
 
 			const info = document.getElementById("info")
+
+			// const data = getProjectData(smaller.id, colocalizados)
+			// createInfo(data)
+
 			info.classList.remove("hidden")
 
-
-			if(getProjectData(smaller.id, colocalizados)){
+			if(getProjectData(smaller.id, colocalizados)){ 
 				const data = getProjectData(smaller.id, colocalizados) // get data from colocalizados.json
 				createInfo(data)
-				// let contatenation = ""
-				// for(let val in data){
-				// 	switch(val) {
-				// 		case 'NOME': contatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
-				// 		case 'DESCRIÇÃO': contatenation += "<p class='description'>" +  data[val] + "</p>"; break
-				// 		case 'ANO': contatenation += "<p class='ano'>" +  data[val] + "</p>"; break
-				// 		case 'SECRETARIA': contatenation += "<p class='secretaria'>" +  data[val] + "</p>"; break
-				// 		case 'STATUS': contatenation += "<p class='status'>" +  data[val] + "</p>"; break
-				// 	}
-				// }
-				// renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
 			}
 			else { renderElement("<p>ERRO. Checar id: " + smaller.id + "</p>", "#info") }
 		}

@@ -1,3 +1,4 @@
+"use strict"
 import {  Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import BingMaps from 'ol/source/BingMaps.js'
 import VectorSource from 'ol/source/Vector.js'
@@ -5,7 +6,6 @@ import KML from 'ol/format/KML'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
-// import Select from 'ol/interaction/Select'
 
 /**
 * Create all layers for app
