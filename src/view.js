@@ -234,6 +234,14 @@ docReady(() => {
 		}
 	})
 
+	/*
+	* sidebar events
+	*/
+	let gohome = document.getElementById('gohome')
+	gohome.innerText = 'OUC Centro'
+	gohome.addEventListener('click', function() {
+		document.getElementById('info').classList.add('hidden')
+	})
 
 	/*
 	after render, initiate app

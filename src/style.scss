@@ -41,7 +41,8 @@ html, body {
 	left: -100%;
 	background-color:rgba(255,255,255, 0.5);
 	padding: 1em;
-	transition: left 0.35s ease-in-out
+	transition: left 0.35s ease-in-out;
+	display: none;
 }
 
 #panel.open{
@@ -61,19 +62,17 @@ html, body {
 	margin-top: 3px;
 }
 
-#info{
+#infowrap{
 	z-index: 100;
 	position: absolute;
 	width: 25vw;
-	bottom:1em;
-	right: 1em;
-	padding:1em;
+	height: 100%;
+	top: 0;
+	left: 0;
 	opacity: 1;
-	background-color:rgba(255,255,255, 0.5);
+	background-color: red;
+	box-shadow: 4px 0 4px rgba(0, 0, 0, .24);
 	transition: 1s ease-in opacity;
-	&.hidden {
-		opacity: 0;
-	}
 	.info-legend{
 		height: 20px;
 		margin-bottom: 1rem;
@@ -87,6 +86,17 @@ html, body {
 		margin: .35rem 0;
 		line-height: 1.2
 	}
+	#info {
+		transition: 400ms ease-in margin-top;
+		overflow: hidden;
+		margin-top: 40px;
+		padding: 1em;
+		background-color: #FFF;
+		height: calc(100vh - 40px);
+		&.hidden {
+			margin-top: 100vh;
+		}
+	}
 }
 
 #close-info{
@@ -97,6 +107,7 @@ html, body {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	width: 100%;
-	background-color: grey
+	left: 25vw;
+	right: 0;
+	background-color: grey;
 }
