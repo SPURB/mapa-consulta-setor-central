@@ -37,7 +37,7 @@ function createList(colocalizados){
 			list += '<li '+">" + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + " disabled>" + '</li>'
 		}
 		else{
-			list += '<li style="border-color:rgba('
+			list += '<li style="background-color:rgba('
 				+ layerColors[item.ID][0]+','
 				+layerColors[item.ID][1]+','
 				+layerColors[item.ID][2]+','
@@ -67,6 +67,8 @@ function setListActions(element, view, layers){
 			const images = getFiles(idprojeto, projetos)
 			createInfo(data, layerColors[idprojeto], images)
 			document.getElementById("info").classList.remove("hidden")
+			document.getElementById('projectInfo').classList.add('hidden')
+			document.getElementById('gohome').classList.remove('hidden')
 			// !!!CLEAN THIS FUNCTION!!!
 
 			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
@@ -169,18 +171,30 @@ function createInfo(data, projectColor, images){
 	images ? console.log(images) : null 
 
 	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
-	let contatenation = "<div class='info-legend' style='"+ concatColor +"'></div>"
+	let contatenation = ''
+	if (images.images) {
+		contatenation += "<div class='coverSec' style='background-image: url(" + process.env.APP_URL + images.images[0].path + ")'></div>"
+	}
+	else {
+		contatenation = ''
+	}
+	contatenation += "<div class='info-legend' style='"+ concatColor +"'></div>"
 
 	for(let val in data){
 		switch(val) {
 			case 'NOME': contatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
 			case 'DESCRIÇÃO': contatenation += "<p class='description'>" +  data[val] + "</p>"; break
-			case 'ANO': contatenation += "<p class='ano'>" +  data[val] + "</p>"; break
-			case 'SECRETARIA': contatenation += "<p class='secretaria'>" +  data[val] + "</p>"; break
-			case 'STATUS': contatenation += "<p class='status'>" +  data[val] + "</p>"; break
+			case 'ANO': contatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
+			case 'SECRETARIA': contatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
+			case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
 		}
 	}
 	renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
+}
+
+
+function createBaseInfo(data, images) {
+	console.log(getProjectData('BASE', colocalizados))
 }
 
 
@@ -199,6 +213,7 @@ docReady(() => {
 		target: document.getElementById('map'),
 		view: view
 	})
+
 
 	/*
 	* map events
@@ -229,6 +244,8 @@ docReady(() => {
 				const images = getFiles(smaller.id, projetos)
 
 				createInfo(data, layerColors[smaller.id], images)
+				document.getElementById('projectInfo').classList.add('hidden')
+				document.getElementById('gohome').classList.remove('hidden')
 			}
 			else { renderElement("<p>ERRO. Checar id: " + smaller.id + "</p>", "#info") }
 		}
@@ -237,10 +254,13 @@ docReady(() => {
 	/*
 	* sidebar events
 	*/
+	let gohomeName = document.getElementById('gohomeName')
+	gohomeName.innerText = 'OUC Centro' /* change to get innerText from db */
 	let gohome = document.getElementById('gohome')
-	gohome.innerText = 'OUC Centro'
 	gohome.addEventListener('click', function() {
 		document.getElementById('info').classList.add('hidden')
+		document.getElementById('gohome').classList.add('hidden')
+		document.getElementById('projectInfo').classList.remove('hidden')
 	})
 
 	/*

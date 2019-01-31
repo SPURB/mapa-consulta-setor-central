@@ -4,7 +4,14 @@ html, body {
 	margin: 0;
 	height: 100%;
 	overflow: hidden;
-	font-family: sans-serif
+	font-family: 'Roboto';
+	font-size: 16px;
+	color: #333;
+	line-height: 120%;
+}
+
+p {
+	margin: 0;
 }
 
 .btn {
@@ -13,11 +20,12 @@ html, body {
 	&#open{
 		position: absolute;
 		top: 1em;
-		left: 1em;
+		right: 1em;
 	}
 	&#close{
-		position: unset;
-		float: right;
+		position: absolute;
+		top: 1em;
+		right: 1em;
 	}
 
 	// &#open-info{
@@ -38,61 +46,192 @@ html, body {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	left: -100%;
-	background-color:rgba(255,255,255, 0.5);
-	padding: 1em;
-	transition: left 0.35s ease-in-out;
-	display: none;
+	right: -100%;
+	width: 320px;
+	background-color: #FFF;
+	box-shadow: -4px 0 4px rgba(0, 0, 0, .24);
+	transition: right 0.4s ease-in-out;
 }
 
 #panel.open{
-	left: 0;
+	right: 0;
+	& > * {
+		user-select: none;
+		-moz-user-select: none;
+	}
 }
 
 .title{
-	font-size: 2em;
-	margin: 0.5rem 0 1rem;
+	font-weight: 700;
+	font-size: larger;
+	width: 100%;
+	padding: 1em;
+	background-color: #F5F5F5;
+}
+
+#projetos {
+	padding: 1em;
 }
 
 #projetos li{
-	padding-left: 3px;
-	border-left-width: 20px;
-	border-left-style: solid;
-	margin-bottom: 3px;
-	margin-top: 3px;
+	margin: 0 0 16px 0;
+	padding: 0 0 0 1em;
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
+	div {
+		min-width: 20px;
+		height: 20px;
+	}
+	input[type=button] {
+		border: 0;
+		padding: 0 0 0 8px;
+		background-color: #FFF;
+		width: 100%;
+		text-align: left;
+		font-family: 'Roboto';
+		color: #333;
+		font-size: smaller;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	input[disabled] {
+		color: #BDBDBD;
+	}
+	&:hover {
+		input {
+			font-weight: 700;
+			cursor: pointer;
+		}
+		input[disabled] {
+			font-weight: normal;
+			cursor: inherit;
+		}
+	}
 }
 
 #infowrap{
 	z-index: 100;
 	position: absolute;
-	width: 25vw;
+	width: 320px;
 	height: 100%;
 	top: 0;
 	left: 0;
 	opacity: 1;
-	background-color: red;
+	background-color: #FFF;
 	box-shadow: 4px 0 4px rgba(0, 0, 0, .24);
 	transition: 1s ease-in opacity;
-	.info-legend{
-		height: 20px;
-		margin-bottom: 1rem;
-		background-color: grey;
+	#gohome {
+		box-sizing: border-box;
+		font-size: small;
+		display: flex;
+		align-items: center;
+		padding-left: 1em;
+		width: 100%;
+		height: 40px;
+		background-color: #F5F5F5;
+		color: #777;
+		transition: .4s all;
+		user-select: none;
+		-moz-user-select: none;
+		&.hidden {
+			height: 0;
+			overflow: hidden;
+		}
+		&:hover {
+			color: #333;
+			cursor: pointer;
+		}
+		&:active {
+			background-color: #777;
+		}
+		#gohomeName {
+			margin-left: 8px;
+		}
 	}
-	.project-title {
-		font-weight: 700;
-		margin: .25rem 0
-	}
-	p {
-		margin: .35rem 0;
-		line-height: 1.2
+	#baseInfo {
+		transition: .4s ease-in all;
+		height: 100%;
+		overflow-y: scroll;
+		padding: 1em;
+		box-sizing: border-box;
+		&::after {
+			content: '';
+			display: block;
+			width: calc(100% + 2em);
+			background: #F5F5F5;
+			height: 40px;
+			margin: 2em -1em 0 -1em;
+		}
+		&.hidden {
+			opacity: 0;
+			height: 0;
+			overflow: hidden;
+		}
 	}
 	#info {
-		transition: 400ms ease-in margin-top;
-		overflow: hidden;
-		margin-top: 40px;
-		padding: 1em;
+		transition: 200ms ease-in-out margin-top;
+		overflow-y: scroll;
+		overflow-x: hidden;
+		padding: 0 1em 1em 1em;
+		margin-top: -1em;
 		background-color: #FFF;
-		height: calc(100vh - 40px);
+		height: calc(100vh - 56px);
+		box-sizing: border-box;
+		display: flex;
+		flex-flow: column nowrap;
+		.coverSec {
+			width: 100%;
+			padding-top: calc(100% * 9/16);
+			background-color: grey;
+			background-size: cover;
+		}
+		.info-legend{
+			height: 20px;
+			margin-bottom: 1em;
+			background-color: grey;
+			order: 0;
+			-webkit-order: 0;
+		}
+		.project-title {
+			font-weight: 700;
+			order: 1;
+			-webkit-order: 1;
+			margin-bottom: 16px;
+		}
+		.ano {
+			order: 2;
+			-webkit-order: 2;
+		}
+		.status {
+			order: 3;
+			-webkit-order: 3;
+		}
+		.secretaria {
+			order: 4;
+			-webkit-order: 4;
+		}
+		.ano, .status, .secretaria {
+			color: #777;
+			font-size: 12px;
+			span { font-weight: bold; }
+		}
+		.description {
+			font-family: 'Georgia';
+			font-size: smaller;
+			order: 5;
+			-webkit-order: 5;
+			margin-top: 16px;
+			&::after {
+				content: '';
+				display: block;
+				width: calc(100% + 2em + 4px);
+				background: #F5F5F5;
+				height: 40px;
+				margin: 2em -1em 0 -1em;
+			}
+		}
 		&.hidden {
 			margin-top: 100vh;
 		}
@@ -107,7 +246,7 @@ html, body {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	left: 25vw;
+	left: 320px;
 	right: 0;
-	background-color: grey;
+	background-color: #FFF;
 }
