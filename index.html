@@ -7,7 +7,7 @@
 	<body>
 		<button id="open" class="btn menu-display">Abrir lista de projetos</button>
 		<div id="panel">
-			<button id="close" class="btn menu-display">></button>
+			<button id="close" class="btn menu-display">×</button>
 			<section id="legenda-projetos">
 				<h2 class="title">Lista de projetos</h2>
 				<ul id="projetos"></ul>
@@ -16,25 +16,12 @@
 
 		<!-- <button id="open-info" class="btn info-display">Abrir informações</button>
 		<button id="close-info" class="btn info-display ">Ocultar</button> -->
-		<div id="infowrap">
+		<div id="infowrap" class="hidden">
+			<button id="toggleHidden">▲</button>
 			<div id="gohome" class="hidden">
 				< <span id="gohomeName"></span>
 			</div>
-			<div id="baseInfo">
-				<p>A Operação Urbana Centro foi criada com o objetivo de promover a melhoria e a revalorização da área central, para atrair investimentos imobiliários, turísticos e culturais e reverter o processo de deterioração do Centro. Abrange as regiões dos chamados Centro Velho e Centro Novo, bem como parte de bairros históricos como Glicério, Brás, Bexiga, Vila Buarque e Santa Ifigênia.</p>
-				<p>Esta operação estabeleceu incentivos, mediante contrapartida financeira, à produção de novas edificações, à regularização de imóveis, à reconstrução e reforma das existentes para sua adequação a novos usos, e também estabeleceu condições especiais para a transferência de potencial construtivo de imóveis de interesse histórico.</p>
-				<p>O Plano Diretor Estratégico de 2014 recepcionou as Operações Urbanas vigentes, definindo a Macroárea de Estruturação Metropolitana (MEM) como território estratégico de transformação, onde podem incidir instrumentos urbanísticos específicos que tenham condições de promover essas transformações, entre eles as operações urbanas consorciadas.</p>
-				<p>O PDE de 2014, em seu §2º do art. 382, determinou que a Lei da Operação Urbana Centro será revista, uma vez que não está adequada às diretrizes previstas no Estatuto da Cidade (Lei Federal nº 10.257/2001) para as Operações Urbanas Consorciadas, tais como: elaboração de EIA-RIMA; a previsão de solução habitacional da área e entorno no escopo da Operação Urbana; definição de instrumentos, mecanismos, procedimentos e programa de intervenção pública a serem adotados, bem como a previsão de emissão da quantidade de CEPAC proporcional ao estoque de potencial adicional de construção para a área de abrangência. </p>
-				<p>A OU Centro não apresenta um programa prévio de obras/serviços e a aplicação dos recursos arrecadados é decidida pela Comissão Executiva da Operação Urbana Centro. As contrapartidas financeiras arrecadadas pelos direitos adicionais de construção são pagas em dinheiro, a cada proposta de participação aprovada (outorga onerosa) e devem ser obrigatoriamente aplicados na própria região da Operação Urbana, em acordo com suas diretrizes e objetivos. </p><p>A Operação Urbana Centro foi criada com o objetivo de promover a melhoria e a revalorização da área central, para atrair investimentos imobiliários, turísticos e culturais e reverter o processo de deterioração do Centro. Abrange as regiões dos chamados Centro Velho e Centro Novo, bem como parte de bairros históricos como Glicério, Brás, Bexiga, Vila Buarque e Santa Ifigênia.</p>
-				<p>Esta operação estabeleceu incentivos, mediante contrapartida financeira, à produção de novas edificações, à regularização de imóveis, à reconstrução e reforma das existentes para sua adequação a novos usos, e também estabeleceu condições especiais para a transferência de potencial construtivo de imóveis de interesse histórico.</p>
-				<p>O Plano Diretor Estratégico de 2014 recepcionou as Operações Urbanas vigentes, definindo a Macroárea de Estruturação Metropolitana (MEM) como território estratégico de transformação, onde podem incidir instrumentos urbanísticos específicos que tenham condições de promover essas transformações, entre eles as operações urbanas consorciadas.</p>
-				<p>O PDE de 2014, em seu §2º do art. 382, determinou que a Lei da Operação Urbana Centro será revista, uma vez que não está adequada às diretrizes previstas no Estatuto da Cidade (Lei Federal nº 10.257/2001) para as Operações Urbanas Consorciadas, tais como: elaboração de EIA-RIMA; a previsão de solução habitacional da área e entorno no escopo da Operação Urbana; definição de instrumentos, mecanismos, procedimentos e programa de intervenção pública a serem adotados, bem como a previsão de emissão da quantidade de CEPAC proporcional ao estoque de potencial adicional de construção para a área de abrangência. </p>
-				<p>A OU Centro não apresenta um programa prévio de obras/serviços e a aplicação dos recursos arrecadados é decidida pela Comissão Executiva da Operação Urbana Centro. As contrapartidas financeiras arrecadadas pelos direitos adicionais de construção são pagas em dinheiro, a cada proposta de participação aprovada (outorga onerosa) e devem ser obrigatoriamente aplicados na própria região da Operação Urbana, em acordo com suas diretrizes e objetivos. </p><p>A Operação Urbana Centro foi criada com o objetivo de promover a melhoria e a revalorização da área central, para atrair investimentos imobiliários, turísticos e culturais e reverter o processo de deterioração do Centro. Abrange as regiões dos chamados Centro Velho e Centro Novo, bem como parte de bairros históricos como Glicério, Brás, Bexiga, Vila Buarque e Santa Ifigênia.</p>
-				<p>Esta operação estabeleceu incentivos, mediante contrapartida financeira, à produção de novas edificações, à regularização de imóveis, à reconstrução e reforma das existentes para sua adequação a novos usos, e também estabeleceu condições especiais para a transferência de potencial construtivo de imóveis de interesse histórico.</p>
-				<p>O Plano Diretor Estratégico de 2014 recepcionou as Operações Urbanas vigentes, definindo a Macroárea de Estruturação Metropolitana (MEM) como território estratégico de transformação, onde podem incidir instrumentos urbanísticos específicos que tenham condições de promover essas transformações, entre eles as operações urbanas consorciadas.</p>
-				<p>O PDE de 2014, em seu §2º do art. 382, determinou que a Lei da Operação Urbana Centro será revista, uma vez que não está adequada às diretrizes previstas no Estatuto da Cidade (Lei Federal nº 10.257/2001) para as Operações Urbanas Consorciadas, tais como: elaboração de EIA-RIMA; a previsão de solução habitacional da área e entorno no escopo da Operação Urbana; definição de instrumentos, mecanismos, procedimentos e programa de intervenção pública a serem adotados, bem como a previsão de emissão da quantidade de CEPAC proporcional ao estoque de potencial adicional de construção para a área de abrangência. </p>
-				<p>A OU Centro não apresenta um programa prévio de obras/serviços e a aplicação dos recursos arrecadados é decidida pela Comissão Executiva da Operação Urbana Centro. As contrapartidas financeiras arrecadadas pelos direitos adicionais de construção são pagas em dinheiro, a cada proposta de participação aprovada (outorga onerosa) e devem ser obrigatoriamente aplicados na própria região da Operação Urbana, em acordo com suas diretrizes e objetivos. </p>
-			</div>
+			<div id="baseInfo"></div>
 			<div id="info" class="hidden"></div>
 		</div>
 		<div id="map" class="map"></div>

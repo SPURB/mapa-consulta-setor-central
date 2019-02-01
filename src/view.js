@@ -67,8 +67,11 @@ function setListActions(element, view, layers){
 			const images = getFiles(idprojeto, projetos)
 			createInfo(data, layerColors[idprojeto], images)
 			document.getElementById("info").classList.remove("hidden")
-			document.getElementById('projectInfo').classList.add('hidden')
+			document.getElementById('baseInfo').classList.add('hidden')
 			document.getElementById('gohome').classList.remove('hidden')
+			document.getElementById('infowrap').classList.remove('hidden')
+			document.getElementById('panel').classList.toggle('open')
+			document.getElementById('toggleHidden').classList.add('rotate')
 			// !!!CLEAN THIS FUNCTION!!!
 
 			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
@@ -189,12 +192,32 @@ function createInfo(data, projectColor, images){
 			case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
 		}
 	}
-	renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
+	renderElement(contatenation, "#info") // render DOM
 }
 
 
-function createBaseInfo(data, images) {
-	console.log(getProjectData('BASE', colocalizados))
+function createBaseInfo(data) {
+	let contatenation = ''
+
+	contatenation += "<h1 class='baseInfo-title'>" + data.NOME + "</h1>"
+
+	contatenation += "<div class='cover' style='background-image: url(" + "teste" + ");'></div>"
+
+	if (data.ANO || data.SECRETARIA || data.STATUS) {
+		contatenation += "<div class='dados'>"
+		for (let val in data) {
+			switch (val) {
+				case 'ANO': contatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
+				case 'SECRETARIA': contatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
+				case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
+			}
+		}
+		contatenation += "</div>"
+	}
+
+	contatenation += "<p class='description'>" + data.DESCRIÇÃO + "</p>"
+
+	renderElement(contatenation, "#baseInfo")
 }
 
 
@@ -213,7 +236,6 @@ docReady(() => {
 		target: document.getElementById('map'),
 		view: view
 	})
-
 
 	/*
 	* map events
@@ -244,23 +266,33 @@ docReady(() => {
 				const images = getFiles(smaller.id, projetos)
 
 				createInfo(data, layerColors[smaller.id], images)
-				document.getElementById('projectInfo').classList.add('hidden')
+				document.getElementById('baseInfo').classList.add('hidden')
 				document.getElementById('gohome').classList.remove('hidden')
+				document.getElementById('infowrap').classList.remove('hidden')
+				document.getElementById('toggleHidden').classList.add('rotate')
 			}
-			else { renderElement("<p>ERRO. Checar id: " + smaller.id + "</p>", "#info") }
+			else { renderElement("<div class='erro'>Algo deu errado... <p class='info'>Projeto ID <span>" + smaller.id + "</span></p></div>", "#info") }
 		}
 	})
 
 	/*
 	* sidebar events
 	*/
+	createBaseInfo(getProjectData('BASE', colocalizados))
+
 	let gohomeName = document.getElementById('gohomeName')
-	gohomeName.innerText = 'OUC Centro' /* change to get innerText from db */
+	gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
 	let gohome = document.getElementById('gohome')
 	gohome.addEventListener('click', function() {
 		document.getElementById('info').classList.add('hidden')
 		document.getElementById('gohome').classList.add('hidden')
-		document.getElementById('projectInfo').classList.remove('hidden')
+		document.getElementById('baseInfo').classList.remove('hidden')
+	})
+
+	let hideshow = document.getElementById('toggleHidden')
+	hideshow.addEventListener('click', function(event) {
+		document.getElementById('infowrap').classList.toggle('hidden')
+		hideshow.classList.toggle('rotate')
 	})
 
 	/*
