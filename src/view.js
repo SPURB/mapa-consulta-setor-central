@@ -126,12 +126,12 @@ function menuEvents (triggers, toHide){
 	normalizedHTMLArr[0].addEventListener('click', event =>{
 		toHide.classList.toggle('open')
 		normalizedHTMLArr[1].classList.remove('hide')
-		event.target.classList.add('hide')
+		// event.target.classList.add('hide')
 	})
 	normalizedHTMLArr[1].addEventListener('click', event =>{
 		toHide.classList.toggle('open')
 		normalizedHTMLArr[0].classList.remove('hide')
-		event.target.classList.add('hide')
+		// event.target.classList.add('hide')
 	})
 
 }
@@ -143,25 +143,32 @@ function menuEvents (triggers, toHide){
 * @return { Object } { hero, images }
 */
 function getFiles(id, projetos){
-	const idsFromNames = projetos.filter(projeto => {
-        let substId =  projeto.name.substring(0,3) 
-        substId = substId.replace(/[^\d]/g, '') 
-        substId = parseInt(substId)
-        if(substId === id){
-            return projeto
-        }
-    })
-	const files = idsFromNames[0].children
-    const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
-    const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
-
-	if(images.length > 0){
-		return {
-			images: images.map(image => { return {"path": image.path, extension: image.extension} }),
-			hero: hero[0].path
-		}
+	if (id === 'BASE') {
+		/* "'ID':'BASE'" in colocalizados relates to "id: 0" in projetos */
+		let baseproject = projetos.filter(projeto => parseInt(projeto.name.substring(0,3).replace(/[^\d]/g, '')) === 0)
+		return baseproject
 	}
-	else return false
+	else {
+		const idsFromNames = projetos.filter(projeto => {
+			let substId =  projeto.name.substring(0,3) 
+			substId = substId.replace(/[^\d]/g, '') 
+			substId = parseInt(substId)
+			if(substId !== 0 && substId === id){
+				return projeto
+			}
+		})
+		const files = idsFromNames[0].children
+		const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
+		const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
+
+		if(images.length > 0){
+			return {
+				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+				hero: hero[0].path
+			}
+		}
+		else return false
+	}
 }
 
 /**
@@ -171,7 +178,7 @@ function getFiles(id, projetos){
 */ 
 function createInfo(data, projectColor, images){
 
-	images ? console.log(images) : null 
+	// images ? console.log(images) : null
 
 	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
 	let contatenation = ''
@@ -195,13 +202,16 @@ function createInfo(data, projectColor, images){
 	renderElement(contatenation, "#info") // render DOM
 }
 
-
+/**
+* Create initial info (images, strings) box with data from the larger project
+* @param { Object } data colocalizados.json item (return from getProjectData())
+*/
 function createBaseInfo(data) {
 	let contatenation = ''
 
 	contatenation += "<h1 class='baseInfo-title'>" + data.NOME + "</h1>"
 
-	contatenation += "<div class='cover' style='background-image: url(" + "teste" + ");'></div>"
+	contatenation += "<div class='cover' style='background-image: url(" + process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path + ");'></div>"
 
 	if (data.ANO || data.SECRETARIA || data.STATUS) {
 		contatenation += "<div class='dados'>"
@@ -313,4 +323,3 @@ docReady(() => {
 	.then( () => fitToBaseLayer )
 	.catch( error => console.error(error) )
 })
-

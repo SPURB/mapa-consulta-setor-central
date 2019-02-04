@@ -7,7 +7,7 @@ html, body {
 	font-family: 'Roboto';
 	font-size: 16px;
 	color: #333;
-	line-height: 120%;
+	line-height: 160%;
 }
 
 p {
@@ -22,50 +22,56 @@ p {
 	font-family: inherit;
 
 	&#open{
+		img {
+			width: 12px;
+			height: 12px;
+			border-radius: 100%;
+			margin-right: 0;
+			padding: 4px;
+			vertical-align: -5px;
+			filter: invert(1) contrast(200%);
+		}
 		line-height: calc(2rem - 2px);
 		background-color: #EB5757;
-		border: 1px solid transparent;
+		border-width: 0;
 		border-radius: 1rem;
 		color: #FFF;
-		box-shadow: 0 4px 4px rgba(0, 0, 0, .24);
 		cursor: pointer;
-		max-width: calc(2.2rem - 2px);
+		max-width: calc(2rem - 4px);
+		max-height: calc(16px + .8rem);
 		overflow: hidden;
-		padding: 0 .8rem 0 calc(.5rem - 2px);
+		padding: 0 .8rem 0 4px;
 		white-space: nowrap;
 		text-overflow: hidden;
 		transition: all .2s ease-in-out;
-		animation: btn-abrelista 4s ease-in-out 1s;
-		&:hover { opacity: .8; }
-		&:active { opacity: 1; }
-		&::before {
-			content: '<';
-			display: inline-block;
-			line-height: 1.2rem;
-			width: 1.2rem;
-			border-radius: 100%;
-			vertical-align: baseline;
-			background-color: rgba(0, 0, 0, .12);
-			margin-right: .5rem;
+		animation: btn-abrelista 8s ease-in-out 1s;
+		box-shadow: 0 4px 4px rgba(0, 0, 0, .24);
+		&:hover {
+			opacity: .8;
+			max-width: 20rem;
 		}
+		&:active { opacity: 1; }
 		@keyframes btn-abrelista {
 			0% { max-width: calc(2.2rem - 2px); }
-			20% { max-width: 20rem; }
-			80% { max-width: 20rem; }
+			10% { max-width: 20rem; }
+			90% { max-width: 20rem; }
 			100% { max-width: calc(2.2rem - 2px); }
 		}
 	}
 	&#close{
-		padding: 0;
-		line-height: 20px;
-		width: 20px;
+		img {
+			width: 12px;
+			height: 12px;
+			filter: invert(1) contrast(160%);
+		}
+		padding: 12px;
 		border-radius: 100%;
 		border: 0;
-		background-color: #FFF;
+		background-color: rgba(0, 0, 0, .12);
 		cursor: pointer;
 		transition: all ease-in-out .2s;
 		&:hover {
-			background-color: rgba(0, 0, 0, .12);
+			background-color: transparent;
 			color: #FFF;
 		}
 		&:active { background-color: inherit; color: initial; }
@@ -85,14 +91,14 @@ p {
 	background-color: #FFF;
 	box-shadow: -4px 0 4px rgba(0, 0, 0, .24);
 	transition: right 0.4s ease-in-out;
-}
-
-#panel.open{
-	right: 0;
 	& > * {
 		user-select: none;
 		-moz-user-select: none;
 	}
+}
+
+#panel.open{
+	right: 0;
 }
 
 .title{
@@ -156,25 +162,26 @@ p {
 	left: 0;
 	opacity: 1;
 	background-color: #FFF;
-	border-right: 1rem solid #777;
 	transition: 1s ease-in opacity;
 	overflow: hidden;
-	#toggleHidden {		
+	#toggleHidden {
+		img {
+			width: 16px;
+			height: 16px;
+			filter: invert(1);
+		}
 		position: absolute;
-		right: 8px;
-		top: 8px;
-		border: 0;
-		line-height: calc(1.5rem - 4px);
-		width: 1.5rem;
+		right: 20px;
+		top: 20px;
+		padding: 6px 8px 10px 8px;
+		border-width: 0;
 		border-radius: 100%;
-		padding: 0 0 4px 0;
-		background-color: #BDBDBD;
-		color: #FFF;
 		cursor: pointer;
 		transition: all ease-in-out .2s;
+		background-color: rgba(0, 0, 0, .48);
 		display: none;
 		&.rotate { transform: rotate(180deg); }
-		&:hover { background-color: #777; }
+		&:hover { background-color: rgba(0, 0, 0, .12); }
 		&:active { background-color: #333;}
 	}
 	#gohome {
@@ -200,6 +207,10 @@ p {
 		}
 		&:active {
 			background-color: #777;
+		}
+		img {
+			width: 12px;
+			height: 12px;
 		}
 		#gohomeName {
 			margin-left: 8px;
@@ -234,18 +245,15 @@ p {
 			background-color: #EB5757;
 			padding: 1rem 1.25rem;
 			p {
-				margin-bottom: 4px;
 				color: #FFF;
 				font-size: 12px;
 				span {
 					font-weight: 700;
 				}
 			}
-			& > *:last-child { margin-bottom: 0; }
 		}
 		.description {
 			font-family: 'Georgia';
-			font-size: smaller;
 			padding: 1.25rem;
 			background-color: #FFF;
 		}
@@ -273,6 +281,8 @@ p {
 		}
 		.project-title {
 			font-weight: 700;
+			font-size: x-large;
+			line-height: 160%;
 			order: 1;
 			-webkit-order: 1;
 			background-color: #FFF;
@@ -281,12 +291,10 @@ p {
 		.ano {
 			order: 2;
 			-webkit-order: 2;
-			padding-bottom: 8px !important;
 		}
 		.status {
 			order: 3;
 			-webkit-order: 3;
-			padding-bottom: 8px !important;
 		}
 		.secretaria {
 			order: 4;
@@ -301,7 +309,6 @@ p {
 		}
 		.description {
 			font-family: 'Georgia';
-			font-size: smaller;
 			order: 5;
 			-webkit-order: 5;
 			padding: 1.25rem;
@@ -360,9 +367,9 @@ p {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	left: 20rem;
+	left: 24rem;
 	right: 0;
-	background-color: #FFF;
+	background-color: #F5F5F5;
 }
 
 @media (orientation: portrait) {
@@ -370,8 +377,10 @@ p {
 		position: relative;
 		margin: auto;
 		border-right: 0;
-		transform: translateY(8rem);
-		max-height: calc(100vh - 8rem);
+		transform: translateY(4rem);
+		max-height: calc(100vh - 4rem);
+		width: calc(100% - 16px);
+		max-width: 36rem;
 		border-radius: 1rem 1rem 0 0;
 		box-shadow: 0px -4px 4px rgba(0, 0, 0, .24);
 		z-index: 99;
