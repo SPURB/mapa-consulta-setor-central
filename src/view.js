@@ -3,8 +3,9 @@ import { isNumber } from 'util'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
+import Select from 'ol/interaction/Select.js'
 import { projetos, colocalizados  } from './model'
-import {  returnLayers,  layerColors, getProjectData } from './presenter'
+import { returnLayers, layerColors, getProjectData } from './presenter'
 import { containsExtent } from 'ol/extent'
 
 /**
@@ -69,9 +70,15 @@ function setListActions(element, view, layers){
 			document.getElementById("info").classList.remove("hidden")
 			document.getElementById('baseInfo').classList.add('hidden')
 			document.getElementById('gohome').classList.remove('hidden')
-			document.getElementById('infowrap').classList.remove('hidden')
 			document.getElementById('panel').classList.toggle('open')
-			document.getElementById('toggleHidden').classList.add('rotate')
+			if (window.innerHeight > window.innerWidth) {
+				document.getElementById('infowrap').classList.remove('hidden')
+				document.getElementById('toggleHidden').classList.add('rotate')
+			}
+			else {
+				document.getElementById('infowrap').classList.add('hidden')
+				document.getElementById('toggleHidden').classList.remove('rotate')
+			}
 			// !!!CLEAN THIS FUNCTION!!!
 
 			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
@@ -237,7 +244,9 @@ docReady(() => {
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],
 		projection: 'EPSG:3857',
-		zoom: 13
+		zoom: 13,
+		minZoom: 12.7,
+		maxZoom: 28
 	})
 
 	let map = new Map({
@@ -276,10 +285,16 @@ docReady(() => {
 				const images = getFiles(smaller.id, projetos)
 
 				createInfo(data, layerColors[smaller.id], images)
-				document.getElementById('baseInfo').classList.add('hidden')
+				document.getElementById('baseInfo').classList.add('hidden') // classes' changes for clicks on map
 				document.getElementById('gohome').classList.remove('hidden')
-				document.getElementById('infowrap').classList.remove('hidden')
-				document.getElementById('toggleHidden').classList.add('rotate')
+				if (window.innerHeight > window.innerWidth) {
+					document.getElementById('infowrap').classList.remove('hidden')
+					document.getElementById('toggleHidden').classList.add('rotate')
+				}
+				else {
+					document.getElementById('infowrap').classList.add('hidden')
+					document.getElementById('toggleHidden').classList.remove('rotate')
+				}
 			}
 			else { renderElement("<div class='erro'>Algo deu errado... <p class='info'>Projeto ID <span>" + smaller.id + "</span></p></div>", "#info") }
 		}
@@ -290,6 +305,9 @@ docReady(() => {
 	*/
 	createBaseInfo(getProjectData('BASE', colocalizados))
 
+	/*
+	* return to initial page - classes' changes
+	*/
 	let gohomeName = document.getElementById('gohomeName')
 	gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
 	let gohome = document.getElementById('gohome')
@@ -297,13 +315,33 @@ docReady(() => {
 		document.getElementById('info').classList.add('hidden')
 		document.getElementById('gohome').classList.add('hidden')
 		document.getElementById('baseInfo').classList.remove('hidden')
+		fitToId(view, thisMapLayers, 0)
 	})
 
+	/*
+	* sidebar hiding - classes' changes
+	*/
 	let hideshow = document.getElementById('toggleHidden')
 	hideshow.addEventListener('click', function(event) {
 		document.getElementById('infowrap').classList.toggle('hidden')
 		hideshow.classList.toggle('rotate')
 	})
+
+	/*
+	* for landscape devices, resize map for sidebar hiding/showing
+	*/
+	if (window.innerHeight < window.innerWidth) {
+		let sidebar = document.getElementById('infowrap')
+		var observer = new MutationObserver(function(mutationsList) {
+			for(var mutation of mutationsList) {
+				if (mutation.type == 'attributes') {
+					setTimeout(function() { map.updateSize() }, 200)
+				}
+				else { return false }
+			}
+		})
+		observer.observe(sidebar, { attributes: true, childList: false, subtree: false })
+	}
 
 	/*
 	after render, initiate app

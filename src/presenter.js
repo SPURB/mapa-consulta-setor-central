@@ -1,6 +1,6 @@
 "use strict"
 import {  Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
-// import BingMaps from 'ol/source/BingMaps.js'
+import BingMaps from 'ol/source/BingMaps.js'
 import VectorSource from 'ol/source/Vector.js'
 import KML from 'ol/format/KML'
 import Style from 'ol/style/Style'
@@ -96,14 +96,14 @@ function returnLayers(projetos, app_url){
 		const layers = kmlLayers.map(vector => vector.layer)
 
 		// Mapa base
-		// const bingMaps = new TileLayer({
-		// 	source: new BingMaps({
-		// 	imagerySet: 'CanvasGray',
-		// 	culture: 'pt-BR',
-		// 	key: process.env.BING_API_KEY
-		// 	})
-		// })
-		// layers.unshift(bingMaps)
+		const bingMaps = new TileLayer({
+			source: new BingMaps({
+			imagerySet: 'CanvasGray',
+			culture: 'pt-BR',
+			key: process.env.BING_API_KEY
+			})
+		})
+		layers.unshift(bingMaps)
 
 		return layers
 	}
