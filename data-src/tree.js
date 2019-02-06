@@ -31,14 +31,15 @@ function createJsFromExcel(inputExcel, tableName, outputJS){
 	let outputJson = [];
 
 	rows.map(function(rowLine){ // para cada linha
-		let collection = Object.entries(rowLine); 
+		let collection = Object.entries(rowLine);
 		let output = {}
 
 		collection.map(function(index) {
-			if(index[1] != ''){ //se não tiver dados não inclui no json final
+			if(index[1] !== ''){ //se não tiver dados não inclui no json final
 				output[index[0]] = index[1];
 			}
 		});
+
 		if(output !== {}) { outputJson.push(output)}
 	})
 

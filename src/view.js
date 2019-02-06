@@ -4,7 +4,7 @@ import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { projetos, colocalizados  } from './model'
-import {  returnLayers,  layerColors, getProjectData } from './presenter'
+import { returnLayers, layerColors, getProjectData } from './presenter'
 import { containsExtent } from 'ol/extent'
 
 /**
@@ -37,7 +37,7 @@ function createList(colocalizados){
 			list += '<li '+">" + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + " disabled>" + '</li>'
 		}
 		else{
-			list += '<li style="border-color:rgba('
+			list += '<li style="background-color:rgba('
 				+ layerColors[item.ID][0]+','
 				+layerColors[item.ID][1]+','
 				+layerColors[item.ID][2]+','
@@ -67,6 +67,17 @@ function setListActions(element, view, layers){
 			const images = getFiles(idprojeto, projetos)
 			createInfo(data, layerColors[idprojeto], images)
 			document.getElementById("info").classList.remove("hidden")
+			document.getElementById('baseInfo').classList.add('hidden')
+			document.getElementById('gohome').classList.remove('hidden')
+			document.getElementById('panel').classList.toggle('open')
+			if (window.innerHeight > window.innerWidth) {
+				document.getElementById('infowrap').classList.remove('hidden')
+				document.getElementById('toggleHidden').classList.add('rotate')
+			}
+			else {
+				document.getElementById('infowrap').classList.add('hidden')
+				document.getElementById('toggleHidden').classList.remove('rotate')
+			}
 			// !!!CLEAN THIS FUNCTION!!!
 
 			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
@@ -121,12 +132,12 @@ function menuEvents (triggers, toHide){
 	normalizedHTMLArr[0].addEventListener('click', event =>{
 		toHide.classList.toggle('open')
 		normalizedHTMLArr[1].classList.remove('hide')
-		event.target.classList.add('hide')
+		// event.target.classList.add('hide')
 	})
 	normalizedHTMLArr[1].addEventListener('click', event =>{
 		toHide.classList.toggle('open')
 		normalizedHTMLArr[0].classList.remove('hide')
-		event.target.classList.add('hide')
+		// event.target.classList.add('hide')
 	})
 
 }
@@ -138,25 +149,32 @@ function menuEvents (triggers, toHide){
 * @return { Object } { hero, images }
 */
 function getFiles(id, projetos){
-	const idsFromNames = projetos.filter(projeto => {
-        let substId =  projeto.name.substring(0,3) 
-        substId = substId.replace(/[^\d]/g, '') 
-        substId = parseInt(substId)
-        if(substId === id){
-            return projeto
-        }
-    })
-	const files = idsFromNames[0].children
-    const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
-    const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
-
-	if(images.length > 0){
-		return {
-			images: images.map(image => { return {"path": image.path, extension: image.extension} }),
-			hero: hero[0].path
-		}
+	if (id === 'BASE') {
+		/* "'ID':'BASE'" in colocalizados relates to "id: 0" in projetos */
+		let baseproject = projetos.filter(projeto => parseInt(projeto.name.substring(0,3).replace(/[^\d]/g, '')) === 0)
+		return baseproject
 	}
-	else return false
+	else {
+		const idsFromNames = projetos.filter(projeto => {
+			let substId =  projeto.name.substring(0,3) 
+			substId = substId.replace(/[^\d]/g, '') 
+			substId = parseInt(substId)
+			if(substId !== 0 && substId === id){
+				return projeto
+			}
+		})
+		const files = idsFromNames[0].children
+		const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
+		const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
+
+		if(images.length > 0 && hero){
+			return {
+				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+				hero: hero[0].path
+			}
+		}
+		else return false
+	}
 }
 
 /**
@@ -166,21 +184,56 @@ function getFiles(id, projetos){
 */ 
 function createInfo(data, projectColor, images){
 
-	images ? console.log(images) : null 
+	// images ? console.log(images) : null
 
 	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
-	let contatenation = "<div class='info-legend' style='"+ concatColor +"'></div>"
+	let contatenation = ''
+	if (images.images) {
+		contatenation += "<div class='coverSec' style='background-image: url(" + process.env.APP_URL + images.images[0].path + ")'></div>"
+	}
+	else {
+		contatenation = ''
+	}
+	contatenation += "<div class='info-legend' style='"+ concatColor +"'></div>"
 
 	for(let val in data){
 		switch(val) {
 			case 'NOME': contatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
 			case 'DESCRIÇÃO': contatenation += "<p class='description'>" +  data[val] + "</p>"; break
-			case 'ANO': contatenation += "<p class='ano'>" +  data[val] + "</p>"; break
-			case 'SECRETARIA': contatenation += "<p class='secretaria'>" +  data[val] + "</p>"; break
-			case 'STATUS': contatenation += "<p class='status'>" +  data[val] + "</p>"; break
+			case 'ANO': contatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
+			case 'SECRETARIA': contatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
+			case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
 		}
 	}
-	renderElement("<p>"+ contatenation + "</p>", "#info") // render DOM
+	renderElement(contatenation, "#info") // render DOM
+}
+
+/**
+* Create initial info (images, strings) box with data from the larger project
+* @param { Object } data colocalizados.json item (return from getProjectData())
+*/
+function createBaseInfo(data) {
+	let contatenation = ''
+
+	contatenation += "<h1 class='baseInfo-title'>" + data.NOME + "</h1>"
+
+	contatenation += "<div class='cover' style='background-image: url(" + process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path + ");'></div>"
+
+	if (data.ANO || data.SECRETARIA || data.STATUS) {
+		contatenation += "<div class='dados'>"
+		for (let val in data) {
+			switch (val) {
+				case 'ANO': contatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
+				case 'SECRETARIA': contatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
+				case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
+			}
+		}
+		contatenation += "</div>"
+	}
+
+	contatenation += "<p class='description'>" + data.DESCRIÇÃO + "</p>"
+
+	renderElement(contatenation, "#baseInfo")
 }
 
 
@@ -190,7 +243,9 @@ docReady(() => {
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],
 		projection: 'EPSG:3857',
-		zoom: 13
+		zoom: 13,
+		minZoom: 12.7,
+		maxZoom: 28
 	})
 
 	let map = new Map({
@@ -229,11 +284,63 @@ docReady(() => {
 				const images = getFiles(smaller.id, projetos)
 
 				createInfo(data, layerColors[smaller.id], images)
+				document.getElementById('baseInfo').classList.add('hidden') // classes' changes for clicks on map
+				document.getElementById('gohome').classList.remove('hidden')
+				if (window.innerHeight > window.innerWidth) {
+					document.getElementById('infowrap').classList.remove('hidden')
+					document.getElementById('toggleHidden').classList.add('rotate')
+				}
+				else {
+					document.getElementById('infowrap').classList.add('hidden')
+					document.getElementById('toggleHidden').classList.remove('rotate')
+				}
 			}
-			else { renderElement("<p>ERRO. Checar id: " + smaller.id + "</p>", "#info") }
+			else { renderElement("<div class='erro'>Algo deu errado... <p class='info'>Projeto ID <span>" + smaller.id + "</span></p></div>", "#info") }
 		}
 	})
 
+	/*
+	* sidebar events
+	*/
+	createBaseInfo(getProjectData('BASE', colocalizados))
+
+	/*
+	* return to initial page - classes' changes
+	*/
+	let gohomeName = document.getElementById('gohomeName')
+	gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
+	let gohome = document.getElementById('gohome')
+	gohome.addEventListener('click', function() {
+		document.getElementById('info').classList.add('hidden')
+		document.getElementById('gohome').classList.add('hidden')
+		document.getElementById('baseInfo').classList.remove('hidden')
+		fitToId(view, thisMapLayers, 0)
+	})
+
+	/*
+	* sidebar hiding - classes' changes
+	*/
+	let hideshow = document.getElementById('toggleHidden')
+	hideshow.addEventListener('click', function(event) {
+		document.getElementById('infowrap').classList.toggle('hidden')
+		hideshow.classList.toggle('rotate')
+	})
+
+	/*
+	* for landscape devices, resize map for sidebar hiding/showing
+	*/
+	if (window.innerHeight < window.innerWidth) {
+		let sidebar = document.getElementById('infowrap')
+		var observer = new MutationObserver(function(mutationsList) {
+			for(var mutation of mutationsList) {
+				if (mutation.type == 'attributes') {
+					setTimeout(function() { map.updateSize() }, 200)
+				}
+				else { return false }
+			}
+		})
+		observer.observe(sidebar, { attributes: true, childList: false, subtree: false })
+	}
 
 	/*
 	after render, initiate app
@@ -253,4 +360,3 @@ docReady(() => {
 	.then( () => fitToBaseLayer )
 	.catch( error => console.error(error) )
 })
-

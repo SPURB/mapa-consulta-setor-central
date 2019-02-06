@@ -5,18 +5,25 @@
 		<link rel="stylesheet" href="src/style.scss">
 </head>
 	<body>
-		<button id="open" class="btn menu-display">Abrir Projetos</button>
+		<button id="open" class="btn menu-display">
+			<img src="src/img/seta.svg"> Abrir lista de projetos
+		</button>
 		<div id="panel">
-			<button id="close" class="btn menu-display">Ocultar Projetos</button>
+			<button id="close" class="btn menu-display"><img src="src/img/fechar.svg" alt="Fechar"></button>
 			<section id="legenda-projetos">
-				<h2 class="title">Projetos</h2>
+				<h2 class="title">Lista de projetos</h2>
 				<ul id="projetos"></ul>
 			</section>
 		</div>
 
-		<!-- <button id="open-info" class="btn info-display">Abrir informações</button>
-		<button id="close-info" class="btn info-display ">Ocultar</button> -->
-		<div id="info" class="hidden"></div>
+		<div id="infowrap" class="hidden">
+			<button id="toggleHidden"><img src="src/img/expand.svg" alt=""></button>
+			<div id="gohome" class="hidden">
+				<img src="src/img/seta.svg" alt="Voltar"> <span id="gohomeName"></span>
+			</div>
+			<div id="baseInfo"></div>
+			<div id="info" class="hidden"></div>
+		</div>
 		<div id="map" class="map"></div>
 		<script src="src/view.js"></script>
 	</body>
