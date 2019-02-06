@@ -54,5 +54,5 @@ function createJsFromExcel(inputExcel, tableName, outputJS){
 	console.log(filePath + ' atualizado')
 }
 
-// createProjetosFromFolder('./data-src/projetos', './data-src/projetos.json')
+createProjetosFromFolder('./data-src/projetos', './data-src/projetos.json')
 createJsFromExcel('./data-src/Colocalizados.xlsx','output', './data-src/colocalizados')

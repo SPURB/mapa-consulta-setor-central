@@ -3,7 +3,6 @@ import { isNumber } from 'util'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
-import Select from 'ol/interaction/Select.js'
 import { projetos, colocalizados  } from './model'
 import { returnLayers, layerColors, getProjectData } from './presenter'
 import { containsExtent } from 'ol/extent'
@@ -168,7 +167,7 @@ function getFiles(id, projetos){
 		const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
 		const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
 
-		if(images.length > 0){
+		if(images.length > 0 && hero){
 			return {
 				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
 				hero: hero[0].path

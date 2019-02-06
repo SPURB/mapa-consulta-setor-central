@@ -7,7 +7,7 @@
     "watch": "parcel watch ./index.html",
     "build": "parcel build --public-url . index.html",
     "files": "node data-src/start.js",
-    "tests": "parcel ./tests/index.html"
+    "tests": "parcel ./test/index.html"
   },
   "devDependencies": {
     "babel-preset-env": "^1.7.0",
@@ -17,7 +17,6 @@
     "node-sass": "^4.11.0",
     "ol": "^5.1.2",
     "parcel-bundler": "^1.9.4",
-    "parcel-plugin-raw-xml": "^1.0.1",
     "xlsx": "^0.14.1"
   }
 }

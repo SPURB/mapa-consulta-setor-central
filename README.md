@@ -11,9 +11,11 @@ BING_API_KEY=chave-bing-mapas
 APP_URL=http://seu-host/levantamento-operacao-urbana-centro
 ```
 
-3. Inclua os arquivos em `data-src/projetos/nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
+4. Altere e renomeie `data-src/Colocalizados.xlsx`.
 
-4. Atualize `data-src/projetos.json`
+3. Inclua os arquivos em `data-src/projetos/id_nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
+
+5. Rode o comando:
 
 ```
 npm run files
@@ -24,12 +26,12 @@ npm run files
 npm run start
 ```
 
-6. Constrói para publicação
+6. Publique o projeto no diretório `dist/`
 ``` 
 npm run build
 ```
 
-7. Observa arquivo em local de deploy
+7. Observe arquivos em local de deploy
 ```
 npm run watch
 ```
