@@ -248,7 +248,7 @@ p {
 		.cover {
 			width: 100%;
 			padding-top: calc(100% * 9/16);
-			background-color: grey;
+			background-color: transparent;
 			background-size: cover;
 		}
 		.dados {
@@ -282,6 +282,93 @@ p {
 			padding-top: calc(100% * 9/16);
 			background-color: grey;
 			background-size: cover;
+			position: relative;
+			.fonte {
+				position: absolute;
+				top: 8px;
+				right: 8px;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, .48);
+				border-radius: 8px;
+				font-size: x-small;
+				line-height: 160%;
+				box-sizing: border-box;
+				transition: all ease-in-out .4s;
+				#openFonte {
+					position: absolute;
+					top: 0;
+					right: 0;
+					padding: 0;
+					padding: 0 0 3px 0;
+					line-height: 14px;
+					font-size: 10px;
+					width: 16px;
+					border: 0;
+					font-weight: bold;
+					box-sizing: border-box;
+					transition: all ease-in .04s;
+					background-color: transparent;
+					color: #FFF;
+					&:hover {
+						background-color: #FFF;
+						color: #333;
+						cursor: pointer;
+					}
+
+				}
+				#closeFonte {
+					position: absolute;
+					right: 2px;
+					top: 2px;
+					padding: 0 0 3px 0;
+					font-size: 13px;
+					line-height: 10px;
+					width: 14px;
+					text-align: center;
+					border-radius: inherit;
+					border: 0;
+					color: #FFF;
+					background-color: rgba(255, 255, 255, .2);
+					box-sizing: border-box;
+					transition: all ease-in .04s;
+					&:hover {
+						background-color: #FFF;
+						color: #333;
+						cursor: pointer;
+					}
+				}
+				span {
+					display: block;
+					color: rgba(255, 255, 255, .6);
+					text-transform: uppercase;
+					&:not(:last-child) {
+						margin-bottom: 4px;
+					}
+					b {
+						display: block;
+						color: #FFF;
+						text-transform: none;
+						font-size: small;
+						a { color: inherit; text-decoration: none; &:hover { border-bottom: 1px solid rgba(255, 255, 255, .6); } }
+					}
+				}
+				&.open {
+					max-width: calc(100% - 16px);
+					max-height: calc(100% - 16px);
+					padding: 4px 8px;
+					#closeFonte { display: normal; }
+					#openFonte { display: none; }
+				}
+				&.closed {
+					max-width: 16px;
+					max-height: 16px;
+					overflow: hidden;
+					#closeFonte { display: none; }
+					#openFonte { display: normal; }
+					span { color: transparent; }
+				}
+			}
 		}
 		.info-legend{
 			min-height: 2rem;
@@ -301,10 +388,12 @@ p {
 		.ano {
 			order: 2;
 			-webkit-order: 2;
+			padding-bottom: .5rem !important;
 		}
 		.status {
 			order: 3;
 			-webkit-order: 3;
+			padding-bottom: .5rem !important;
 		}
 		.secretaria {
 			order: 4;
@@ -312,7 +401,8 @@ p {
 		}
 		.ano, .status, .secretaria {
 			color: #777;
-			font-size: 12px;
+			font-size: small;
+			line-height: 1.6;
 			background-color: #FFF;
 			padding: 0 1.25rem;
 			span { font-weight: bold; }

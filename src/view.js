@@ -188,13 +188,31 @@ function createInfo(data, projectColor, images){
 
 	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
 	let contatenation = ''
+
 	if (images.images) {
-		contatenation += "<div class='coverSec' style='background-image: url(" + process.env.APP_URL + images.images[0].path + ")'></div>"
+
 	}
-	else {
-		contatenation = ''
-	}
+
+	// if (images.images) {
+	// 	contatenation += "<div class='coverSec' style='background-image: url(" + process.env.APP_URL + images.images[0].path + ")'>"
+		
+	// 	contatenation += "<section class='fonte closed' id='coverSecSrc'><button id='openFonte'>i</button><button id='closeFonte'>x</button>"
+	// 	contatenation += "<span>Autor <b>" + data.AUTOR + "</b></span>"
+	// 	if (data.FONTE.substring(0,4) === 'http') {
+	// 		contatenation += "<span>Fonte <b><a href='" + data.FONTE + "' title='" + data.FONTE + "' target='_blank'>" + data.FONTE + "</a></b></span>"
+	// 	}
+	// 	else {
+	// 		contatenation += "<span>Fonte <b>" + data.FONTE + "</b></span></section>"
+	// 	}
+
+	// 	contatenation += "</div>"
+	// }
+	// else {
+	// 	contatenation = ''
+	// }
+
 	contatenation += "<div class='info-legend' style='"+ concatColor +"'></div>"
+	contatenation += "<div class='data' id='projectData'>"
 
 	for(let val in data){
 		switch(val) {
@@ -204,7 +222,11 @@ function createInfo(data, projectColor, images){
 			case 'SECRETARIA': contatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
 			case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
 		}
+		contatenation += "</div>"
 	}
+
+	contatenation += "</div>"
+
 	renderElement(contatenation, "#info") // render DOM
 }
 
@@ -238,6 +260,8 @@ function createBaseInfo(data) {
 
 
 docReady(() => {
+	// console.log(colocalizados)
+	// console.log(projetos)
 	const thisMapLayers = returnLayers(projetos, process.env.APP_URL)
 
 	let view = new View({
@@ -324,6 +348,20 @@ docReady(() => {
 	hideshow.addEventListener('click', function(event) {
 		document.getElementById('infowrap').classList.toggle('hidden')
 		hideshow.classList.toggle('rotate')
+	})
+
+	/*
+	* sidebar projects picture info events - toggle source box
+	*/
+	let openFonteBt = document.getElementById('openFonte')
+	let closeFonteBt = document.getElementById('closeFonte')
+	openFonteBt.addEventListener('click', function(event) {
+		event.target.parentNode.classList.remove('closed')
+		event.target.parentNode.classList.add('open')
+	})
+	closeFonteBt.addEventListener('click', function(event) {
+		event.target.parentNode.classList.remove('open')
+		event.target.parentNode.classList.add('closed')
 	})
 
 	/*
