@@ -5,15 +5,17 @@
 npm install
 ```
 
-2. Inclua a chave do bing maps e o host de deste repositório no arquivo `.env`:
+2. Renomeie o arquivo e `.env.sample` para `.env` e o altere incluindo a chave do bing maps e o host de publicação:
 ```
 BING_API_KEY=chave-bing-mapas
 APP_URL=http://seu-host/levantamento-operacao-urbana-centro
 ```
+> É necessário incluir data-src em um server http com cors liberado (ou no mesmo host). Sugestão para facilitar desenvolvimento: [http-server](https://github.com/indexzero/http-server). 
+> Para gerar uma chave no [bing maps](https://docs.microsoft.com/en-us/bingmaps/getting-started/bing-maps-dev-center-help/getting-a-bing-maps-key)
 
-4. Altere e renomeie `data-src/Colocalizados.xlsx`.
+3. Altere e renomeie `data-src/Colocalizados.sample.xlsx` para `data-src/Colocalizados.xlsx` e altere a tabela `output` com as informações do projeto.
 
-3. Inclua os arquivos em `data-src/projetos/id_nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
+4. Inclua os arquivos em `data-src/projetos/id_nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
 
 5. Rode o comando:
 
@@ -21,17 +23,22 @@ APP_URL=http://seu-host/levantamento-operacao-urbana-centro
 npm run files
 ```
 
-5. Inicie a aplicação para desenvolvimento
+6. Inicie a aplicação para desenvolvimento
 ```
 npm run start
 ```
 
-6. Publique o projeto no diretório `dist/`
+7. Publique o projeto no diretório `dist/`
 ``` 
 npm run build
 ```
 
-7. Observe arquivos em local de deploy
+8. Observe arquivos em local de deploy
 ```
 npm run watch
+```
+
+9. Visualize e desenvolva testes unitários (qunit)
+```
+npm run tests
 ```

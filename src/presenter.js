@@ -158,5 +158,6 @@ function getProjectData(id, colocalizados){
 export {
     returnLayers, 
 	getProjectData,
-	layerColors
+	layerColors,
+	getRandomInt
 }
