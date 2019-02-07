@@ -360,3 +360,4 @@ docReady(() => {
 	.then( () => fitToBaseLayer )
 	.catch( error => console.error(error) )
 })
+
