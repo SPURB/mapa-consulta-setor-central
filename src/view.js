@@ -186,30 +186,27 @@ function createInfo(data, projectColor, images){
 
 	// images ? console.log(images) : null
 
+	let infoCont = document.getElementById('infoCont')
+	let coverImg = document.getElementById('coverSec')
+	let autor = document.getElementById('fonteAutor')
+	let fonte = document.getElementById('fonteFonte')
+
 	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
 	let contatenation = ''
 
 	if (images.images) {
-
+		coverImg.style.backgroundImage = 'url("' + process.env.APP_URL + images.images[0].path + '")'
+		let autorStr = 'Autor <b>' + data.AUTOR + '</b>'
+		let fonteStr = ''
+		if (data.FONTE.substring(0,4) === 'http') {
+			fonteStr += "Fonte <b><a href='" + data.FONTE + "' title='" + data.FONTE + "' target='_blank'>" + data.FONTE + "</a></b>"
+		}
+		else {
+			fonteStr += "Fonte <b>" + data.FONTE + "</b>"
+		}
+		renderElement(autorStr, '#fonteAutor')
+		renderElement(fonteStr, '#fonteFonte')
 	}
-
-	// if (images.images) {
-	// 	contatenation += "<div class='coverSec' style='background-image: url(" + process.env.APP_URL + images.images[0].path + ")'>"
-		
-	// 	contatenation += "<section class='fonte closed' id='coverSecSrc'><button id='openFonte'>i</button><button id='closeFonte'>x</button>"
-	// 	contatenation += "<span>Autor <b>" + data.AUTOR + "</b></span>"
-	// 	if (data.FONTE.substring(0,4) === 'http') {
-	// 		contatenation += "<span>Fonte <b><a href='" + data.FONTE + "' title='" + data.FONTE + "' target='_blank'>" + data.FONTE + "</a></b></span>"
-	// 	}
-	// 	else {
-	// 		contatenation += "<span>Fonte <b>" + data.FONTE + "</b></span></section>"
-	// 	}
-
-	// 	contatenation += "</div>"
-	// }
-	// else {
-	// 	contatenation = ''
-	// }
 
 	contatenation += "<div class='info-legend' style='"+ concatColor +"'></div>"
 	contatenation += "<div class='data' id='projectData'>"
@@ -227,7 +224,7 @@ function createInfo(data, projectColor, images){
 
 	contatenation += "</div>"
 
-	renderElement(contatenation, "#info") // render DOM
+	renderElement(contatenation, "#infoCont") // render DOM
 }
 
 /**

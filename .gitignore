@@ -9,7 +9,7 @@ yarn-error.log*
 /data-src/projetos/*
 !/data-src/projetos/00_piu-central
 !/data-src/projetos/1_largo-do-arouche
-!/data-src/projetos/2_minhocao-fase-1-mp
+!/data-src/projetos/4_usina-de-asfalto
 projetos.json
 colocalizados.json
 
