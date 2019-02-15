@@ -224,7 +224,7 @@ function createInfo(data, projectColor, images){
 	let fonte = document.getElementById('fonteFonte')
 
 	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
-	let contatenation = ''
+	let concatenation = ''
 
 	if (images.images) {
 		coverImg.style.backgroundImage = 'url("' + process.env.APP_URL + images.images[0].path + '")'
@@ -240,23 +240,23 @@ function createInfo(data, projectColor, images){
 		renderElement(fonteStr, '#fonteFonte')
 	}
 
-	contatenation += "<div class='info-legend' style='"+ concatColor +"'></div>"
-	contatenation += "<div class='data' id='projectData'>"
+	concatenation += "<div class='info-legend' style='"+ concatColor +"'></div>"
+	concatenation += "<div class='data' id='projectData'>"
 
 	for(let val in data){
 		switch(val) {
-			case 'NOME': contatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
-			case 'DESCRIÇÃO': contatenation += "<p class='description'>" +  data[val] + "</p>"; break
-			case 'ANO': contatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
-			case 'SECRETARIA': contatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
-			case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
+			case 'NOME': concatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
+			case 'DESCRIÇÃO': concatenation += "<p class='description'>" +  data[val] + "</p>"; break
+			case 'ANO': concatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
+			case 'SECRETARIA': concatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
+			case 'STATUS': concatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
 		}
-		contatenation += "</div>"
+		concatenation += "</div>"
 	}
 
-	contatenation += "</div>"
+	concatenation += "</div>"
 
-	renderElement(contatenation, "#infoCont") // render DOM
+	renderElement(concatenation, "#infoCont") // render DOM
 }
 
 /**
@@ -264,67 +264,27 @@ function createInfo(data, projectColor, images){
 * @param { Object } data colocalizados.json item (return from getProjectData())
 */
 function createBaseInfo(data) {
-	let contatenation = ''
+	let concatenation = ''
 
-	contatenation += "<h1 class='baseInfo-title'>" + data.NOME + "</h1>"
+	concatenation += "<h1 class='baseInfo-title'>" + data.NOME + "</h1>"
 
-	contatenation += "<div class='cover' style='background-image: url(" + process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path + ");'></div>"
+	concatenation += "<div class='cover' style='background-image: url(" + process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path + ");'></div>"
 
 	if (data.ANO || data.SECRETARIA || data.STATUS) {
-		contatenation += "<div class='dados'>"
+		concatenation += "<div class='dados'>"
 		for (let val in data) {
 			switch (val) {
-				case 'ANO': contatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
-				case 'SECRETARIA': contatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
-				case 'STATUS': contatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
+				case 'ANO': concatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
+				case 'SECRETARIA': concatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
+				case 'STATUS': concatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
 			}
 		}
-		contatenation += "</div>"
+		concatenation += "</div>"
 	}
 
-	contatenation += "<p class='description'>" + data.DESCRIÇÃO + "</p>"
+	concatenation += "<p class='description'>" + data.DESCRIÇÃO + "</p>"
 
-	renderElement(contatenation, "#baseInfo")
-}
-
-function setEventListeners (){ 
-	/*
-	* return to initial page - classes' changes
-	*/
-	let gohomeName = document.getElementById('gohomeName')
-	gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
-	let gohome = document.getElementById('gohome')
-	gohome.addEventListener('click', function() {
-		document.getElementById('info').classList.add('hidden')
-		document.getElementById('gohome').classList.add('hidden')
-		document.getElementById('baseInfo').classList.remove('hidden')
-		fitToId(view, baseLayers, 0)
-	})
-
-	/*
-	* sidebar hiding - classes' changes
-	*/
-	var hideshow = document.getElementById('toggleHidden')
-	hideshow.addEventListener('click', function(event) {
-		console.log(event)
-		document.getElementById('infowrap').classList.toggle('hidden')
-		hideshow.classList.toggle('rotate')
-	})
-
-	/*
-	* sidebar projects picture info events - toggle source box
-	*/
-	let openFonteBt = document.getElementById('openFonte')
-	let closeFonteBt = document.getElementById('closeFonte')
-	openFonteBt.addEventListener('click', function(event) {
-		event.target.parentNode.classList.remove('closed')
-		event.target.parentNode.classList.add('open')
-	})
-	closeFonteBt.addEventListener('click', function(event) {
-		event.target.parentNode.classList.remove('open')
-		event.target.parentNode.classList.add('closed')
-	})
-
+	renderElement(concatenation, "#baseInfo")
 }
 
 export {
@@ -338,7 +298,6 @@ export {
 	getFiles,
 	createInfo,
 	createBaseInfo,
-	setEventListeners,
 	noBaseProjetos,
 	parseNameToNumericalId
 }

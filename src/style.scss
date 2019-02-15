@@ -545,3 +545,15 @@ p {
 		margin-left: 0;
 	}
 }
+
+/*
+* Open layers classes
+*/
+#map {
+	.ol-zoom {
+		bottom: .5em;
+		right: .5em;
+		top: unset;
+		left: unset;
+	}
+}

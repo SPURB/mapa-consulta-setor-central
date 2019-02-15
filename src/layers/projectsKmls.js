@@ -13,12 +13,14 @@ import { parseNameToNumericalId } from '../domRenderers'
 * @param { String } app_url Url of this app (not attached to this app)
 * @return { Array } Array of New Layers's (from Open Layers) instances with idprojeto setted (layers[index].values_.projectId)
 */
-function returnLayers(projetos, app_url){
+function returnLayers(projetos, app_url, colocalizados){
 	try{
 		let kmlLayers = []
 		projetos.forEach(projeto => { 
 			const files = projeto.children
 			const projectId = parseNameToNumericalId(projeto.name) // return a integer, the id of the proje
+			const title = getProjectData(projectId, colocalizados)["NOME"] 
+
 			files.forEach( file => { // Create projeto's layer
 				if(file.extension === '.kml'){
 					const source = new VectorSource({
@@ -31,8 +33,6 @@ function returnLayers(projetos, app_url){
 					const blue = getRandomInt(0,255)
 
 					setLayerColors(projectId,[red, green, blue], .25)
-					// const baseColor =  [ red, green, blue, .3 ] // setRandomColor(projectId)
-					// const baseColor = setRandomColor(projectId)
 
 					const style = new Style({
 						stroke: new Stroke({
@@ -46,7 +46,7 @@ function returnLayers(projetos, app_url){
 
 					kmlLayers.push({
 						layer: new VectorLayer({
-							title: projeto.name,
+							title: title,
 							source: source,
 							style: style, 
 							projectId: projectId // set id from the folder name 
