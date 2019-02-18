@@ -37,7 +37,8 @@ function returnBases(projeto, app_url, bing){
 				})
 
 				kmlLayers.unshift({
-					layer: new VectorLayer({ 
+					layer: new VectorLayer({
+						title: file.name,
 						source: source,
 						style: style,
 						projectId: 0 // 0 => base
@@ -49,6 +50,7 @@ function returnBases(projeto, app_url, bing){
 
 		if (bing) { // Base with Bing maps tile, set false to develop
 			const bingMaps = new TileLayer({
+				title:"Base Bing Maps",
 				source: new BingMaps({
 				imagerySet: 'CanvasGray',
 				culture: 'pt-BR',

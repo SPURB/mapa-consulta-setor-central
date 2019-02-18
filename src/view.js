@@ -1,12 +1,12 @@
 "use strict"
 import 'ol/ol.css';
-import 'ol-layerswitcher/src/ol-layerswitcher.css';
+// import 'ol-layerswitcher/src/ol-layerswitcher.css';
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 
 import LayerSwitcher from 'ol-layerswitcher';
-import {defaults as defaultControls, ScaleLine} from 'ol/control';
+import { ScaleLine, ZoomSlider} from 'ol/control';
 
 import { projetos, colocalizados  } from './model'
 import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
@@ -40,24 +40,21 @@ docReady(() => {
 		maxZoom: 28
 	})
 
-
-
-	let map = new Map({
+	let appmap = new Map({
+		title:'projetos',
 		layers: baseLayers, 
 		loadTilesWhileAnimating: true,
 		target: 'map',
 		view: view,
-		controls: defaultControls().extend([
-			 new ScaleLine()
-		])
+		controls:[] // remove defaults (compass, +- zoom buttons, attribution)
 	})
 
 	/*
 	* map events
 	*/
-	map.on('singleclick', evt => {
+	appmap.on('singleclick', evt => {
 		let idAndextents = []
-		map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
 			const projectjId = layer.values_.projectId
 			if(projectjId !== 0) { // exclui a base
 				idAndextents.push(
@@ -101,18 +98,9 @@ docReady(() => {
 	*/
 	createBaseInfo(getProjectData('BASE', colocalizados)) // sidebar first load
 
-	let fitToBaseLayer = new Promise( () => {
-		setTimeout(() => {
-			fitToId(view, baseLayers, 0) // fit to base layer
-		}, 1500 )
-	})
-
-	let addProjectLayers = new Promise( () => {
-		setTimeout(() => {
-			projectLayers.forEach(layer => map.addLayer(layer)) // add project layers
-		}, 0)
-	})
-
+	/*
+	* Create all event listeners
+	*/
 	let setListeners = new Promise( () => {
 		setTimeout(() => {
 			 // create event liteners
@@ -157,7 +145,7 @@ docReady(() => {
 				var observer = new MutationObserver(function(mutationsList) {
 					for(var mutation of mutationsList) {
 						if (mutation.type == 'attributes') {
-							setTimeout(function() { map.updateSize() }, 200)
+							setTimeout(function() { appmap.updateSize() }, 200)
 						}
 						else { return false }
 					}
@@ -167,7 +155,34 @@ docReady(() => {
 		}, 0)
 	})
 
-	
+	/*
+	* Fit to the first kml base layer
+	*/
+	let fitToBaseLayer = new Promise( () => {
+		setTimeout(() => {
+			fitToId(view, baseLayers, 0) // fit to base layer
+		}, 1500 )
+	})
+
+	/*
+	* Add non base layers to the map
+	*/
+	let addProjectLayers = new Promise( () => {
+		setTimeout(() => {
+			projectLayers.forEach(layer => appmap.addLayer(layer)) // add project layers
+		}, 0)
+	})
+
+	let addControls = new Promise ( () => {
+		setTimeout(() => {
+			appmap.addControl(new ScaleLine())
+			appmap.addControl(new ZoomSlider())
+			appmap.addControl(new LayerSwitcher({
+				tipLabel: 'Abrir lista de projetos'
+			}))
+		}, 0)
+	})
+
 	/*
 	* Ordered app initiation 
 	*/
@@ -177,21 +192,15 @@ docReady(() => {
 		*/
 		// createList(colocalizados), // TODO: injetar lista adicionado com layerSwitcher
 		setListActions(document.getElementById("projetos"), view, projectLayers),
-		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
+		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel"))
 	])
 	/*
-	* Then add event listeners and do map events 
+	* Then add event listeners and create map events
 	*/
 	.then( () => setListeners)
 	.then( () => fitToBaseLayer )
 	.then( () => addProjectLayers )
+	.then( () => addControls)
 	.catch( error => console.error(error) )
-
-	let layerSwitcher = new LayerSwitcher()
-	map.addControl(layerSwitcher)
-
-	// let projetosDom = document.getElementById('legenda-projetos')
-	// let layerSwitcher = new LayerSwitcher().renderPanel(map, projetosDom)
-	// map.addControl(layerSwitcher)
-
 })
+

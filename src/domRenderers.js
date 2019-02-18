@@ -7,7 +7,7 @@ import { containsExtent } from 'ol/extent'
 /**
 * Reduce projetos to single Base object
 * @param { Array } projetos The projetos from './model'
-* @return { Object } The base folder example { children: [ {…}, {…}, {…} ], name: "00_base", path: "data-src/projetos/00_base", size: 0, type: "directory"}
+* @return { Object } The base folder example { children: [ {…}, {…} ], name: "00_base", path: "data-src/projetos/00_base", size: 1, type: "directory"}
 */
 function baseObject (projetos) {
 	return projetos.reduce( projeto =>{ 
@@ -71,7 +71,7 @@ function createList(colocalizados){
 		}
 		else{
 			list += '<li style="background-color:rgba('
-				+ layerColors[item.ID][0]+','
+				+layerColors[item.ID][0]+','
 				+layerColors[item.ID][1]+','
 				+layerColors[item.ID][2]+','
 				+layerColors[item.ID][3]
@@ -218,10 +218,10 @@ function createInfo(data, projectColor, images){
 
 	// images ? console.log(images) : null
 
-	let infoCont = document.getElementById('infoCont')
+	// let infoCont = document.getElementById('infoCont')
 	let coverImg = document.getElementById('coverSec')
-	let autor = document.getElementById('fonteAutor')
-	let fonte = document.getElementById('fonteFonte')
+	// let autor = document.getElementById('fonteAutor')
+	// let fonte = document.getElementById('fonteFonte')
 
 	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
 	let concatenation = ''

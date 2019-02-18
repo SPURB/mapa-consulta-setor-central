@@ -5,18 +5,6 @@
 		<link rel="stylesheet" href="src/style.scss">
 </head>
 	<body>
-		<button id="open" class="btn menu-display">
-			<img src="src/img/seta.svg"> Abrir lista de projetos
-		</button>
-		<div id="panel">
-			<button id="close" class="btn menu-display"><img src="src/img/fechar.svg" alt="Fechar"></button>
-			<section id="legenda-projetos">
-				<h2 class="title">Lista de projetos</h2>
-				<ul id="projetos"></ul>
-				<!-- createList() vem aqui -->
-			</section>
-		</div>
-
 		<div id="infowrap" class="hidden">
 			<button id="toggleHidden"><img src="src/img/expand.svg" alt=""></button>
 			<div id="gohome" class="hidden">
@@ -34,6 +22,16 @@
 				</div>
 				<div id="infoCont"></div>
 			</div>
+		</div>
+		<button id="open" class="btn menu-display">
+			<img src="src/img/seta.svg"> Abrir lista de projetos
+		</button>
+		<div id="panel">
+			<button id="close" class="btn menu-display"><img src="src/img/fechar.svg" alt="Fechar"></button>
+			<section id="legenda-projetos">
+				<h2 class="title">Lista de projetos</h2>
+				<div id="projetos" class="layer-switcher"></div>
+			</section>
 		</div>
 		<div id="map" class="map"></div>
 		<script src="src/view.js"></script>

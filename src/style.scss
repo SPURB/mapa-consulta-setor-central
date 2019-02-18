@@ -473,8 +473,6 @@ p {
 	}
 }
 
-#close-info{}
-
 #map {
 	position: absolute;
 	top: 0;
@@ -484,6 +482,71 @@ p {
 	margin-left: 24rem;
 	background-color: #F5F5F5;
 	transition: all ease-in-out .2s;
+
+	/*
+	* Open layers default classes
+	*/
+	.ol-zoomslider {
+		bottom: .5em;
+		right: .5em;
+		top: unset;
+		left: unset;
+			background-color: rgba(255, 255, 255, 0.85)
+	}
+	.ol-scale-line, .ol-zoomslider-thumb {
+		background:rgba(235, 87, 87, 0.5) //- #EB5757
+	}
+
+	/*
+	 * Layer switcher (ol-layerswitcher) default classes
+	*/
+	.layer-switcher {
+		position: absolute;
+		top: 3rem;
+		right: 1rem;
+		font-family: inherit;
+		
+		button[title="Abrir lista de projetos"]{
+			height: 1.75em;
+			width: 1.75em;
+			background: url('../src/img/setaBranca.svg') #EB5757;
+			background-repeat: no-repeat;
+			background-position: center;
+			background-size: 12px 12px;
+			line-height: calc(2rem - 2px);
+			border-width: 0;
+			border-radius: 1rem;
+			color: #FFF;
+			cursor: pointer;
+			max-width: calc(2rem - 4px);
+			max-height: calc(16px + .8rem);
+			// overflow: hidden;
+			padding: 0 .8rem 0 4px;
+			white-space: nowrap;
+			// text-overflow: hidden;
+			transition: all .2s ease-in-out;
+			animation: btn-abrelista 8s ease-in-out 1s;
+			box-shadow: 0 4px 4px rgba(0, 0, 0, .24);
+		}
+		&:active { opacity: 1 }
+		@keyframes btn-abrelista {
+			0% { max-width: calc(2.2rem - 2px); }
+			10% { max-width: 20rem; }
+			90% { max-width: 20rem; }
+			100% { max-width: calc(2.2rem - 2px); }
+		}
+
+		.panel{
+			overflow-x: hidden;
+			z-index: 10;
+			position: absolute;
+			margin-top:.5em;
+			width: 24rem;
+			background-color: #FFF;
+			box-shadow: -4px 0 4px rgba(0, 0, 0, 0.24);
+			transition: right 0.4s ease-in-out;
+		}
+	}
 }
 
 #infoWrap[class=""] + #map {
@@ -543,17 +606,5 @@ p {
 	}
 	#map {
 		margin-left: 0;
-	}
-}
-
-/*
-* Open layers classes
-*/
-#map {
-	.ol-zoom {
-		bottom: .5em;
-		right: .5em;
-		top: unset;
-		left: unset;
 	}
 }
