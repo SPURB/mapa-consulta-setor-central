@@ -9,7 +9,6 @@ html, body {
 	color: #333;
 	line-height: 160%;
 }
-
 p {
 	margin: 0;
 }
@@ -502,7 +501,7 @@ p {
 	*/
 	.layer-switcher {
 		position: absolute;
-		top: 3rem;
+		top: 1rem;
 		right: 1rem;
 		font-family: inherit;
 		
@@ -536,7 +535,7 @@ p {
 			100% { max-width: calc(2.2rem - 2px); }
 		}
 
-		.panel{
+		#projetos-panel{
 			overflow-x: hidden;
 			z-index: 10;
 			position: absolute;
@@ -545,6 +544,9 @@ p {
 			background-color: #FFF;
 			box-shadow: -4px 0 4px rgba(0, 0, 0, 0.24);
 			transition: right 0.4s ease-in-out;
+		}
+		#projetos-panel.opened{ 
+			position: relative;
 		}
 	}
 }

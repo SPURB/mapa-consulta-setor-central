@@ -67,15 +67,15 @@ function createList(colocalizados){
 	}
 	cleanList.forEach( item => {
 		if(layerColors[item.ID] === undefined){
-			list += '<li '+">" + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + " disabled>" + '</li>'
+			list += `<li><input type='button' value='${item.NOME }' inputid='${item.ID}' disabled></li>`
 		}
 		else{
-			list += '<li style="background-color:rgba('
-				+layerColors[item.ID][0]+','
-				+layerColors[item.ID][1]+','
-				+layerColors[item.ID][2]+','
-				+layerColors[item.ID][3]
-				+')">' + "<input type='button' value='" + item.NOME +"' inputid=" + item.ID + ">" + '</li>'
+			const r = layerColors[item.ID][0]
+			const g = layerColors[item.ID][1]
+			const b = layerColors[item.ID][2]
+			const a = layerColors[item.ID][3]
+			const projectId = 'projeto-id__' + item.ID
+			list += ` <li style="background-color:rgba(${r}, ${g}, ${b}, ${a})"><input type="checkbox" id='${projectId}'><label for=${projectId}>${item.NOME}</label>`
 		}
 	})
 	renderElement(list, '#projetos')

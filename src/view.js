@@ -5,8 +5,7 @@ import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 
-import LayerSwitcher from 'ol-layerswitcher';
-import { ScaleLine, ZoomSlider} from 'ol/control';
+import { ScaleLine, ZoomSlider} from 'ol/control'
 
 import { projetos, colocalizados  } from './model'
 import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
@@ -15,7 +14,7 @@ import {
 	baseObject,
 	noBaseProjetos,
 	renderElement,
-	// createList,
+	createList,
 	setListActions,
 	fitToId,
 	smallerExtent,
@@ -177,9 +176,9 @@ docReady(() => {
 		setTimeout(() => {
 			appmap.addControl(new ScaleLine())
 			appmap.addControl(new ZoomSlider())
-			appmap.addControl(new LayerSwitcher({
-				tipLabel: 'Abrir lista de projetos'
-			}))
+			// appmap.addControl(new LayerSwitcher({
+			// 	tipLabel: 'Abrir lista de projetos'
+			// }))
 		}, 0)
 	})
 
@@ -190,7 +189,7 @@ docReady(() => {
 		/*
 		 * First create DOM elements
 		*/
-		// createList(colocalizados), // TODO: injetar lista adicionado com layerSwitcher
+		createList(colocalizados), // TODO: injetar lista adicionado com layerSwitcher
 		setListActions(document.getElementById("projetos"), view, projectLayers),
 		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel"))
 	])
