@@ -1,7 +1,7 @@
 "use strict";
 import { isNumber } from 'util'
-import { projetos, colocalizados  } from './model'
-import { layerColors, getProjectData } from './layers/projectsKmls'
+import { projetos } from './model'
+import { layerColors } from './layers/projectsKmls'
 import { containsExtent } from 'ol/extent'
 
 /**
@@ -67,19 +67,41 @@ function createList(colocalizados){
 	}
 	cleanList.forEach( item => {
 		if(layerColors[item.ID] === undefined){
-			list += `<li><input type='button' value='${item.NOME }' inputid='${item.ID}' disabled></li>`
+			list += `
+				<li>
+					<p>${item.NOME}</p>
+				</li>
+			`
 		}
 		else{
 			const r = layerColors[item.ID][0]
 			const g = layerColors[item.ID][1]
 			const b = layerColors[item.ID][2]
 			const a = layerColors[item.ID][3]
-			const projectId = 'projeto-id__' + item.ID
-			list += ` <li style="background-color:rgba(${r}, ${g}, ${b}, ${a})"><input type="checkbox" id='${projectId}'><label for=${projectId}>${item.NOME}</label>`
+
+			const projectId = 'projeto-id_' + item.ID
+			const btnProjectId = 'btn-projeto-id_' + item.ID
+
+			listCreated.push(item.ID)
+
+			list += `
+				<li style='border-left-color:rgba(${r}, ${g}, ${b}, ${a})'>
+					<input type='checkbox' id='${projectId}' checked>
+					<label for=${projectId}>${item.NOME}</label>
+					<button id="${btnProjectId}">></button>
+				</li>
+			`
+
 		}
 	})
 	renderElement(list, '#projetos')
 }
+
+
+/**
+* @return { Array } List of ids setted by createList(colocalizados) 
+*/
+let listCreated = []
 
 /**
 * Set eventLestener to run fitToId for menu list items
@@ -87,37 +109,37 @@ function createList(colocalizados){
 * @param { Object } view an instance of View (new View) from open layers
 * @param { Array } layers an instance of layers (new Layers) from open layers
 */
-function setListActions(element, view, layers){ 
-	const parseHTMLlist = Array.from(element.children)
-	parseHTMLlist.forEach( item => {
-		const idprojeto = parseInt(item.firstChild.getAttribute("inputid"))
+// function setListActions(element, view, layers){ 
+// 	const parseHTMLlist = Array.from(element.children)
+// 	parseHTMLlist.forEach( item => {
+// 		const idprojeto = parseInt(item.firstChild.getAttribute("inputid"))
 
-		item.firstChild.onclick = () => {
-			fitToId(view, layers, idprojeto)
+// 		item.firstChild.onclick = () => {
+// 			fitToId(view, layers, idprojeto)
 
-			// !!!CLEAN THIS FUNCTION!!!
-			const data = getProjectData(idprojeto, colocalizados)
-			const images = getFiles(idprojeto, projetos)
-			createInfo(data, layerColors[idprojeto], images)
-			document.getElementById("info").classList.remove("hidden")
-			document.getElementById('baseInfo').classList.add('hidden')
-			document.getElementById('gohome').classList.remove('hidden')
-			document.getElementById('panel').classList.toggle('open')
-			if (window.innerHeight > window.innerWidth) {
-				document.getElementById('infowrap').classList.remove('hidden')
-				document.getElementById('toggleHidden').classList.add('rotate')
-			}
-			else {
-				document.getElementById('infowrap').classList.add('hidden')
-				document.getElementById('toggleHidden').classList.remove('rotate')
-			}
-			// !!!CLEAN THIS FUNCTION!!!
+// 			// !!!CLEAN THIS FUNCTION!!!
+// 			const data = getProjectData(idprojeto, colocalizados)
+// 			const images = getFiles(idprojeto, projetos)
+// 			createInfo(data, layerColors[idprojeto], images)
+// 			document.getElementById("info").classList.remove("hidden")
+// 			document.getElementById('baseInfo').classList.add('hidden')
+// 			document.getElementById('gohome').classList.remove('hidden')
+// 			document.getElementById('panel').classList.toggle('open')
+// 			if (window.innerHeight > window.innerWidth) {
+// 				document.getElementById('infowrap').classList.remove('hidden')
+// 				document.getElementById('toggleHidden').classList.add('rotate')
+// 			}
+// 			else {
+// 				document.getElementById('infowrap').classList.add('hidden')
+// 				document.getElementById('toggleHidden').classList.remove('rotate')
+// 			}
+// 			// !!!CLEAN THIS FUNCTION!!!
 
-			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
-			item.classList.add('clicked')
-		}
-	})
-}
+// 			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
+// 			item.classList.add('clicked')
+// 		}
+// 	})
+// }
 
 /** 
 Fit to id. Change current view fitting to a id
@@ -137,6 +159,19 @@ function fitToId(view, layers, id){
 		console.error(error)
 		console.log(id)
 	}
+}
+
+/** 
+Switch layer visibilty state
+* @param  { Array } layers An array of layers (new Layer's) from open layers
+* @param { Boolean } state Visibility of this layer
+* @param { Number } id An project id to fit in (injected in returnLayers() as projectId)
+*/
+function switchVisibilityState(layers, state, id) {
+	const layer = layers.find( layer => layer.values_.projectId === id) 
+	console.log(layer)
+	console.log(id)
+	console.log(state)
 }
 
 /**
@@ -176,7 +211,7 @@ function menuEvents (triggers, toHide){
 
 /**
 * Return the files from each projetos.json
-* @param { Number } id The prject id
+* @param { Number } id The project id
 * @param { Object } projetos The projetos.json data
 * @return { Object } { hero, images }
 */
@@ -215,48 +250,41 @@ function getFiles(id, projetos){
 * @param { String } projectColor rgba color string
 */ 
 function createInfo(data, projectColor, images){
-
-	// images ? console.log(images) : null
-
-	// let infoCont = document.getElementById('infoCont')
 	let coverImg = document.getElementById('coverSec')
-	// let autor = document.getElementById('fonteAutor')
-	// let fonte = document.getElementById('fonteFonte')
-
-	const concatColor = 'background-color: rgba(' + projectColor[0] +', ' + projectColor[1] +',' + projectColor[2] +','+ projectColor[3] +')'
+	const concatColor = `background-color: rgba(${projectColor[0]}, ${projectColor[1]}, ${projectColor[2]}, ${projectColor[3]})`
 	let concatenation = ''
 
 	if (images.images) {
-		coverImg.style.backgroundImage = 'url("' + process.env.APP_URL + images.images[0].path + '")'
-		let autorStr = 'Autor <b>' + data.AUTOR + '</b>'
+		const coverImgPath = process.env.APP_URL + images.images[0].path
+
+		coverImg.style.backgroundImage = `url("${coverImgPath}")`
+		let autorStr = `Autor <b>${data.AUTOR}</b>`
 		let fonteStr = ''
 		if (data.FONTE.substring(0,4) === 'http') {
-			fonteStr += "Fonte <b><a href='" + data.FONTE + "' title='" + data.FONTE + "' target='_blank'>" + data.FONTE + "</a></b>"
+			fonteStr += `Fonte <b><a href='${data.FONTE}' title='${data.FONTE}' target='_blank'>${data.FONTE}</a></b>`
 		}
 		else {
-			fonteStr += "Fonte <b>" + data.FONTE + "</b>"
+			fonteStr += `Fonte <b>${data.FONTE}</b>`
 		}
 		renderElement(autorStr, '#fonteAutor')
 		renderElement(fonteStr, '#fonteFonte')
 	}
 
-	concatenation += "<div class='info-legend' style='"+ concatColor +"'></div>"
+	concatenation += `<div class='info-legend' style='${concatColor}'></div>`
 	concatenation += "<div class='data' id='projectData'>"
 
 	for(let val in data){
 		switch(val) {
-			case 'NOME': concatenation += "<h4 class='project-title'>" +  data[val] + "</h4>"; break
-			case 'DESCRIÇÃO': concatenation += "<p class='description'>" +  data[val] + "</p>"; break
-			case 'ANO': concatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
-			case 'SECRETARIA': concatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
-			case 'STATUS': concatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
+			case 'NOME': concatenation += `<h4 class='project-title'>${data[val]}</h4>`; break
+			case 'DESCRIÇÃO': concatenation += `<p class='description'>${data[val]}</p>`; break
+			case 'ANO': concatenation += `<p class='ano'>Início <span>${data[val]}</span></p>`; break
+			case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${data[val]}</span></p>`; break
+			case 'STATUS': concatenation += `<p class='status'>Status <span>${data[val]}</span></p>`; break
 		}
 		concatenation += "</div>"
 	}
-
 	concatenation += "</div>"
-
-	renderElement(concatenation, "#infoCont") // render DOM
+	renderElement(concatenation, "#infoCont")
 }
 
 /**
@@ -265,33 +293,57 @@ function createInfo(data, projectColor, images){
 */
 function createBaseInfo(data) {
 	let concatenation = ''
+	const nome = data.NOME
+	const bgImgPath = process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path
 
-	concatenation += "<h1 class='baseInfo-title'>" + data.NOME + "</h1>"
-
-	concatenation += "<div class='cover' style='background-image: url(" + process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path + ");'></div>"
+	concatenation += `<h1 class='baseInfo-title'>${nome}</h1>`
+	concatenation += `<div class='cover' style='background-image: url("${bgImgPath}");'></div>` 
 
 	if (data.ANO || data.SECRETARIA || data.STATUS) {
 		concatenation += "<div class='dados'>"
 		for (let val in data) {
+			const dado = data[val]	
 			switch (val) {
-				case 'ANO': concatenation += "<p class='ano'>Início <span>" +  data[val] + "</span></p>"; break
-				case 'SECRETARIA': concatenation += "<p class='secretaria'>Responsável <span>" +  data[val] + "</span></p>"; break
-				case 'STATUS': concatenation += "<p class='status'>Status <span>" +  data[val] + "</span></p>"; break
+				case 'ANO': concatenation += `<p class='ano'>Início <span>${dado}</span></p>`; break
+				case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${dado}</span></p>`; break
+				case 'STATUS': concatenation += `<p class='status'>Status <span>${dado}</span></p>`; break
 			}
 		}
 		concatenation += "</div>"
 	}
-
-	concatenation += "<p class='description'>" + data.DESCRIÇÃO + "</p>"
-
+	concatenation += `<p class='description'>${data.DESCRIÇÃO}</p>`
 	renderElement(concatenation, "#baseInfo")
+}
+
+/**
+* Sidebar (left) -> Toggle classes of clicked project and the base project 
+*/
+function toggleInfoClasses(){
+	document.getElementById('baseInfo').classList.add('hidden') // classes' changes for clicks on map
+	document.getElementById('gohome').classList.remove('hidden')
+
+	const orientationIsPortrait = window.matchMedia("(orientation: portrait)").matches 
+
+	if (orientationIsPortrait) {
+		document.getElementById('infowrap').classList.remove('hidden')
+		document.getElementById('toggleHidden').classList.add('rotate')
+	}
+	else {
+		document.getElementById('infowrap').classList.add('hidden')
+		document.getElementById('toggleHidden').classList.remove('rotate')
+	}
 }
 
 export {
 	baseObject,
 	renderElement,
 	createList,
-	setListActions,
+	listCreated,
+	toggleInfoClasses,
+	switchVisibilityState,
+	// ToggleCheckbox,
+	// setListActions,
+	// toggleCheckbox,
 	fitToId,
 	smallerExtent,
 	menuEvents,

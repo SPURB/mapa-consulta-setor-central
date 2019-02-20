@@ -1,5 +1,5 @@
 "use strict"
-import {  Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
+import { Vector as VectorLayer } from 'ol/layer'
 import VectorSource from 'ol/source/Vector.js'
 import KML from 'ol/format/KML'
 import Style from 'ol/style/Style'

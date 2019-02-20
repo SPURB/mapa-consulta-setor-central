@@ -1,12 +1,9 @@
 "use strict"
 import 'ol/ol.css';
-// import 'ol-layerswitcher/src/ol-layerswitcher.css';
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
-
 import { ScaleLine, ZoomSlider} from 'ol/control'
-
 import { projetos, colocalizados  } from './model'
 import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
 import { returnBases } from './layers/bases'
@@ -15,7 +12,12 @@ import {
 	noBaseProjetos,
 	renderElement,
 	createList,
-	setListActions,
+	listCreated,
+	toggleInfoClasses,
+	switchVisibilityState,
+	// ToggleCheckbox,
+	// setListActions,
+	// toggleCheckbox,
 	fitToId,
 	smallerExtent,
 	menuEvents,
@@ -63,7 +65,7 @@ docReady(() => {
 				})
 			}
 		})
-		if(idAndextents.length >= 1) {
+		if (idAndextents.length >= 1) {
 			const smaller = smallerExtent(idAndextents)
 			view.fit(smaller.extent, { // fit to smaller extent 
 				duration: 1000
@@ -72,21 +74,13 @@ docReady(() => {
 			const info = document.getElementById("info")
 			info.classList.remove("hidden")
 
-			if(getProjectData(smaller.id, colocalizados)){
-				const data = getProjectData(smaller.id, colocalizados) // get data from colocalizados.json
+			if (getProjectData(smaller.id, colocalizados)) {
+				const data = getProjectData(smaller.id, colocalizados)
 				const images = getFiles(smaller.id, projetos)
+				const colors = layerColors[smaller.id]
 
-				createInfo(data, layerColors[smaller.id], images)
-				document.getElementById('baseInfo').classList.add('hidden') // classes' changes for clicks on map
-				document.getElementById('gohome').classList.remove('hidden')
-				if (window.innerHeight > window.innerWidth) {
-					document.getElementById('infowrap').classList.remove('hidden')
-					document.getElementById('toggleHidden').classList.add('rotate')
-				}
-				else {
-					document.getElementById('infowrap').classList.add('hidden')
-					document.getElementById('toggleHidden').classList.remove('rotate')
-				}
+				createInfo(data, colors, images)
+				toggleInfoClasses()
 			}
 			else { renderElement("<div class='erro'>Algo deu errado... <p class='info'>Projeto ID <span>" + smaller.id + "</span></p></div>", "#info") }
 		}
@@ -102,7 +96,9 @@ docReady(() => {
 	*/
 	let setListeners = new Promise( () => {
 		setTimeout(() => {
-			 // create event liteners
+			/*
+			* Sidebar (left) -> Go home
+			*/
 			let gohomeName = document.getElementById('gohomeName')
 			gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
 			let gohome = document.getElementById('gohome')
@@ -114,7 +110,7 @@ docReady(() => {
 			})
 
 			/*
-			* sidebar hiding - classes' changes
+			* Sidebar (left) -> Hide entire menu
 			*/
 			var hideshow = document.getElementById('toggleHidden')
 			hideshow.addEventListener('click', function(event) {
@@ -124,7 +120,7 @@ docReady(() => {
 			})
 
 			/*
-			* sidebar projects picture info events - toggle source box
+			* Sidebar (left) -> Project picture info events - toggle source box
 			*/
 			let openFonteBt = document.getElementById('openFonte')
 			let closeFonteBt = document.getElementById('closeFonte')
@@ -136,8 +132,9 @@ docReady(() => {
 				event.target.parentNode.classList.remove('open')
 				event.target.parentNode.classList.add('closed')
 			})
+
 			/*
-			* for landscape devices, resize map for sidebar hiding/showing
+			* Sidebar (left) -> for landscape devices, resize map for sidebar hiding/showing
 			*/
 			if (window.innerHeight < window.innerWidth) {
 				let sidebar = document.getElementById('infowrap')
@@ -151,6 +148,37 @@ docReady(() => {
 				})
 				observer.observe(sidebar, { attributes: true, childList: false, subtree: false })
 			}
+
+			/*
+			* Sidebar (right) -> Listeners for projetos checkboxes
+			*/
+			listCreated.forEach(id => {
+				id = Number(id)
+				const prjId = 'projeto-id_' + id 
+				const btnPojectId = 'btn-projeto-id_' + id
+				const gotoBtn = document.getElementById(btnPojectId)
+				const element = document.getElementById(prjId)
+
+				// fit to clicked project, change Sidebar (left) info, uncheck other layers, change display
+				gotoBtn.onclick = () => {
+					const data = getProjectData(id, colocalizados)
+					const colors = layerColors[id]
+					const images = getFiles(id, projetos)
+
+					// fit to clicked project, change Sidebar (left) info
+					createInfo(data, colors, images)
+					toggleInfoClasses()
+					fitToId(view, projectLayers, id)
+					document.getElementById('panel').classList.remove('open')
+				}
+
+				// change layer display
+				element.onchange = () => {
+					// console.log('checkbox')
+					// console.log(id)
+					switchVisibilityState(projectLayers, element.checked, id)
+				}
+			})
 		}, 0)
 	})
 
@@ -176,9 +204,6 @@ docReady(() => {
 		setTimeout(() => {
 			appmap.addControl(new ScaleLine())
 			appmap.addControl(new ZoomSlider())
-			// appmap.addControl(new LayerSwitcher({
-			// 	tipLabel: 'Abrir lista de projetos'
-			// }))
 		}, 0)
 	})
 
@@ -190,7 +215,7 @@ docReady(() => {
 		 * First create DOM elements
 		*/
 		createList(colocalizados), // TODO: injetar lista adicionado com layerSwitcher
-		setListActions(document.getElementById("projetos"), view, projectLayers),
+		// setListActions(document.getElementById("projetos"), view, projectLayers),
 		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel"))
 	])
 	/*
@@ -202,4 +227,5 @@ docReady(() => {
 	.then( () => addControls)
 	.catch( error => console.error(error) )
 })
+
 
