@@ -4,6 +4,11 @@ import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { ScaleLine, ZoomSlider} from 'ol/control'
+import { pointerMove } from 'ol/events/condition'
+import Select from 'ol/interaction/Select.js'
+import Style from 'ol/style/Style'
+import Stroke from 'ol/style/Stroke'
+import Fill from 'ol/style/Fill'
 import { projetos, colocalizados  } from './model'
 import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
 import { returnBases } from './layers/bases'
@@ -27,6 +32,7 @@ import {
 docReady(() => {
 	const justBase = baseObject(projetos) // single'BASE' projetos Object
 	const baseLayers = returnBases(justBase, process.env.APP_URL, true) // open layer's BASE's layers
+	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
 
 	const noBase = noBaseProjetos(projetos) // projetos 
 	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
@@ -51,11 +57,33 @@ docReady(() => {
 	/*
 	* map events
 	*/
+	appmap.addInteraction(
+		new Select({
+			condition: pointerMove,
+			layers: projectLayers,
+			style: new Style({
+				stroke: new Stroke({
+					color: [0, 255, 0, 1],
+					width: 3
+				}),
+				fill: new Fill({
+					color: [255, 255, 255, .5]
+				})
+			}),
+			hitTolerance: 10
+		})
+	)
+
 	appmap.on('singleclick', evt => {
 		setInitialState('initial')
 
 		let idAndextents = []
 		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+
+			//reset app
+			projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
+			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
+
 			const projectjId = layer.values_.projectId
 			if(projectjId !== 0) { // exclui a base
 				idAndextents.push(
@@ -95,16 +123,12 @@ docReady(() => {
 	})
 
 	/*
-	* sidebar events
-	*/
-	createBaseInfo(getProjectData('BASE', colocalizados)) // sidebar first load
-
-	/*
 	* Create all event listeners
 	*/
 	let setListeners = new Promise( () => {
 		setTimeout(() => {
 			/*
+			* Sidebar events
 			* Sidebar (left) -> Go home
 			*/
 			let gohomeName = document.getElementById('gohomeName')
@@ -118,7 +142,6 @@ docReady(() => {
 
 				// resetApp
 				setInitialState('initial')
-				const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
 				fitToId(view, baseLayer)
 				projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
 				listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
@@ -151,7 +174,8 @@ docReady(() => {
 			/*
 			* Sidebar (left) -> for landscape devices, resize map for sidebar hiding/showing
 			*/
-			if (window.innerHeight < window.innerWidth) {
+			const isPortrait = window.matchMedia("(orientation: portrait)").matches // window.innerHeight < window.innerWidth
+			if (isPortrait) {
 				let sidebar = document.getElementById('infowrap')
 				var observer = new MutationObserver(function(mutationsList) {
 					for(var mutation of mutationsList) {
@@ -248,6 +272,7 @@ docReady(() => {
 		/*
 		 * First create DOM elements
 		*/
+		createBaseInfo(getProjectData('BASE', colocalizados)), // sidebar first load
 		createList(colocalizados),
 		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel"))
 	])
