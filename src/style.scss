@@ -9,7 +9,6 @@ html, body {
 	color: #333;
 	line-height: 160%;
 }
-
 p {
 	margin: 0;
 }
@@ -116,41 +115,33 @@ p {
 
 #projetos li{
 	margin: 0 0 16px 0;
-	padding: 0 0 0 1rem;
+	padding: 0 0 0 .25rem;
+	border-left: solid 1.5em white;
 	display: flex;
 	align-items: center;
 	box-sizing: border-box;
 	font-size: initial;
-	div {
-		min-width: 20px;
-		height: 20px;
+	line-height: 1.32;
+	p {
+		color: #c5c0c0;
 	}
-	input[type=button] {
-		border: 0;
-		padding: 0 0 0 8px;
-		background-color: #FFF;
-		width: 100%;
-		text-align: left;
-		font-family: 'Roboto';
-		color: #333;
-		font-size: smaller;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-	input[disabled] {
-		color: #BDBDBD;
-	}
-	&:hover {
-		input {
-			font-weight: 700;
+	button{
+		background-color: #f4f5f6;
+		border-radius: .2rem;
+		font-size: small;
+		margin: 0 .2rem;
+		padding: .1rem .4rem;
+		border:none;
+		color: #c0c0c0;
+		transition: all ease-in-out .15s;
+		&:hover{
+			background-color: #565353;
+			color: white;
 			cursor: pointer;
-		}
-		input[disabled] {
-			font-weight: normal;
-			cursor: inherit;
+			padding: .15rem .5rem;
 		}
 	}
+	label { margin-left: .5rem }
 	&:last-child { margin-bottom: 0; }
 }
 
@@ -165,6 +156,7 @@ p {
 	background-color: #FFF;
 	transform: translateX(-100%);
 	transition: all ease-in-out .2s;
+	.no-display { display: none }
 	#toggleHidden {
 		position: absolute;
 		top: 12px;
@@ -268,7 +260,8 @@ p {
 			background-color: #FFF;
 		}
 	}
-	#info {
+
+	#info, #info-error {
 		transition: 200ms ease-in-out margin-top;
 		overflow-y: scroll;
 		overflow-x: hidden;
@@ -473,8 +466,6 @@ p {
 	}
 }
 
-#close-info{}
-
 #map {
 	position: absolute;
 	top: 0;
@@ -484,9 +475,23 @@ p {
 	margin-left: 24rem;
 	background-color: #F5F5F5;
 	transition: all ease-in-out .2s;
+
+	/*
+	* Open layers default classes
+	*/
+	.ol-zoomslider {
+		bottom: .5em;
+		right: .5em;
+		top: unset;
+		left: unset;
+			background-color: rgba(255, 255, 255, 0.85)
+	}
+	.ol-scale-line, .ol-zoomslider-thumb {
+		background:rgba(235, 87, 87, 0.5) //- #EB5757
+	}
 }
 
-#infoWrap[class=""] + #map {
+#map.no-panel {
 	margin-left: 0;
 }
 

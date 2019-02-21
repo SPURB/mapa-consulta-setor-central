@@ -33,12 +33,24 @@ npm run start
 npm run build
 ```
 
-8. Observe arquivos em local de deploy
+8. Personalize estilos em determinados kmls
 ```
-npm run watch
-```
+# arquivo nome do arquivo .kml
+data-src/projetos/nome-do-projeto/arquivo-kml_custom-dashed.kml
 
-9. Visualize e desenvolva testes unitários (qunit)
+# src/layers/projectsKmls.js aletere a constante customStyles 
+const customStyles = [...,'custom-dashed']
+
 ```
-npm run tests
+e crie o estilo 
+```projectsKmls.js
+if (file.extension === '.kml' && isCustom === 'custom-dashed') {
+    var style = new Style({
+        stroke: new Stroke({
+            color: [0, 0, 0, 1],
+            width: 1.5,
+            lineDash: [.1, 5]
+        })
+    })
+}
 ```
