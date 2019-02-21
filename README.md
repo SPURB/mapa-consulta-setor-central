@@ -42,3 +42,25 @@ npm run watch
 ```
 npm run tests
 ```
+
+10. Personalize estilos alterando o nome do kml 
+```
+# arquivo nome do arquivo .kml
+data-src/projetos/nome-do-projeto/arquivo-kml_custom-dashed.kml
+
+# src/layers/projectsKmls.js aletere a constante customStyles 
+const customStyles = [...'custom-dashed']
+
+```
+e crie o estilo 
+```
+if (file.extension === '.kml' && isCustom === 'custom-dashed') {
+    var style = new Style({
+        stroke: new Stroke({
+            color: [0, 0, 0, 1],
+            width: 1.5,
+            lineDash: [.1, 5]
+        })
+    })
+}
+```

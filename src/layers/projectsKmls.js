@@ -22,7 +22,56 @@ function returnLayers(projetos, app_url, colocalizados){
 			const title = getProjectData(projectId, colocalizados)["NOME"] 
 
 			files.forEach( file => { // Create projeto's layer
-				if(file.extension === '.kml'){
+
+				const customStyles = ['custom-horario', 'custom-antihorario', 'custom-vlt']
+				let isCustom = false
+				customStyles.forEach( substring => {
+					file.name.includes(substring) ? isCustom = substring : null
+				})
+
+				if (file.extension === '.kml' && isCustom === 'custom-vlt') {
+					var style = new Style({
+						stroke: new Stroke({
+							color: [0, 0, 0, 1],
+							width: 1.5
+						})
+					})
+				}
+
+				if (file.extension === '.kml' && isCustom === 'custom-horario') {
+					var style = new Style({
+						stroke: new Stroke({
+							color: [0, 0, 255, 1],
+							width: 1.5
+						})
+					})
+				}
+
+				if (file.extension === '.kml' && isCustom === 'custom-antihorario') {
+					var style = new Style({
+						stroke: new Stroke({
+							color: [255, 0, 0, 1],
+							width: 1.5
+						})
+					})
+				}
+
+				if (file.extension === '.kml' && isCustom) {
+					const source = new VectorSource({
+						url: app_url + file.path,
+						format: new KML({ extractStyles: false })
+					})
+					kmlLayers.push({
+						layer: new VectorLayer({
+							title: title,
+							source: source,
+							style: style, 
+							projectId: projectId
+						}) 
+					})
+				}
+
+				else if (file.extension === '.kml') {
 					const source = new VectorSource({
 						url: app_url + file.path,
 						format: new KML({ extractStyles: false })
@@ -36,7 +85,7 @@ function returnLayers(projetos, app_url, colocalizados){
 
 					const style = new Style({
 						stroke: new Stroke({
-							color: [red, green, blue, 0.25],//baseColor,
+							color: [red, green, blue, 0.40],//baseColor,
 							width: 2
 						}),
 						fill: new Fill({
