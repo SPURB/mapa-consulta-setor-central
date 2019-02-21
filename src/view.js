@@ -15,20 +15,18 @@ import {
 	listCreated,
 	toggleInfoClasses,
 	switchVisibilityState,
-	// ToggleCheckbox,
-	// setListActions,
-	// toggleCheckbox,
 	fitToId,
 	smallerExtent,
 	menuEvents,
 	getFiles,
 	createInfo,
 	createBaseInfo,
+	setInitialState,
 } from './domRenderers'
 
 docReady(() => {
 	const justBase = baseObject(projetos) // single'BASE' projetos Object
-	const baseLayers = returnBases(justBase, process.env.APP_URL, false) // open layer's BASE's layers
+	const baseLayers = returnBases(justBase, process.env.APP_URL, true) // open layer's BASE's layers
 
 	const noBase = noBaseProjetos(projetos) // projetos 
 	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
@@ -54,6 +52,8 @@ docReady(() => {
 	* map events
 	*/
 	appmap.on('singleclick', evt => {
+		setInitialState('initial')
+
 		let idAndextents = []
 		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
 			const projectjId = layer.values_.projectId
@@ -66,6 +66,8 @@ docReady(() => {
 			}
 		})
 		if (idAndextents.length >= 1) {
+			document.getElementById('map').classList.remove('no-panel')
+
 			const smaller = smallerExtent(idAndextents)
 			view.fit(smaller.extent, { // fit to smaller extent 
 				duration: 1000
@@ -82,7 +84,13 @@ docReady(() => {
 				createInfo(data, colors, images)
 				toggleInfoClasses()
 			}
-			else { renderElement("<div class='erro'>Algo deu errado... <p class='info'>Projeto ID <span>" + smaller.id + "</span></p></div>", "#info") }
+			else { 
+					renderElement(`
+						<div class='erro'>Algo deu errado... 
+							<p class='info'>Projeto ID <span>${smaller.id}</span></p>
+						</div>`, "#info-error")
+					setInitialState('error')
+				}
 		}
 	})
 
@@ -102,19 +110,26 @@ docReady(() => {
 			let gohomeName = document.getElementById('gohomeName')
 			gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
 			let gohome = document.getElementById('gohome')
-			gohome.addEventListener('click', function() {
+			gohome.addEventListener('click', () => {
+
 				document.getElementById('info').classList.add('hidden')
 				document.getElementById('gohome').classList.add('hidden')
 				document.getElementById('baseInfo').classList.remove('hidden')
-				fitToId(view, baseLayers, 0)
+
+				// resetApp
+				setInitialState('initial')
+				const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
+				fitToId(view, baseLayer)
+				projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
+				listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 			})
 
 			/*
-			* Sidebar (left) -> Hide entire menu
+			* Sidebar (left) -> Hide menu
 			*/
-			var hideshow = document.getElementById('toggleHidden')
-			hideshow.addEventListener('click', function(event) {
-				console.log(event)
+			let hideshow = document.getElementById('toggleHidden')
+			hideshow.addEventListener('click', () => {
+				document.getElementById('map').classList.toggle('no-panel')
 				document.getElementById('infowrap').classList.toggle('hidden')
 				hideshow.classList.toggle('rotate')
 			})
@@ -158,25 +173,43 @@ docReady(() => {
 				const btnPojectId = 'btn-projeto-id_' + id
 				const gotoBtn = document.getElementById(btnPojectId)
 				const element = document.getElementById(prjId)
+				const layer = projectLayers.find( layer => layer.values_.projectId === id)
 
-				// fit to clicked project, change Sidebar (left) info, uncheck other layers, change display
+				// fit to clicked project, change Sidebar (left) info, fit
 				gotoBtn.onclick = () => {
+					setInitialState('initial')
 					const data = getProjectData(id, colocalizados)
 					const colors = layerColors[id]
 					const images = getFiles(id, projetos)
 
+					// uncheck all itens except the clicked one at Sidebar (right) 
+					const othersIds = listCreated.filter( idItem => idItem !== id )
+					othersIds.forEach(idItem => {
+						let checkEl = 'projeto-id_' + idItem
+						document.getElementById(checkEl).checked = false
+					})
+					element.checked = true
+					
+					// hide all other layers
+					projectLayers.forEach( tohidelayer => {
+						switchVisibilityState(tohidelayer, false)
+					})
+					switchVisibilityState(layer, true)
+
+					// hide panel Sidebar (right)
+					document.getElementById('panel').classList.remove('open')
+					document.getElementById('map').classList.remove('no-panel')
+
 					// fit to clicked project, change Sidebar (left) info
 					createInfo(data, colors, images)
 					toggleInfoClasses()
-					fitToId(view, projectLayers, id)
-					document.getElementById('panel').classList.remove('open')
+					const projectLayer = projectLayers.find( layer => layer.values_.projectId === id)
+					fitToId(view, projectLayer)
 				}
 
-				// change layer display
+				// toggle layer visibility with checkboxes status at Sidebar (right)
 				element.onchange = () => {
-					// console.log('checkbox')
-					// console.log(id)
-					switchVisibilityState(projectLayers, element.checked, id)
+					switchVisibilityState(layer, element.checked)
 				}
 			})
 		}, 0)
@@ -187,7 +220,8 @@ docReady(() => {
 	*/
 	let fitToBaseLayer = new Promise( () => {
 		setTimeout(() => {
-			fitToId(view, baseLayers, 0) // fit to base layer
+			const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
+			fitToId(view, baseLayer) // fit to base layer
 		}, 1500 )
 	})
 
@@ -214,8 +248,7 @@ docReady(() => {
 		/*
 		 * First create DOM elements
 		*/
-		createList(colocalizados), // TODO: injetar lista adicionado com layerSwitcher
-		// setListActions(document.getElementById("projetos"), view, projectLayers),
+		createList(colocalizados),
 		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel"))
 	])
 	/*

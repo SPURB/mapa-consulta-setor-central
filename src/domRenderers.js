@@ -103,57 +103,16 @@ function createList(colocalizados){
 */
 let listCreated = []
 
-/**
-* Set eventLestener to run fitToId for menu list items
-* @param { Node } element to watch changes
-* @param { Object } view an instance of View (new View) from open layers
-* @param { Array } layers an instance of layers (new Layers) from open layers
-*/
-// function setListActions(element, view, layers){ 
-// 	const parseHTMLlist = Array.from(element.children)
-// 	parseHTMLlist.forEach( item => {
-// 		const idprojeto = parseInt(item.firstChild.getAttribute("inputid"))
-
-// 		item.firstChild.onclick = () => {
-// 			fitToId(view, layers, idprojeto)
-
-// 			// !!!CLEAN THIS FUNCTION!!!
-// 			const data = getProjectData(idprojeto, colocalizados)
-// 			const images = getFiles(idprojeto, projetos)
-// 			createInfo(data, layerColors[idprojeto], images)
-// 			document.getElementById("info").classList.remove("hidden")
-// 			document.getElementById('baseInfo').classList.add('hidden')
-// 			document.getElementById('gohome').classList.remove('hidden')
-// 			document.getElementById('panel').classList.toggle('open')
-// 			if (window.innerHeight > window.innerWidth) {
-// 				document.getElementById('infowrap').classList.remove('hidden')
-// 				document.getElementById('toggleHidden').classList.add('rotate')
-// 			}
-// 			else {
-// 				document.getElementById('infowrap').classList.add('hidden')
-// 				document.getElementById('toggleHidden').classList.remove('rotate')
-// 			}
-// 			// !!!CLEAN THIS FUNCTION!!!
-
-// 			parseHTMLlist.forEach(item => item.classList.remove("clicked")) // Reset all itens
-// 			item.classList.add('clicked')
-// 		}
-// 	})
-// }
-
 /** 
 Fit to id. Change current view fitting to a id
 * @param { Object } view Instance of View (new View) from open layers
-* @param  { Array } layers An array of layers (new Layer's) from open layers
-* @param { Number } id An project id to fit in (injected in returnLayers() as projectId)
+* @param  { Object } layer The layer (new Layer's) from open layers to fit in
 */
-function fitToId(view, layers, id){
+function fitToId(view, layer){
 	try {
-		const layerToFit = layers.find( layer => layer.values_.projectId === id) 
-		view.fit(layerToFit.getSource().getExtent(), {
+		view.fit(layer.getSource().getExtent(), {
 			duration: 1500
 		})
-
 	}
 	catch (error) {
 		console.error(error)
@@ -163,15 +122,11 @@ function fitToId(view, layers, id){
 
 /** 
 Switch layer visibilty state
-* @param  { Array } layers An array of layers (new Layer's) from open layers
-* @param { Boolean } state Visibility of this layer
-* @param { Number } id An project id to fit in (injected in returnLayers() as projectId)
+* @param  { Object } layer The layer to change the state
+* @param { Boolean } state Visibility state of this layer
 */
-function switchVisibilityState(layers, state, id) {
-	const layer = layers.find( layer => layer.values_.projectId === id) 
-	console.log(layer)
-	console.log(id)
-	console.log(state)
+function switchVisibilityState(layer, state) {
+	state ? layer.setOpacity(1) : layer.setOpacity(.1)
 }
 
 /**
@@ -200,12 +155,10 @@ function menuEvents (triggers, toHide){
 	normalizedHTMLArr[0].addEventListener('click', event =>{
 		toHide.classList.toggle('open')
 		normalizedHTMLArr[1].classList.remove('hide')
-		// event.target.classList.add('hide')
 	})
 	normalizedHTMLArr[1].addEventListener('click', event =>{
 		toHide.classList.toggle('open')
 		normalizedHTMLArr[0].classList.remove('hide')
-		// event.target.classList.add('hide')
 	})
 }
 
@@ -233,8 +186,9 @@ function getFiles(id, projetos){
 		const files = idsFromNames[0].children
 		const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
 		const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
+		
 
-		if(images.length > 0 && hero){
+		if(images.length > 0 && hero.length > 0){
 			return {
 				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
 				hero: hero[0].path
@@ -258,6 +212,7 @@ function createInfo(data, projectColor, images){
 		const coverImgPath = process.env.APP_URL + images.images[0].path
 
 		coverImg.style.backgroundImage = `url("${coverImgPath}")`
+
 		let autorStr = `Autor <b>${data.AUTOR}</b>`
 		let fonteStr = ''
 		if (data.FONTE.substring(0,4) === 'http') {
@@ -334,6 +289,25 @@ function toggleInfoClasses(){
 	}
 }
 
+/**
+* Set initial state of app 
+* @param { String } stateStr 'error' or 'initial'
+*/ 
+function setInitialState(stateStr){
+	if(stateStr === 'initial'){
+		document.getElementById('info-error').classList.add('no-display')
+		document.getElementById('baseInfo').classList.remove('no-display')
+		document.getElementById('info').classList.remove('no-display')
+	}
+	if(stateStr === 'error'){
+		document.getElementById('gohome').classList.remove('hidden')
+		document.getElementById('info-error').classList.remove('no-display')
+		document.getElementById('baseInfo').classList.add('no-display')
+		document.getElementById('info').classList.add('no-display')
+	}
+	else { null }
+}
+
 export {
 	baseObject,
 	renderElement,
@@ -341,9 +315,6 @@ export {
 	listCreated,
 	toggleInfoClasses,
 	switchVisibilityState,
-	// ToggleCheckbox,
-	// setListActions,
-	// toggleCheckbox,
 	fitToId,
 	smallerExtent,
 	menuEvents,
@@ -351,5 +322,6 @@ export {
 	createInfo,
 	createBaseInfo,
 	noBaseProjetos,
-	parseNameToNumericalId
+	parseNameToNumericalId,
+	setInitialState
 }
