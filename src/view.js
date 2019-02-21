@@ -67,7 +67,7 @@ docReady(() => {
 					width: 3
 				}),
 				fill: new Fill({
-					color: [255, 255, 255, .5]
+					color: [255, 255, 255, 0.5]
 				})
 			}),
 			hitTolerance: 10
@@ -80,7 +80,7 @@ docReady(() => {
 		let idAndextents = []
 		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
 
-			//reset app
+			//reset visibilty
 			projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
 			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 
