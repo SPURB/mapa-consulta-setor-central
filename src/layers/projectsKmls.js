@@ -30,6 +30,8 @@ function returnLayers(projetos, app_url, colocalizados){
 				})
 
 				if (file.extension === '.kml' && isCustom === 'custom-vlt') {
+					setLayerColors(projectId,[0, 0, 0], 1)
+
 					var style = new Style({
 						stroke: new Stroke({
 							color: [0, 0, 0, 1],
@@ -39,6 +41,8 @@ function returnLayers(projetos, app_url, colocalizados){
 				}
 
 				if (file.extension === '.kml' && isCustom === 'custom-horario') {
+					setLayerColors(projectId,[0, 0, 255], 1)
+
 					var style = new Style({
 						stroke: new Stroke({
 							color: [0, 0, 255, 1],
@@ -48,6 +52,8 @@ function returnLayers(projetos, app_url, colocalizados){
 				}
 
 				if (file.extension === '.kml' && isCustom === 'custom-antihorario') {
+					setLayerColors(projectId,[255, 0, 0], 1)
+
 					var style = new Style({
 						stroke: new Stroke({
 							color: [255, 0, 0, 1],
@@ -85,8 +91,8 @@ function returnLayers(projetos, app_url, colocalizados){
 
 					const style = new Style({
 						stroke: new Stroke({
-							color: [red, green, blue, 0.40],//baseColor,
-							width: 2
+							color: [red, green, blue, 0.35],//baseColor,
+							width: 1
 						}),
 						fill: new Fill({
 							color: [red, green, blue, 0.25]

@@ -107,11 +107,12 @@ let listCreated = []
 Fit to id. Change current view fitting to a id
 * @param { Object } view Instance of View (new View) from open layers
 * @param  { Object } layer The layer (new Layer's) from open layers to fit in
+* @param  { Array } padding Padding array of this fit -> [top, right, bottom, left] in pixels
 */
-function fitToId(view, layer){
+function fitToId(view, layer, padding){
 	try {
 		view.fit(layer.getSource().getExtent(), {
-			duration: 1500
+			padding: padding
 		})
 	}
 	catch (error) {
@@ -128,6 +129,48 @@ Switch layer visibilty state
 function switchVisibilityState(layer, state) {
 	state ? layer.setOpacity(1) : layer.setOpacity(.1)
 }
+
+/** 
+* Create info-kml data
+* @param  { Object } kmlAttributes The kml attributes
+*/
+function displayKmlInfo(kmlAttributes) {
+	const exceptions = [
+		'SubClasses', 
+		'EntityHand', 
+		// 'REVISIONNU', 
+		'Render', 
+		'geometry', 
+		'ID2', 
+		// 'id', 
+		'olinetype', 
+		'source',
+		'zIndex',
+		'projectId',
+		'opacity',
+		'visible',
+		'maxResolution',
+		'minResolution'
+
+	]
+	let info = document.getElementById("info-kml")
+
+	let concatenation = ''
+
+	if(info.classList.contains('no-display')) {	
+		info.classList.remove('no-display')
+	}
+
+	for (let key in kmlAttributes) {
+		if(exceptions.includes(key) === false){
+			concatenation += `<span>${key}</span><p>${kmlAttributes[key]}</p>`
+		}
+	}
+
+	if ( concatenation!=='' ){ info.innerHTML = concatenation }
+	else { info.classList.add('no-display') }
+}
+
 
 /**
 * Return the smaller extent from a Array of extents
@@ -215,7 +258,7 @@ function createInfo(data, projectColor, images){
 
 		let autorStr = `Autor <b>${data.AUTOR}</b>`
 		let fonteStr = ''
-		if (data.FONTE.substring(0,4) === 'http') {
+		if (typeof(data.FONTE) === 'string' && data.FONTE.substring(0,4) === 'http') {
 			fonteStr += `Fonte <b><a href='${data.FONTE}' title='${data.FONTE}' target='_blank'>${data.FONTE}</a></b>`
 		}
 		else {
@@ -229,14 +272,17 @@ function createInfo(data, projectColor, images){
 	concatenation += "<div class='data' id='projectData'>"
 
 	for(let val in data){
-		switch(val) {
-			case 'NOME': concatenation += `<h4 class='project-title'>${data[val]}</h4>`; break
-			case 'DESCRIÇÃO': concatenation += `<p class='description'>${data[val]}</p>`; break
-			case 'ANO': concatenation += `<p class='ano'>Início <span>${data[val]}</span></p>`; break
-			case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${data[val]}</span></p>`; break
-			case 'STATUS': concatenation += `<p class='status'>Status <span>${data[val]}</span></p>`; break
+		if(data[val] !== 0) {
+			switch(val) {
+				case 'NOME': concatenation += `<h4 class='project-title'>${data[val]}</h4>`; break
+				case 'DESCRIÇÃO': concatenation += `<p class='description'>${data[val]}</p>`; break
+				case 'ANO': concatenation += `<p class='ano'>Início <span>${data[val]}</span></p>`; break
+				case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${data[val]}</span></p>`; break
+				case 'STATUS': concatenation += `<p class='status'>Status <span>${data[val]}</span></p>`; break
+				default: concatenation += ''
+			}
+			concatenation += "</div>"
 		}
-		concatenation += "</div>"
 	}
 	concatenation += "</div>"
 	renderElement(concatenation, "#infoCont")
@@ -258,10 +304,13 @@ function createBaseInfo(data) {
 		concatenation += "<div class='dados'>"
 		for (let val in data) {
 			const dado = data[val]	
-			switch (val) {
-				case 'ANO': concatenation += `<p class='ano'>Início <span>${dado}</span></p>`; break
-				case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${dado}</span></p>`; break
-				case 'STATUS': concatenation += `<p class='status'>Status <span>${dado}</span></p>`; break
+			if(dado !== 0){
+				switch (val) {
+					case 'ANO': concatenation += `<p class='ano'>Início <span>${dado}</span></p>`; break
+					case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${dado}</span></p>`; break
+					case 'STATUS': concatenation += `<p class='status'>Status <span>${dado}</span></p>`; break
+					default: concatenation += ''
+				}
 			}
 		}
 		concatenation += "</div>"
@@ -295,11 +344,13 @@ function toggleInfoClasses(){
 */ 
 function setInitialState(stateStr){
 	if(stateStr === 'initial'){
+		document.getElementById('info-kml').classList.add('no-display')
 		document.getElementById('info-error').classList.add('no-display')
 		document.getElementById('baseInfo').classList.remove('no-display')
 		document.getElementById('info').classList.remove('no-display')
 	}
 	if(stateStr === 'error'){
+		document.getElementById('info-kml').classList.add('no-display')
 		document.getElementById('gohome').classList.remove('hidden')
 		document.getElementById('info-error').classList.remove('no-display')
 		document.getElementById('baseInfo').classList.add('no-display')
@@ -323,5 +374,6 @@ export {
 	createBaseInfo,
 	noBaseProjetos,
 	parseNameToNumericalId,
-	setInitialState
+	setInitialState,
+	displayKmlInfo
 }

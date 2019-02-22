@@ -9,12 +9,12 @@ import XLSX from 'xlsx'
 * @return { File } A json file from the folders directory tree 
 */
 function createProjetosFromFolder(input, output){
-    const files = JSON.stringify( directoryTree(input, { normalizePath: true, extensions: /\.(jpg|gif|png|svg|kml)$/ }) )
-    
-    fs.writeFile(output, files, 'utf8', err => { 
-        if(err) console.error(err)
-        else console.log(output, 'atualizado')
-    })
+	const files = JSON.stringify( directoryTree(input, { normalizePath: true, extensions: /\.(jpg|gif|png|svg|kml)$/ }) )
+	
+	fs.writeFile(output, files, 'utf8', err => { 
+		if(err) console.error(err)
+		else console.log(output, 'atualizado')
+	})
 }
 
 

@@ -265,7 +265,6 @@ p {
 		transition: 200ms ease-in-out margin-top;
 		overflow-y: scroll;
 		overflow-x: hidden;
-		background-color: #F5F5F5;
 		height: calc(100vh - 40px);
 		box-sizing: border-box;
 		.coverSec {
@@ -466,13 +465,45 @@ p {
 	}
 }
 
+#info-kml.no-display{
+	height: 0;
+	transition: all ease-in-out .2s
+} 
+
+#info-kml{
+	position: absolute;
+	right: calc(-50% - 8px);
+	background: rgba(235, 87, 87, 0.5);
+	width: 50%;
+	z-index: 120;
+	bottom: 48px;
+	border-radius: .25rem;
+	line-height: 1.5;
+	font-size: 10px;
+	padding: .5em 0;
+	display: grid;
+	grid-template-columns: 1fr 3fr;
+	will-change: contents, height;
+	p, span {
+		color: #fff;
+	}
+	p {
+		margin: 0 .5em 0 0;
+		border-bottom: 1px solid #fff
+	}
+	span {
+		margin: 0 .5em;
+	}
+}
+
+
 #map {
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	margin-left: 24rem;
+	// margin-left: 24rem;
 	background-color: #F5F5F5;
 	transition: all ease-in-out .2s;
 
@@ -484,15 +515,25 @@ p {
 		right: .5em;
 		top: unset;
 		left: unset;
-			background-color: rgba(255, 255, 255, 0.85)
+		background-color: rgba(255, 255, 255, 0.85);
+		max-width: 10px;
+	}
+	.ol-scale-line{ 
+		transition: all ease-in-out .2s;
+		left: 24.5rem
 	}
 	.ol-scale-line, .ol-zoomslider-thumb {
 		background:rgba(235, 87, 87, 0.5) //- #EB5757
+	}
+	.ol-zoomslider-thumb{ 
+		max-width: 5px;
+		max-height: 5px;
 	}
 }
 
 #map.no-panel {
 	margin-left: 0;
+	.ol-scale-line { left: 8px }
 }
 
 @media (orientation: portrait), (max-width: 800px) {
@@ -548,5 +589,16 @@ p {
 	}
 	#map {
 		margin-left: 0;
+		.ol-scale-line { 
+			top: 8px;
+			left:8px;
+			bottom: unset
+		}
+		.ol-zoomslider{
+			top:43px;
+			left:8px;
+			right: unset
+		}
 	}
+	
 }

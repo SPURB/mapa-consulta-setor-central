@@ -27,20 +27,22 @@ import {
 	createInfo,
 	createBaseInfo,
 	setInitialState,
+	displayKmlInfo
 } from './domRenderers'
 
 docReady(() => {
 	const justBase = baseObject(projetos) // single'BASE' projetos Object
 	const baseLayers = returnBases(justBase, process.env.APP_URL, true) // open layer's BASE's layers
 	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
-
 	const noBase = noBaseProjetos(projetos) // projetos 
 	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
+	const isPortrait = window.matchMedia("(orientation: portrait)").matches // window.innerHeight < window.innerWidth
+	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
 
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],
 		projection: 'EPSG:3857',
-		zoom: 13,
+		zoom: 14,
 		minZoom: 12.7,
 		maxZoom: 28
 	})
@@ -74,6 +76,31 @@ docReady(() => {
 		})
 	)
 
+
+	// var kmlsVals = []
+	// function forEachPointerMove(val){
+	// 	kmlsVals.push(val)
+
+	// 	if (kmlsVals.length > 1 && kmlsVals[0] !== kmlsVals [1]){
+	// 		displayKmlInfo(kmlsVals[1])
+		
+	// 	}
+	// 	if (kmlsVals.length > 2) {
+	// 		kmlsVals = []
+	// 	}
+	// }
+
+	// appmap.on('pointermove', function(evt) {
+	// 	if (evt.dragging) {
+	// 		return;
+	// 	}
+	// 	let pixel = appmap.getEventPixel(evt.originalEvent);
+	// 	appmap.forEachFeatureAtPixel(pixel, layer => {
+	// 		forEachPointerMove(layer.values_)
+	// 	})
+	// })
+
+
 	appmap.on('singleclick', evt => {
 		setInitialState('initial')
 
@@ -84,12 +111,15 @@ docReady(() => {
 			projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
 			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 
+
 			const projectjId = layer.values_.projectId
+			const kmlData = layer.values_
 			if(projectjId !== 0) { // exclui a base
 				idAndextents.push(
 				{
 					id: projectjId,
-					extent: layer.getSource().getExtent()
+					extent: layer.getSource().getExtent(),
+					kmlData: kmlData
 				})
 			}
 		})
@@ -98,7 +128,7 @@ docReady(() => {
 
 			const smaller = smallerExtent(idAndextents)
 			view.fit(smaller.extent, { // fit to smaller extent 
-				duration: 1000
+				padding: fitPadding
 			})
 
 			const info = document.getElementById("info")
@@ -109,6 +139,7 @@ docReady(() => {
 				const images = getFiles(smaller.id, projetos)
 				const colors = layerColors[smaller.id]
 
+				displayKmlInfo(smaller.kmlData)
 				createInfo(data, colors, images)
 				toggleInfoClasses()
 			}
@@ -142,7 +173,7 @@ docReady(() => {
 
 				// resetApp
 				setInitialState('initial')
-				fitToId(view, baseLayer)
+				fitToId(view, baseLayer, fitPadding)
 				projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
 				listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 			})
@@ -152,6 +183,7 @@ docReady(() => {
 			*/
 			let hideshow = document.getElementById('toggleHidden')
 			hideshow.addEventListener('click', () => {
+				document.getElementById('info-kml').classList.add('no-display')
 				document.getElementById('map').classList.toggle('no-panel')
 				document.getElementById('infowrap').classList.toggle('hidden')
 				hideshow.classList.toggle('rotate')
@@ -174,7 +206,6 @@ docReady(() => {
 			/*
 			* Sidebar (left) -> for landscape devices, resize map for sidebar hiding/showing
 			*/
-			const isPortrait = window.matchMedia("(orientation: portrait)").matches // window.innerHeight < window.innerWidth
 			if (isPortrait) {
 				let sidebar = document.getElementById('infowrap')
 				var observer = new MutationObserver(function(mutationsList) {
@@ -228,7 +259,8 @@ docReady(() => {
 					createInfo(data, colors, images)
 					toggleInfoClasses()
 					const projectLayer = projectLayers.find( layer => layer.values_.projectId === id)
-					fitToId(view, projectLayer)
+					fitToId(view, projectLayer,fitPadding)
+					displayKmlInfo(projectLayer.values_)
 				}
 
 				// toggle layer visibility with checkboxes status at Sidebar (right)
@@ -245,7 +277,7 @@ docReady(() => {
 	let fitToBaseLayer = new Promise( () => {
 		setTimeout(() => {
 			const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
-			fitToId(view, baseLayer) // fit to base layer
+			fitToId(view, baseLayer, fitPadding) // fit to base layer
 		}, 1500 )
 	})
 
