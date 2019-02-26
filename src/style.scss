@@ -4,7 +4,7 @@ html, body {
 	margin: 0;
 	height: 100%;
 	overflow: hidden;
-	font-family: 'Roboto';
+	font-family: 'Roboto', 'Helvetica', sans-serif;
 	font-size: 16px;
 	color: #333;
 	line-height: 160%;
@@ -464,6 +464,68 @@ p {
 		}
 	}
 }
+
+/*
+* comment-box
+*/
+.comment-box{
+	border-top: 1em solid #777777;
+	padding: 1.25em;
+	font-size: normal;
+	.comment-box-action-title{
+		padding: 0.25em 0 1em;
+		border-bottom: 1px solid #777777; 
+	}
+}
+.comment-box form {
+	label, input, textarea, button{ 
+		display: flex;
+		width: 100%;
+		line-height: 2
+	}
+	input, textarea {
+		font-family: inherit;
+		border-radius: 3px;
+		border: 1px solid #BDBDBD;
+		background-color:#F5F5F5;
+		padding: 0 .5em;
+		font-size: 1em;
+		transition: all ease-in-out .25s;
+		&:hover, &:active, &:focus {
+			background-color: white;
+			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
+		}
+	}
+	label {
+		padding-top: 0.9em;
+		padding-bottom: 0.2em
+	}
+	input {
+		min-height: 45px;
+	}
+	textarea {
+		min-height: 185px
+	}
+	.button {
+		cursor: pointer;
+		margin-top: 1.5em;
+		margin-bottom:3em;
+		min-height: 60px;
+		text-transform: uppercase;
+		font-size:large;
+		color: #BDBDBD;
+		&:hover, &:active, &:focus {
+			font-weight: 700;
+			color: #777777;
+			background-color: white;
+			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
+		}
+	}
+}
+/*
+* FIM comment-box
+*/
+
 
 #info-kml.no-display{
 	height: 0;

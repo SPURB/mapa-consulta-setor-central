@@ -320,6 +320,58 @@ function createBaseInfo(data) {
 }
 
 /**
+* Create commentable form
+* @param { String } query The element query selector to inject the form
+*/
+function createCommentBox (query) {
+	const emailPattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+	const idPrefix = query.substring(1, query.length)
+	const commentBox = `
+		<div class="comment-box">
+			<h3 class="comment-box-action-title">Comente aqui</h3>
+			<form name="${idPrefix}">
+				<div>
+					<label for="${idPrefix}-name">Nome</label>
+					<input type="text" id="${idPrefix}-name" minlength="2" maxlength="60" required></input>
+				</div>
+
+				<div>
+					<label for="${idPrefix}-surname">Sobrenome</label>
+					<input type="text" id="${idPrefix}-surname" minlength="1" maxlength="60" required></input>
+				</div>
+
+				<div>
+					<label for="${idPrefix}-organization">Organização (opcional)</label>
+					<input type="text" id="${idPrefix}-organization" minlength="2" maxlength="120"></input>
+				</div>
+
+				<div>
+					<label for="${idPrefix}-email">Email</label>
+					<input type="email" id="${idPrefix}-email" title="Inclua um email válido" pattern='${emailPattern}' required></input> 
+				</div>
+
+				<div>
+					<label for="${idPrefix}-comment">Comentário</label>
+					<textarea type="text" id="${idPrefix}-comment" minlength="2" required></textarea>
+				</div>
+
+				<input type="submit" class="button" value="Comentar" id="${idPrefix}-submit">
+			</form>
+		</div>
+	`
+	const parser = new DOMParser()
+	const commentBoxNode = parser.parseFromString(commentBox, 'text/html').body.firstChild
+
+	const el = document.querySelector(query)
+	el.appendChild(commentBoxNode)
+
+	// document.forms[idPrefix].submit(e =>{
+	// 	return false
+	// })
+}
+
+
+/**
 * Sidebar (left) -> Toggle classes of clicked project and the base project 
 */
 function toggleInfoClasses(){
@@ -375,5 +427,7 @@ export {
 	noBaseProjetos,
 	parseNameToNumericalId,
 	setInitialState,
+	createCommentBox,
+	// setCommentBoxEventListener,
 	displayKmlInfo
 }

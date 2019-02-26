@@ -27,12 +27,14 @@ import {
 	createInfo,
 	createBaseInfo,
 	setInitialState,
+	createCommentBox,
+	// setCommentBoxEventListener,
 	displayKmlInfo
 } from './domRenderers'
 
 docReady(() => {
 	const justBase = baseObject(projetos) // single'BASE' projetos Object
-	const baseLayers = returnBases(justBase, process.env.APP_URL, true) // open layer's BASE's layers
+	const baseLayers = returnBases(justBase, process.env.APP_URL, false) // open layer's BASE's layers
 	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
 	const noBase = noBaseProjetos(projetos) // projetos 
 	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
@@ -44,7 +46,7 @@ docReady(() => {
 		projection: 'EPSG:3857',
 		zoom: 14,
 		minZoom: 12.7,
-		maxZoom: 28
+		maxZoom: 19
 	})
 
 	let appmap = new Map({
@@ -274,27 +276,32 @@ docReady(() => {
 	/*
 	* Fit to the first kml base layer
 	*/
-	let fitToBaseLayer = new Promise( () => {
+	let fitToBaseLayer = new Promise( (resolve) => {
 		setTimeout(() => {
 			const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
-			fitToId(view, baseLayer, fitPadding) // fit to base layer
+			resolve ( fitToId(view, baseLayer, fitPadding) ) // fit to base layer }
 		}, 1500 )
 	})
 
 	/*
 	* Add non base layers to the map
 	*/
-	let addProjectLayers = new Promise( () => {
+	let addProjectLayers = new Promise( resolve => {
 		setTimeout(() => {
-			projectLayers.forEach(layer => appmap.addLayer(layer)) // add project layers
+			resolve(projectLayers.forEach(layer => appmap.addLayer(layer))) // add project layers
 		}, 0)
 	})
 
-	let addControls = new Promise ( () => {
+	let addControls = new Promise ( resolve => {
 		setTimeout(() => {
-			appmap.addControl(new ScaleLine())
-			appmap.addControl(new ZoomSlider())
+			resolve(appmap.addControl(new ScaleLine()), appmap.addControl(new ZoomSlider()))
 		}, 0)
+	})
+
+	let addCommentBox = new Promise (resolve => {
+		setTimeout(() => {
+			resolve (createCommentBox("#baseInfo"))
+		},0)
 	})
 
 	/*
@@ -315,6 +322,8 @@ docReady(() => {
 	.then( () => fitToBaseLayer )
 	.then( () => addProjectLayers )
 	.then( () => addControls)
+	.then( () => addCommentBox)
+	// .then(() => setCommentBoxEventListener("#baseInfo"))
 	.catch( error => console.error(error) )
 })
 
