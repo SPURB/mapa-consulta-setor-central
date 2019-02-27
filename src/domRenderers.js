@@ -325,34 +325,34 @@ function createBaseInfo(data) {
 */
 function createCommentBox (query) {
 	const emailPattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
-	const idPrefix = query.substring(1, query.length)
+	const idPrefix = query.substring(1, query.length) // remove '#'
 	const commentBox = `
 		<div class="comment-box">
 			<h3 class="comment-box-action-title">Comente aqui</h3>
-			<form name="${idPrefix}">
+			<form name="${idPrefix}" class="validate">
 				<div>
 					<label for="${idPrefix}-name">Nome</label>
-					<input type="text" id="${idPrefix}-name" minlength="2" maxlength="60" required></input>
+					<input type="text" class="${idPrefix}-field" id="${idPrefix}-name" minlength="2" maxlength="60" required></input>
 				</div>
 
 				<div>
 					<label for="${idPrefix}-surname">Sobrenome</label>
-					<input type="text" id="${idPrefix}-surname" minlength="1" maxlength="60" required></input>
+					<input type="text" class="${idPrefix}-field" id="${idPrefix}-surname" minlength="1" maxlength="60" required></input>
 				</div>
 
 				<div>
 					<label for="${idPrefix}-organization">Organização (opcional)</label>
-					<input type="text" id="${idPrefix}-organization" minlength="2" maxlength="120"></input>
+					<input type="text" class="${idPrefix}-field" id="${idPrefix}-organization" minlength="2" maxlength="120"></input>
 				</div>
 
 				<div>
 					<label for="${idPrefix}-email">Email</label>
-					<input type="email" id="${idPrefix}-email" title="Inclua um email válido" pattern='${emailPattern}' required></input> 
+					<input type="email" class="${idPrefix}-field" id="${idPrefix}-email" title="Inclua um email válido" pattern='${emailPattern}' required></input> 
 				</div>
 
 				<div>
 					<label for="${idPrefix}-comment">Comentário</label>
-					<textarea type="text" id="${idPrefix}-comment" minlength="2" required></textarea>
+					<textarea type="text" class="${idPrefix}-field" id="${idPrefix}-comment" minlength="3" required></textarea>
 				</div>
 
 				<input type="submit" class="button" value="Comentar" id="${idPrefix}-submit">
@@ -364,10 +364,48 @@ function createCommentBox (query) {
 
 	const el = document.querySelector(query)
 	el.appendChild(commentBoxNode)
+}
 
-	// document.forms[idPrefix].submit(e =>{
-	// 	return false
-	// })
+/**
+* Check form field input errors
+* @param { Node } field The element input field to check for errors
+* @returns { Object } if is Valid { isValid, id } . If is not valid { isValid, message, id }
+* isValid -> Boolean. This field is valid or not.
+* message -> String. The error message.
+*/
+function fieldErrors(field){
+	const validity = field.validity
+	let message = 'Campo inválido'
+	// TODO: Change message for each error and fields
+	// console.log(field.type) // tipos 
+	// text
+	// textarea
+	// email
+
+	// console.log(field.validity) // erros de cada field
+	// badInput: Boolean
+	// customError: Boolean
+	// patternMismatch: Boolean
+	// rangeOverflow: Boolean
+	// rangeUnderflow: Boolean
+	// stepMismatch: Boolean
+	// tooLong: Boolean
+	// tooShort: Boolean
+	// typeMismatch: Boolean
+	// valid: Boolean
+	// valueMissing: Boolean
+
+	if(!validity.valid) {
+		return {
+			isValid: false, 
+			message: message
+		}
+	}
+	else {
+		return { 
+			isValid: true
+		} 
+	}
 }
 
 
@@ -428,6 +466,6 @@ export {
 	parseNameToNumericalId,
 	setInitialState,
 	createCommentBox,
-	// setCommentBoxEventListener,
+	fieldErrors,
 	displayKmlInfo
 }

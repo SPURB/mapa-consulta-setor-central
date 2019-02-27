@@ -1,5 +1,5 @@
 "use strict"
-import 'ol/ol.css';
+// import 'ol/ol.css'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
@@ -28,13 +28,13 @@ import {
 	createBaseInfo,
 	setInitialState,
 	createCommentBox,
-	// setCommentBoxEventListener,
+	fieldErrors,
 	displayKmlInfo
 } from './domRenderers'
 
 docReady(() => {
 	const justBase = baseObject(projetos) // single'BASE' projetos Object
-	const baseLayers = returnBases(justBase, process.env.APP_URL, false) // open layer's BASE's layers
+	const baseLayers = returnBases(justBase, process.env.APP_URL, true) // open layer's BASE's layers
 	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
 	const noBase = noBaseProjetos(projetos) // projetos 
 	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
@@ -77,31 +77,6 @@ docReady(() => {
 			hitTolerance: 10
 		})
 	)
-
-
-	// var kmlsVals = []
-	// function forEachPointerMove(val){
-	// 	kmlsVals.push(val)
-
-	// 	if (kmlsVals.length > 1 && kmlsVals[0] !== kmlsVals [1]){
-	// 		displayKmlInfo(kmlsVals[1])
-		
-	// 	}
-	// 	if (kmlsVals.length > 2) {
-	// 		kmlsVals = []
-	// 	}
-	// }
-
-	// appmap.on('pointermove', function(evt) {
-	// 	if (evt.dragging) {
-	// 		return;
-	// 	}
-	// 	let pixel = appmap.getEventPixel(evt.originalEvent);
-	// 	appmap.forEachFeatureAtPixel(pixel, layer => {
-	// 		forEachPointerMove(layer.values_)
-	// 	})
-	// })
-
 
 	appmap.on('singleclick', evt => {
 		setInitialState('initial')
@@ -156,7 +131,123 @@ docReady(() => {
 	})
 
 	/*
-	* Create all event listeners
+	* Create DOM elements
+	*/
+	const addCommentBox = new Promise ((resolve, reject) => {
+		setTimeout(() => {
+			try { resolve (createCommentBox("#baseInfo")) } 
+			catch (error) { reject(error) }
+		}, 0)
+	})
+
+	/*
+	* addCommentBox event listeners
+	*/
+	const commentBoxListeners = new Promise ((resolve, reject) => {
+		setTimeout(() => {
+			let formErrors = []
+			// let output = {}
+			/*
+			 * Input fields and comment (textarea) blur events
+			*/
+			const listenFields = (() => {
+				// reset html default validation
+				document.forms["baseInfo"].setAttribute('novalidate', true)
+
+				document.forms["baseInfo"].addEventListener('blur', event => {
+
+					const validateFormExist = event.target.form
+
+					// just proceed if this form have a 'validate' class
+					if ( validateFormExist === undefined || !validateFormExist.classList.contains('validate')) return; 
+
+					const fieldState = fieldErrors(event.target) // return isValid, message (if not valid)
+
+					if (fieldState.isValid) {
+						event.target.classList.remove('error')
+						event.target.classList.add('touched')
+					}
+
+					else {
+						event.target.classList.add('error')
+					}
+
+				}, true)
+
+			})()
+
+			/*
+			 * Submit onclick event
+			*/
+			const listenSubmitBtn = (() => {
+				document.getElementById("baseInfo-submit").addEventListener('click', e => {
+
+					/*
+					 * Check input errors
+					*/
+					let inputs = [...document.forms["baseInfo"].getElementsByClassName("baseInfo-field")]
+					// console.log(inputs)
+
+					inputs.forEach( input => {
+						const fieldState = fieldErrors(input) // return isValid, message (if not valid)
+
+						if (fieldState.isValid) {
+							input.classList.remove('error')
+						} else {
+
+							input.classList.add('error')
+
+							// list errors
+							formErrors.push({
+								id: input.id,
+								message: fieldState.message
+							})
+
+						}
+					})
+
+
+					if(formErrors.length > 0) {
+
+						// do something else with theese errors
+						formErrors = [] // reset state to next click check
+
+					} else { // form do not have errors
+
+						const output = {
+							'idConsulta': 0,
+							// 'name': 'nome',
+							// 'email': app.form_email,
+							// 'content': app.form_content,
+							'public': 0,
+							'trash': 0,
+							'postid': 0,
+							'commentid': 0,
+							// 'commentcontext': app.attr.context
+						}
+
+						inputs.forEach(input => {
+							switch(input.id){
+								case 'baseInfo-email' : output['email'] = input.value
+							}
+							console.log(input.id)
+						})
+						console.log(output)
+					 } 
+
+					// console.log(formError)
+					e.preventDefault()
+				})
+			})()
+
+			try { resolve(listenFields, listenSubmitBtn) }
+			catch { reject(error) }
+				
+		}, 1)
+	})
+
+	/*
+	* Create all other event listeners
 	*/
 	let setListeners = new Promise( () => {
 		setTimeout(() => {
@@ -270,39 +361,37 @@ docReady(() => {
 					switchVisibilityState(layer, element.checked)
 				}
 			})
-		}, 0)
+		}, 1)
 	})
 
 	/*
 	* Fit to the first kml base layer
 	*/
-	let fitToBaseLayer = new Promise( (resolve) => {
+	const fitToBaseLayer = new Promise( (resolve, reject) => {
+		const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
 		setTimeout(() => {
-			const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
-			resolve ( fitToId(view, baseLayer, fitPadding) ) // fit to base layer }
+			try { resolve(fitToId(view, baseLayer, fitPadding)) }
+			catch (error) { reject(error) }
 		}, 1500 )
 	})
 
 	/*
 	* Add non base layers to the map
 	*/
-	let addProjectLayers = new Promise( resolve => {
+	const addProjectLayers = new Promise( (resolve, reject) => {
 		setTimeout(() => {
-			resolve(projectLayers.forEach(layer => appmap.addLayer(layer))) // add project layers
-		}, 0)
+			try { resolve(projectLayers.forEach(layer => appmap.addLayer(layer))) } // add project layers 
+			catch (error) { reject(error) }
+		}, 1)
 	})
 
-	let addControls = new Promise ( resolve => {
+	const addControls = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
-			resolve(appmap.addControl(new ScaleLine()), appmap.addControl(new ZoomSlider()))
-		}, 0)
+			try { resolve(appmap.addControl(new ScaleLine()), appmap.addControl(new ZoomSlider())) }
+			catch (error) { reject(error) }
+		}, 1)
 	})
 
-	let addCommentBox = new Promise (resolve => {
-		setTimeout(() => {
-			resolve (createCommentBox("#baseInfo"))
-		},0)
-	})
 
 	/*
 	* Ordered app initiation 
@@ -313,17 +402,20 @@ docReady(() => {
 		*/
 		createBaseInfo(getProjectData('BASE', colocalizados)), // sidebar first load
 		createList(colocalizados),
-		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel"))
+		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
+		addCommentBox
 	])
 	/*
-	* Then add event listeners and create map events
+	* Then add event listeners
 	*/
-	.then( () => setListeners)
+	.then( () => setListeners )
+	.then( () => commentBoxListeners )
+	/*
+	 * And do map events
+	*/
 	.then( () => fitToBaseLayer )
 	.then( () => addProjectLayers )
 	.then( () => addControls)
-	.then( () => addCommentBox)
-	// .then(() => setCommentBoxEventListener("#baseInfo"))
 	.catch( error => console.error(error) )
 })
 
