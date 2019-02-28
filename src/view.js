@@ -1,5 +1,5 @@
 "use strict"
-// import 'ol/ol.css'
+import 'ol/ol.css'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
@@ -9,7 +9,7 @@ import Select from 'ol/interaction/Select.js'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
-import { projetos, colocalizados  } from './model'
+import { projetos, colocalizados, apiGet  } from './model'
 import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
 import { returnBases } from './layers/bases'
 import {
@@ -22,15 +22,24 @@ import {
 	switchVisibilityState,
 	fitToId,
 	smallerExtent,
-	menuEvents,
 	getFiles,
 	createInfo,
 	createBaseInfo,
 	setInitialState,
 	createCommentBox,
 	displayKmlInfo
-} from './domRenderers'
-import { commentBoxBlurEvents, commentBoxSubmit } from './eventListeners'
+} from './domRenderers';
+
+import { 
+	commentBoxBlurEvents, 
+	commentBoxSubmit, 
+	sidebarGoHome, 
+	sideBarToggleChildren,
+	sideBarToggleFonte,
+	mapObserver,
+	layersController,
+	menuEvents
+} from './eventListeners'
 
 docReady(() => {
 	const justBase = baseObject(projetos) // single'BASE' projetos Object
@@ -133,6 +142,14 @@ docReady(() => {
 	/*
 	* Create DOM elements
 	*/
+	const addPannels = new Promise ( (resolve, reject) => {
+		setTimeout(() => {
+			createBaseInfo(getProjectData('BASE', colocalizados)) // sidebar first load
+			createList(colocalizados)
+			document.getElementById('gohomeName').innerText = getProjectData('BASE', colocalizados).NOME
+		},0)
+	})
+
 	const addCommentBox = new Promise ((resolve, reject) => {
 		setTimeout(() => {
 			try { resolve (createCommentBox("#baseInfo")) } 
@@ -141,11 +158,16 @@ docReady(() => {
 	})
 
 	/*
-	* commentBox event listeners
+	* Event listeners
 	*/
 	const commentBoxListeners = new Promise ((resolve, reject) => {
 		setTimeout(() => {
-			try { resolve(commentBoxBlurEvents('baseInfo'), commentBoxSubmit('baseInfo', 36, 2, 'Mapa base')) }
+			try {
+					resolve(
+						commentBoxBlurEvents('baseInfo'), 
+						commentBoxSubmit('baseInfo', 36, 2, 'Mapa base OU Centro')
+					)
+				}
 			catch { reject(error) }
 		}, 1)
 	})
@@ -153,126 +175,30 @@ docReady(() => {
 	/*
 	* Create all other event listeners
 	*/
-	let setListeners = new Promise( () => {
+	let pannelListeners = new Promise( (resolve, reject) => {
 		setTimeout(() => {
-			/*
-			* Sidebar events
-			* Sidebar (left) -> Go home
-			*/
-			let gohomeName = document.getElementById('gohomeName')
-			gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
-			let gohome = document.getElementById('gohome')
+			try{
+				resolve(
+					// left sidebar
+					sidebarGoHome(projectLayers, baseLayer, listCreated, view, fitPadding),
+					sideBarToggleChildren(),
+					sideBarToggleFonte(),
 
-			gohome.addEventListener('click', () => {
-				document.getElementById('info').classList.add('hidden')
-				document.getElementById('gohome').classList.add('hidden')
-				document.getElementById('baseInfo').classList.remove('hidden')
+					// map
+					mapObserver(isPortrait, appmap),
 
-				// resetApp
-				setInitialState('initial')
-				fitToId(view, baseLayer, fitPadding)
-				projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
-				listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
-			})
-
-			/*
-			* Sidebar (left) -> Hide menu
-			*/
-			let hideshow = document.getElementById('toggleHidden')
-
-			hideshow.addEventListener('click', () => {
-				document.getElementById('info-kml').classList.add('no-display')
-				document.getElementById('map').classList.toggle('no-panel')
-				document.getElementById('infowrap').classList.toggle('hidden')
-				hideshow.classList.toggle('rotate')
-			})
-
-			/*
-			* Sidebar (left) -> Project picture info events - toggle source box
-			*/
-			let openFonteBt = document.getElementById('openFonte')
-			let closeFonteBt = document.getElementById('closeFonte')
-
-			openFonteBt.addEventListener('click', function(event) {
-				event.target.parentNode.classList.remove('closed')
-				event.target.parentNode.classList.add('open')
-			})
-
-			closeFonteBt.addEventListener('click', function(event) {
-				event.target.parentNode.classList.remove('open')
-				event.target.parentNode.classList.add('closed')
-			})
-
-			/*
-			* Sidebar (left) -> for landscape devices, resize map for sidebar hiding/showing
-			*/
-			if (isPortrait) {
-				let sidebar = document.getElementById('infowrap')
-				var observer = new MutationObserver(function(mutationsList) {
-					for(var mutation of mutationsList) {
-						if (mutation.type == 'attributes') {
-							setTimeout(function() { appmap.updateSize() }, 200)
-						}
-						else { return false }
-					}
-				})
-				observer.observe(sidebar, { attributes: true, childList: false, subtree: false })
+					// right sidebar
+					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
+					layersController(listCreated, projectLayers, layerColors, view, fitPadding)
+				)
 			}
+			catch(error) { reject(error) }
 
-			/*
-			* Sidebar (right) -> Listeners for projetos checkboxes
-			*/
-			listCreated.forEach(id => {
-				id = Number(id)
-				const prjId = 'projeto-id_' + id 
-				const btnPojectId = 'btn-projeto-id_' + id
-				const gotoBtn = document.getElementById(btnPojectId)
-				const element = document.getElementById(prjId)
-				const layer = projectLayers.find( layer => layer.values_.projectId === id)
-
-				// fit to clicked project, change Sidebar (left) info, fit
-				gotoBtn.onclick = () => {
-					setInitialState('initial')
-					const data = getProjectData(id, colocalizados)
-					const colors = layerColors[id]
-					const images = getFiles(id, projetos)
-
-					// uncheck all itens except the clicked one at Sidebar (right) 
-					const othersIds = listCreated.filter( idItem => idItem !== id )
-					othersIds.forEach(idItem => {
-						let checkEl = 'projeto-id_' + idItem
-						document.getElementById(checkEl).checked = false
-					})
-					element.checked = true
-					
-					// hide all other layers
-					projectLayers.forEach( tohidelayer => {
-						switchVisibilityState(tohidelayer, false)
-					})
-					switchVisibilityState(layer, true)
-
-					// hide panel Sidebar (right)
-					document.getElementById('panel').classList.remove('open')
-					document.getElementById('map').classList.remove('no-panel')
-
-					// fit to clicked project, change Sidebar (left) info
-					createInfo(data, colors, images)
-					toggleInfoClasses()
-					const projectLayer = projectLayers.find( layer => layer.values_.projectId === id)
-					fitToId(view, projectLayer,fitPadding)
-					displayKmlInfo(projectLayer.values_)
-				}
-
-				// toggle layer visibility with checkboxes status at Sidebar (right)
-				element.onchange = () => {
-					switchVisibilityState(layer, element.checked)
-				}
-			})
 		}, 1)
 	})
 
 	/*
-	* Fit to the first kml base layer
+	* Fit the view to base layer
 	*/
 	const fitToBaseLayer = new Promise( (resolve, reject) => {
 		const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
@@ -299,31 +225,26 @@ docReady(() => {
 		}, 1)
 	})
 
-
 	/*
 	* Ordered app initiation 
 	*/
 	Promise.all([
 		/*
-		 * First create DOM elements
+		 * Create DOM elements
 		*/
-		createBaseInfo(getProjectData('BASE', colocalizados)), // sidebar first load
-		createList(colocalizados),
-		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
+		addPannels,
 		addCommentBox
 	])
 	/*
 	* Then add event listeners
 	*/
-	.then( () => setListeners )
+	.then( () => pannelListeners )
 	.then( () => commentBoxListeners )
 	/*
-	 * And do map events
+	 * And do other map events
 	*/
 	.then( () => fitToBaseLayer )
 	.then( () => addProjectLayers )
 	.then( () => addControls)
 	.catch( error => console.error(error) )
 })
-
-

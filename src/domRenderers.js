@@ -189,23 +189,6 @@ function smallerExtent(extents) {
 }
 
 /**
-* Add event listeners to toggle 'open' class to an element to hide 
-* @param { Node } triggers The element from DOM to listen event click
-* @param { Node } toHide The element to hide 
-*/ 
-function menuEvents (triggers, toHide){
-	const normalizedHTMLArr = Array.from(triggers)
-	normalizedHTMLArr[0].addEventListener('click', event =>{
-		toHide.classList.toggle('open')
-		normalizedHTMLArr[1].classList.remove('hide')
-	})
-	normalizedHTMLArr[1].addEventListener('click', event =>{
-		toHide.classList.toggle('open')
-		normalizedHTMLArr[0].classList.remove('hide')
-	})
-}
-
-/**
 * Return the files from each projetos.json
 * @param { Number } id The project id
 * @param { Object } projetos The projetos.json data
@@ -289,7 +272,7 @@ function createInfo(data, projectColor, images){
 }
 
 /**
-* Create initial info (images, strings) box with data from the larger project
+* Create initial info (images, strings) box with data from the larger projectgetProjectData 
 * @param { Object } data colocalizados.json item (return from getProjectData())
 */
 function createBaseInfo(data) {
@@ -416,7 +399,6 @@ export {
 	switchVisibilityState,
 	fitToId,
 	smallerExtent,
-	menuEvents,
 	getFiles,
 	createInfo,
 	createBaseInfo,

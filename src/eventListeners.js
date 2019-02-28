@@ -1,5 +1,137 @@
 "use strict";
-import { apiPost, apiGet } from './model'
+import { colocalizados, projetos, apiPost } from './model'
+import { getProjectData } from './layers/projectsKmls'
+import { 
+	setInitialState,
+	fitToId,
+	switchVisibilityState,
+	getFiles,
+	createInfo,
+	toggleInfoClasses,
+	displayKmlInfo
+} from './domRenderers'
+
+/**
+* Sidebar (top left) - Render initial base layer info and resets map to the initial state
+*/
+function sidebarGoHome (layers, baseLayer, list, view, fitPadding){
+	let gohome = document.getElementById('gohome')
+	gohome.addEventListener('click', () => {
+		document.getElementById('info').classList.add('hidden')
+		document.getElementById('gohome').classList.add('hidden')
+		document.getElementById('baseInfo').classList.remove('hidden')
+
+		// resetApp
+		setInitialState('initial')
+		fitToId(view, baseLayer, fitPadding)
+		layers.forEach( lyr => switchVisibilityState(lyr, true) )
+		list.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
+	})
+}
+
+/**
+ * Sidebar (left top) -> Hide all left menu
+ */
+function sideBarToggleChildren(){
+	let hideshow = document.getElementById('toggleHidden')
+	hideshow.addEventListener('click', () => {
+		document.getElementById('info-kml').classList.add('no-display')
+		document.getElementById('map').classList.toggle('no-panel')
+		document.getElementById('infowrap').classList.toggle('hidden')
+		hideshow.classList.toggle('rotate')
+	})
+}
+
+
+/*
+* Sidebar (left) -> Project picture info events - toggle source box
+*/
+function sideBarToggleFonte(){
+	let openFonteBt = document.getElementById('openFonte')
+	let closeFonteBt = document.getElementById('closeFonte')
+
+	openFonteBt.addEventListener('click', function(event) {
+		event.target.parentNode.classList.remove('closed')
+		event.target.parentNode.classList.add('open')
+	})
+
+	closeFonteBt.addEventListener('click', function(event) {
+		event.target.parentNode.classList.remove('open')
+		event.target.parentNode.classList.add('closed')
+	})	
+}
+
+/**
+ * Observe if the map was deformed. Resets to the original proportion is changed
+ * @param { Boolean } isPortrait The app window
+ * @param { Object } map The Open Layers Map instance
+ */
+function mapObserver(isPortrait, map) {
+	if (isPortrait) {
+		let sidebar = document.getElementById('infowrap')
+		var observer = new MutationObserver(function(mutationsList) {
+			for(var mutation of mutationsList) {
+				if (mutation.type == 'attributes') {
+					setTimeout(function() { map.updateSize() }, 200)
+				}
+				else { return false }
+			}
+		})
+		observer.observe(sidebar, { attributes: true, childList: false, subtree: false })
+	}
+}
+
+/*
+* Sidebar (right) -> Listeners for projetos checkboxes
+*/
+function layersController (listCreated, projectLayers, layerColors, view, fitPadding){
+	listCreated.forEach(id => {
+		id = Number(id)
+		const prjId = 'projeto-id_' + id 
+		const btnPojectId = 'btn-projeto-id_' + id
+		const gotoBtn = document.getElementById(btnPojectId)
+		const element = document.getElementById(prjId)
+		const layer = projectLayers.find( layer => layer.values_.projectId === id)
+
+		// fit to clicked project, change Sidebar (left) info, fit
+		gotoBtn.onclick = () => {
+			setInitialState('initial')
+			const data = getProjectData(id, colocalizados)
+			const colors = layerColors[id]
+			const images = getFiles(id, projetos)
+
+			// uncheck all itens except the clicked one at Sidebar (right) 
+			const othersIds = listCreated.filter( idItem => idItem !== id )
+			othersIds.forEach(idItem => {
+				let checkEl = 'projeto-id_' + idItem
+				document.getElementById(checkEl).checked = false
+			})
+			element.checked = true
+			
+			// hide all other layers
+			projectLayers.forEach( tohidelayer => {
+				switchVisibilityState(tohidelayer, false)
+			})
+			switchVisibilityState(layer, true)
+
+			// hide panel Sidebar (right)
+			document.getElementById('panel').classList.remove('open')
+			document.getElementById('map').classList.remove('no-panel')
+
+			// fit to clicked project, change Sidebar (left) info
+			createInfo(data, colors, images)
+			toggleInfoClasses()
+			const projectLayer = projectLayers.find( layer => layer.values_.projectId === id)
+			fitToId(view, projectLayer, fitPadding)
+			displayKmlInfo(projectLayer.values_)
+		}
+
+		// toggle layer visibility with checkboxes status at Sidebar (right)
+		element.onchange = () => {
+			switchVisibilityState(layer, element.checked)
+		}
+	})
+}
 
 /**
 * Listen to blur events at the commentbox form input and text fields 
@@ -26,6 +158,26 @@ function commentBoxBlurEvents(idBase) {
 		}
 
 	}, true)
+}
+
+
+/**
+* Add event listeners to toggle 'open' class to an element to hide 
+* @param { Node } triggers The element from DOM to listen event click
+* @param { Node } toHide The element to hide 
+*/ 
+function menuEvents (triggers, toHide){
+	// const normalizedHTMLArr = Array.from(triggers)
+	const normalizedHTMLArr = [...triggers]
+
+	normalizedHTMLArr[0].addEventListener('click', event =>{
+		toHide.classList.toggle('open')
+		normalizedHTMLArr[1].classList.remove('hide')
+	})
+	normalizedHTMLArr[1].addEventListener('click', event =>{
+		toHide.classList.toggle('open')
+		normalizedHTMLArr[0].classList.remove('hide')
+	})
 }
 
 /**
@@ -79,6 +231,8 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 			let name = inputs.find( input => input.id === fieldNameId).value // João
 			const surname = inputs.find( input => input.id === fieldSurnameId).value // da Silva
 			const organization = inputs.find( input => input.id === fieldOrganizationId).value // Tabajara LTDA
+			const email = inputs.find( input => input.id === fieldEmailId).value
+			const content =  inputs.find( input => input.id === fieldCommentId).value
 
 			name = `${name} ${surname}` // João da Silva
 			if (organization || organization !=='') { name = `${name} (${organization})` } // João da Silva (Tabajara LTDA)
@@ -86,8 +240,8 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 			const output = {
 				'idConsulta': idConsulta,
 				'name': name,
-				'email': inputs.find( input => input.id === fieldEmailId).value , // joaodasilva@tabajara.com
-				'content': inputs.find( input => input.id === fieldCommentId).value , // Lorem ipsum ...
+				'email': email,
+				'content': content,
 				'public': 0,
 				'trash': 0,
 				'postid': 0,
@@ -144,6 +298,14 @@ function fieldErrors(field){
 	}
 }
 
-
-
-export { commentBoxBlurEvents, commentBoxSubmit, fieldErrors }
+export { 
+	commentBoxBlurEvents, 
+	commentBoxSubmit, 
+	fieldErrors, 
+	sidebarGoHome, 
+	sideBarToggleChildren,
+	sideBarToggleFonte,
+	mapObserver,
+	layersController,
+	menuEvents
+}
