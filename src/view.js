@@ -28,13 +28,13 @@ import {
 	createBaseInfo,
 	setInitialState,
 	createCommentBox,
-	fieldErrors,
 	displayKmlInfo
 } from './domRenderers'
+import { commentBoxBlurEvents, commentBoxSubmit } from './eventListeners'
 
 docReady(() => {
 	const justBase = baseObject(projetos) // single'BASE' projetos Object
-	const baseLayers = returnBases(justBase, process.env.APP_URL, true) // open layer's BASE's layers
+	const baseLayers = returnBases(justBase, process.env.APP_URL, false) // open layer's BASE's layers
 	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
 	const noBase = noBaseProjetos(projetos) // projetos 
 	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
@@ -141,108 +141,12 @@ docReady(() => {
 	})
 
 	/*
-	* addCommentBox event listeners
+	* commentBox event listeners
 	*/
 	const commentBoxListeners = new Promise ((resolve, reject) => {
 		setTimeout(() => {
-			let formErrors = []
-			// let output = {}
-			/*
-			 * Input fields and comment (textarea) blur events
-			*/
-			const listenFields = (() => {
-				// reset html default validation
-				document.forms["baseInfo"].setAttribute('novalidate', true)
-
-				document.forms["baseInfo"].addEventListener('blur', event => {
-
-					const validateFormExist = event.target.form
-
-					// just proceed if this form have a 'validate' class
-					if ( validateFormExist === undefined || !validateFormExist.classList.contains('validate')) return; 
-
-					const fieldState = fieldErrors(event.target) // return isValid, message (if not valid)
-
-					if (fieldState.isValid) {
-						event.target.classList.remove('error')
-						event.target.classList.add('touched')
-					}
-
-					else {
-						event.target.classList.add('error')
-					}
-
-				}, true)
-
-			})()
-
-			/*
-			 * Submit onclick event
-			*/
-			const listenSubmitBtn = (() => {
-				document.getElementById("baseInfo-submit").addEventListener('click', e => {
-
-					/*
-					 * Check input errors
-					*/
-					let inputs = [...document.forms["baseInfo"].getElementsByClassName("baseInfo-field")]
-					// console.log(inputs)
-
-					inputs.forEach( input => {
-						const fieldState = fieldErrors(input) // return isValid, message (if not valid)
-
-						if (fieldState.isValid) {
-							input.classList.remove('error')
-						} else {
-
-							input.classList.add('error')
-
-							// list errors
-							formErrors.push({
-								id: input.id,
-								message: fieldState.message
-							})
-
-						}
-					})
-
-
-					if(formErrors.length > 0) {
-
-						// do something else with theese errors
-						formErrors = [] // reset state to next click check
-
-					} else { // form do not have errors
-
-						const output = {
-							'idConsulta': 0,
-							// 'name': 'nome',
-							// 'email': app.form_email,
-							// 'content': app.form_content,
-							'public': 0,
-							'trash': 0,
-							'postid': 0,
-							'commentid': 0,
-							// 'commentcontext': app.attr.context
-						}
-
-						inputs.forEach(input => {
-							switch(input.id){
-								case 'baseInfo-email' : output['email'] = input.value
-							}
-							console.log(input.id)
-						})
-						console.log(output)
-					 } 
-
-					// console.log(formError)
-					e.preventDefault()
-				})
-			})()
-
-			try { resolve(listenFields, listenSubmitBtn) }
+			try { resolve(commentBoxBlurEvents('baseInfo'), commentBoxSubmit('baseInfo', 36, 2, 'Mapa base')) }
 			catch { reject(error) }
-				
 		}, 1)
 	})
 
@@ -258,8 +162,8 @@ docReady(() => {
 			let gohomeName = document.getElementById('gohomeName')
 			gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
 			let gohome = document.getElementById('gohome')
-			gohome.addEventListener('click', () => {
 
+			gohome.addEventListener('click', () => {
 				document.getElementById('info').classList.add('hidden')
 				document.getElementById('gohome').classList.add('hidden')
 				document.getElementById('baseInfo').classList.remove('hidden')
@@ -275,6 +179,7 @@ docReady(() => {
 			* Sidebar (left) -> Hide menu
 			*/
 			let hideshow = document.getElementById('toggleHidden')
+
 			hideshow.addEventListener('click', () => {
 				document.getElementById('info-kml').classList.add('no-display')
 				document.getElementById('map').classList.toggle('no-panel')
@@ -287,10 +192,12 @@ docReady(() => {
 			*/
 			let openFonteBt = document.getElementById('openFonte')
 			let closeFonteBt = document.getElementById('closeFonte')
+
 			openFonteBt.addEventListener('click', function(event) {
 				event.target.parentNode.classList.remove('closed')
 				event.target.parentNode.classList.add('open')
 			})
+
 			closeFonteBt.addEventListener('click', function(event) {
 				event.target.parentNode.classList.remove('open')
 				event.target.parentNode.classList.add('closed')

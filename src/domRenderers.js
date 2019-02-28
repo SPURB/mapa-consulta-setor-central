@@ -366,48 +366,6 @@ function createCommentBox (query) {
 	el.appendChild(commentBoxNode)
 }
 
-/**
-* Check form field input errors
-* @param { Node } field The element input field to check for errors
-* @returns { Object } if is Valid { isValid, id } . If is not valid { isValid, message, id }
-* isValid -> Boolean. This field is valid or not.
-* message -> String. The error message.
-*/
-function fieldErrors(field){
-	const validity = field.validity
-	let message = 'Campo inválido'
-	// TODO: Change message for each error and fields
-	// console.log(field.type) // tipos 
-	// text
-	// textarea
-	// email
-
-	// console.log(field.validity) // erros de cada field
-	// badInput: Boolean
-	// customError: Boolean
-	// patternMismatch: Boolean
-	// rangeOverflow: Boolean
-	// rangeUnderflow: Boolean
-	// stepMismatch: Boolean
-	// tooLong: Boolean
-	// tooShort: Boolean
-	// typeMismatch: Boolean
-	// valid: Boolean
-	// valueMissing: Boolean
-
-	if(!validity.valid) {
-		return {
-			isValid: false, 
-			message: message
-		}
-	}
-	else {
-		return { 
-			isValid: true
-		} 
-	}
-}
-
 
 /**
 * Sidebar (left) -> Toggle classes of clicked project and the base project 
@@ -466,6 +424,5 @@ export {
 	parseNameToNumericalId,
 	setInitialState,
 	createCommentBox,
-	fieldErrors,
 	displayKmlInfo
 }
