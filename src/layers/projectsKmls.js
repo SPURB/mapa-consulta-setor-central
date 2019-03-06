@@ -16,6 +16,7 @@ import { parseNameToNumericalId } from '../domRenderers'
 function returnLayers(projetos, app_url, colocalizados){
 	try{
 		let kmlLayers = []
+
 		projetos.forEach(projeto => { 
 			const files = projeto.children
 			const projectId = parseNameToNumericalId(projeto.name) // return a integer, the id of the proje
@@ -23,11 +24,33 @@ function returnLayers(projetos, app_url, colocalizados){
 
 			files.forEach( file => { // Create projeto's layer
 
-				const customStyles = ['custom-horario', 'custom-antihorario', 'custom-vlt']
+				const customStyles = ['custom-horario', 'custom-antihorario', 'custom-vlt','custom-densidade']
 				let isCustom = false
 				customStyles.forEach( substring => {
 					file.name.includes(substring) ? isCustom = substring : null
 				})
+
+				if (file.extension === '.kml' && isCustom === 'custom-densidade') {
+					setLayerColors(projectId, [0, 255, 0], 1)
+
+					var source = new VectorSource({
+						url: app_url + file.path,
+						format: new KML({ 
+							extractStyles: false
+						})
+					})
+
+					var style = feature => {
+						const densidade_populacional = feature.get('Dens_const')
+						const variator = isNaN(densidade_populacional) ? 0 : parseFloat(densidade_populacional) * (0.1)
+						console.log(variator)
+						return new Style({
+							fill: new Fill({
+								color:[0, 255, 0, variator]
+							})
+						})
+					}
+				}
 
 				if (file.extension === '.kml' && isCustom === 'custom-vlt') {
 					setLayerColors(projectId,[0, 0, 0], 1)
@@ -53,7 +76,6 @@ function returnLayers(projetos, app_url, colocalizados){
 
 				if (file.extension === '.kml' && isCustom === 'custom-antihorario') {
 					setLayerColors(projectId,[255, 0, 0], 1)
-
 					var style = new Style({
 						stroke: new Stroke({
 							color: [255, 0, 0, 1],
@@ -63,15 +85,16 @@ function returnLayers(projetos, app_url, colocalizados){
 				}
 
 				if (file.extension === '.kml' && isCustom) {
-					const source = new VectorSource({
+					var source = new VectorSource({
 						url: app_url + file.path,
 						format: new KML({ extractStyles: false })
 					})
+
 					kmlLayers.push({
 						layer: new VectorLayer({
 							title: title,
 							source: source,
-							style: style, 
+							style: style,
 							projectId: projectId
 						}) 
 					})
