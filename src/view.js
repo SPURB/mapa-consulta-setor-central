@@ -1,5 +1,5 @@
 "use strict"
-import 'ol/ol.css'
+// import 'ol/ol.css'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
@@ -32,7 +32,8 @@ import {
 
 import { 
 	commentBoxBlurEvents, 
-	commentBoxSubmit, 
+	commentBoxSubmit,
+	resetEventListener,
 	sidebarGoHome, 
 	sideBarToggleChildren,
 	sideBarToggleFonte,
@@ -49,6 +50,11 @@ docReady(() => {
 	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // window.innerHeight < window.innerWidth
 	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
+
+	let state = {
+		projectSelected: false, // project clicked at map or right sidebar?
+		idConsulta: 36
+	}
 
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],
@@ -100,7 +106,7 @@ docReady(() => {
 
 			const projectjId = layer.values_.projectId
 			const kmlData = layer.values_
-			if(projectjId !== 0) { // exclui a base
+			if(projectjId !== 0) { // exclude the base
 				idAndextents.push(
 				{
 					id: projectjId,
@@ -110,9 +116,10 @@ docReady(() => {
 			}
 		})
 		if (idAndextents.length >= 1) {
+
 			document.getElementById('map').classList.remove('no-panel')
 
-			const smaller = smallerExtent(idAndextents)
+			const smaller = smallerExtent(idAndextents) // resolve clicks in overlays, gets the smaller extent
 			view.fit(smaller.extent, { // fit to smaller extent 
 				padding: fitPadding
 			})
@@ -120,22 +127,35 @@ docReady(() => {
 			const info = document.getElementById("info")
 			info.classList.remove("hidden")
 
-			if (getProjectData(smaller.id, colocalizados)) {
-				const data = getProjectData(smaller.id, colocalizados)
+			const projectData = getProjectData(smaller.id, colocalizados) 
+
+			if (projectData) {
 				const images = getFiles(smaller.id, projetos)
 				const colors = layerColors[smaller.id]
 
 				displayKmlInfo(smaller.kmlData)
-				createInfo(data, colors, images)
-				toggleInfoClasses()
-			}
-			else { 
+				createInfo(projectData, colors, images)
+				toggleInfoClasses(isPortrait)
+
+
+				// Setup commentBox create element only once
+				if (!state.projectSelected) {
+					createCommentBox('info', false)
+					commentBoxBlurEvents('info')
+				} // setup errors only once
+
+				resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
+
+				commentBoxSubmit('info', state.idConsulta, projectData.ID, projectData.NOME) // change listener attributes at every click
+				state.projectSelected = true // change state to run setup only once
+		}
+			else {
 					renderElement(`
 						<div class='erro'>Algo deu errado... 
 							<p class='info'>Projeto ID <span>${smaller.id}</span></p>
 						</div>`, "#info-error")
 					setInitialState('error')
-				}
+			}
 		}
 	})
 
@@ -152,7 +172,7 @@ docReady(() => {
 
 	const addCommentBox = new Promise ((resolve, reject) => {
 		setTimeout(() => {
-			try { resolve (createCommentBox("#baseInfo")) } 
+			try { resolve ( createCommentBox("baseInfo", state.projectSelected) ) }
 			catch (error) { reject(error) }
 		}, 0)
 	})
@@ -164,11 +184,11 @@ docReady(() => {
 		setTimeout(() => {
 			try {
 					resolve(
-						commentBoxBlurEvents('baseInfo'), 
-						commentBoxSubmit('baseInfo', 36, 2, 'Mapa base OU Centro')
+						commentBoxBlurEvents('baseInfo'),
+						commentBoxSubmit('baseInfo', state.idConsulta, 2, 'Mapa base'),
 					)
 				}
-			catch { reject(error) }
+			catch(error) { reject(error) }
 		}, 1)
 	})
 
@@ -189,7 +209,7 @@ docReady(() => {
 
 					// right sidebar
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
-					layersController(listCreated, projectLayers, layerColors, view, fitPadding)
+					layersController(listCreated, projectLayers, layerColors, view, fitPadding, state)
 				)
 			}
 			catch(error) { reject(error) }
@@ -226,7 +246,7 @@ docReady(() => {
 	})
 
 	/*
-	* Ordered app initiation 
+	* Ordered app initiation. This is done just once
 	*/
 	Promise.all([
 		/*
@@ -245,6 +265,6 @@ docReady(() => {
 	*/
 	.then( () => fitToBaseLayer )
 	.then( () => addProjectLayers )
-	.then( () => addControls)
+	.then( () => addControls )
 	.catch( error => console.error(error) )
 })

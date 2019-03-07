@@ -202,25 +202,33 @@ function getFiles(id, projetos){
 	}
 	else {
 		const idsFromNames = projetos.filter(projeto => {
-			let substId =  projeto.name.substring(0,3) 
-			substId = substId.replace(/[^\d]/g, '') 
-			substId = parseInt(substId)
-			if(substId !== 0 && substId === id){
+			let substringId =  projeto.name.substring(0,3)
+			substringId = substringId.replace(/[^\d]/g, '') 
+			substringId = parseInt(substringId)
+			if(substringId !== 0 && substringId === id){
 				return projeto
 			}
 		})
 		const files = idsFromNames[0].children
-		const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
-		const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
-		
+		const images = files.filter( file =>
+			file.extension === '.gif' ||
+			file.extension === '.png' ||
+			file.extension === '.jpg' ||
+			file.extension === '.jpeg' ||
+			file.extension === '.svg'
+		)
 
+		const hero = files.filter( hero => hero.name.includes(`hero${hero.extension}`))
+		
 		if(images.length > 0 && hero.length > 0){
 			return {
 				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
 				hero: hero[0].path
 			}
 		}
-		else return false
+		else { 
+			console.error(id)
+		}
 	}
 }
 
@@ -228,6 +236,7 @@ function getFiles(id, projetos){
 * Create info box
 * @param { Object } data colocalizados.json item 
 * @param { String } projectColor rgba color string
+* @returns { HTMLDivElement } Create the div#info of selected project
 */ 
 function createInfo(data, projectColor, images){
 	let coverImg = document.getElementById('coverSec')
@@ -305,61 +314,64 @@ function createBaseInfo(data) {
 /**
 * Create commentable form
 * @param { String } query The element query selector to inject the form
+* @param { Boolean } isProject Project was selected? -> state.projectSelected
+* @returns { HTMLDivElement } Them commentable box
 */
-function createCommentBox (query) {
+function createCommentBox (query, isProject) {
+
+	if(isProject || document.body.contains(document.forms[query])) { return } // Stop function if project info box already created
+
 	const emailPattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
-	const idPrefix = query.substring(1, query.length) // remove '#'
 	const commentBox = `
 		<div class="comment-box">
 			<h3 class="comment-box-action-title">Comente aqui</h3>
-			<form name="${idPrefix}" class="validate">
+			<form name="${query}" class="validate">
 				<div>
-					<label for="${idPrefix}-name">Nome</label>
-					<input type="text" class="${idPrefix}-field" id="${idPrefix}-name" minlength="2" maxlength="60" required></input>
+					<label for="${query}-name">Nome</label>
+					<input type="text" class="${query}-field" id="${query}-name" minlength="2" maxlength="60" required></input>
 				</div>
 
 				<div>
-					<label for="${idPrefix}-surname">Sobrenome</label>
-					<input type="text" class="${idPrefix}-field" id="${idPrefix}-surname" minlength="1" maxlength="60" required></input>
+					<label for="${query}-surname">Sobrenome</label>
+					<input type="text" class="${query}-field" id="${query}-surname" minlength="1" maxlength="60" required></input>
 				</div>
 
 				<div>
-					<label for="${idPrefix}-organization">Organização (opcional)</label>
-					<input type="text" class="${idPrefix}-field" id="${idPrefix}-organization" minlength="2" maxlength="120"></input>
+					<label for="${query}-organization">Organização (opcional)</label>
+					<input type="text" class="${query}-field" id="${query}-organization" minlength="2" maxlength="120"></input>
 				</div>
 
 				<div>
-					<label for="${idPrefix}-email">Email</label>
-					<input type="email" class="${idPrefix}-field" id="${idPrefix}-email" title="Inclua um email válido" pattern='${emailPattern}' required></input> 
+					<label for="${query}-email">Email</label>
+					<input type="email" class="${query}-field" id="${query}-email" title="Inclua um email válido" pattern='${emailPattern}' required></input> 
 				</div>
 
 				<div>
-					<label for="${idPrefix}-comment">Comentário</label>
-					<textarea type="text" class="${idPrefix}-field" id="${idPrefix}-comment" minlength="3" required></textarea>
+					<label for="${query}-comment">Comentário</label>
+					<textarea type="text" class="${query}-field" id="${query}-comment" minlength="3" required></textarea>
 				</div>
 
-				<input type="submit" class="button" value="Comentar" id="${idPrefix}-submit">
+				<input type="submit" class="button" value="Comentar" id="${query}-submit">
 			</form>
 		</div>
 	`
 	const parser = new DOMParser()
 	const commentBoxNode = parser.parseFromString(commentBox, 'text/html').body.firstChild
 
-	const el = document.querySelector(query)
+	const el = document.querySelector(`#${query}`)
 	el.appendChild(commentBoxNode)
 }
 
-
 /**
 * Sidebar (left) -> Toggle classes of clicked project and the base project 
+* @param { Boolean } orientation Current window media orientation
+* @returns { HTMLDivElement } Changes #baseInfo, #gohome, #infowrap and #toggleHidden classes
 */
-function toggleInfoClasses(){
+function toggleInfoClasses(orientation){
 	document.getElementById('baseInfo').classList.add('hidden') // classes' changes for clicks on map
 	document.getElementById('gohome').classList.remove('hidden')
 
-	const orientationIsPortrait = window.matchMedia("(orientation: portrait)").matches 
-
-	if (orientationIsPortrait) {
+	if (orientation) {
 		document.getElementById('infowrap').classList.remove('hidden')
 		document.getElementById('toggleHidden').classList.add('rotate')
 	}

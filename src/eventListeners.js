@@ -7,6 +7,8 @@ import {
 	switchVisibilityState,
 	getFiles,
 	createInfo,
+	createCommentBox,
+
 	toggleInfoClasses,
 	displayKmlInfo
 } from './domRenderers'
@@ -84,7 +86,7 @@ function mapObserver(isPortrait, map) {
 /*
 * Sidebar (right) -> Listeners for projetos checkboxes
 */
-function layersController (listCreated, projectLayers, layerColors, view, fitPadding){
+function layersController (listCreated, projectLayers, layerColors, view, fitPadding, state){
 	listCreated.forEach(id => {
 		id = Number(id)
 		const prjId = 'projeto-id_' + id 
@@ -124,6 +126,14 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 			const projectLayer = projectLayers.find( layer => layer.values_.projectId === id)
 			fitToId(view, projectLayer, fitPadding)
 			displayKmlInfo(projectLayer.values_)
+
+			// Setup commentBox 
+			if (!state.projectSelected) { // Create element and event only once only once
+				createCommentBox('info', false)
+				commentBoxBlurEvents('info')
+			}
+			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
+			commentBoxSubmit('info', state.idConsulta, data.ID, data.NOME) // change listener attributes at every click
 		}
 
 		// toggle layer visibility with checkboxes status at Sidebar (right)
@@ -136,6 +146,7 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 /**
 * Listen to blur events at the commentbox form input and text fields 
 * @param { String } idBase The base of id name
+* @returns { EventListener } Form field blur event listener. Add an remove classes ('error' or 'touched') to fields
 */
 function commentBoxBlurEvents(idBase) {
 	document.forms[idBase].setAttribute('novalidate', true)
@@ -167,7 +178,6 @@ function commentBoxBlurEvents(idBase) {
 * @param { Node } toHide The element to hide 
 */ 
 function menuEvents (triggers, toHide){
-	// const normalizedHTMLArr = Array.from(triggers)
 	const normalizedHTMLArr = [...triggers]
 
 	normalizedHTMLArr[0].addEventListener('click', event =>{
@@ -181,11 +191,21 @@ function menuEvents (triggers, toHide){
 }
 
 /**
+ * Clone element to remove event listener
+ * @param { HTMLElement } element 
+ */
+function resetEventListener(element){
+	let infoClone = element.cloneNode(true)
+	element.parentNode.replaceChild(infoClone, element)
+}
+
+/**
 * Submit button click event 
 * @param { String } idBase The base of id name of the form
 * @param { Number } idConsulta The consulta id
 * @param { Number } commentid The comment id
 * @param { String } commentcontext The base of id name of the form
+* @returns
 */
 function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 	let formErrors = []
@@ -197,8 +217,9 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 	const fieldOrganizationId = `${idBase}-organization`
 	const fieldEmailId = `${idBase}-email`
 	const fieldCommentId = `${idBase}-comment`
+	let submitBtn = document.getElementById(submitBtnId)
 
-	document.getElementById(submitBtnId).addEventListener('click', e => {
+	submitBtn.addEventListener('click', e => {
 
 		let inputs = [...document.forms[idBase].getElementsByClassName(fieldClassName)]
 		inputs.forEach( input => {
@@ -221,7 +242,7 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 		if(formErrors.length > 0) {
 			console.log('Errors:')
 			console.log(formErrors)
-			// make something with this errors
+			// make something with theese errors
 
 			formErrors = [] // reset state to next click check
 		}
@@ -235,7 +256,7 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 			const content =  inputs.find( input => input.id === fieldCommentId).value
 
 			name = `${name} ${surname}` // João da Silva
-			if (organization || organization !=='') { name = `${name} (${organization})` } // João da Silva (Tabajara LTDA)
+			if (organization || organization !== '') { name = `${name} (${organization})` } // João da Silva (Tabajara LTDA)
 
 			const output = {
 				'idConsulta': idConsulta,
@@ -248,10 +269,11 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 				'commentid': commentid,
 				'commentcontext': commentcontext
 			}
-			apiPost('members', output)
+			// apiPost('members', output);
+			console.log(output)
 		}
 		e.preventDefault()
-	})
+	}, false)
 }
 
 
@@ -267,7 +289,7 @@ function fieldErrors(field){
 	let message = 'Campo inválido'
 
 	// TODO: Change message for each error and field types
-	// console.log(field.type) // field types 
+	// console.log(field.type) // field types
 	// text
 	// textarea
 	// email
@@ -300,7 +322,8 @@ function fieldErrors(field){
 
 export { 
 	commentBoxBlurEvents, 
-	commentBoxSubmit, 
+	commentBoxSubmit,
+	resetEventListener,
 	fieldErrors, 
 	sidebarGoHome, 
 	sideBarToggleChildren,
