@@ -40,15 +40,21 @@ function returnLayers(projetos, app_url, colocalizados){
 						})
 					})
 
+					let styleCache = {}
 					var style = feature => {
 						const densidade_populacional = feature.get('Dens_const')
-						const variator = isNaN(densidade_populacional) ? 0 : parseFloat(densidade_populacional) * (0.1)
-						console.log(variator)
-						return new Style({
-							fill: new Fill({
-								color:[0, 255, 0, variator]
-							})
-						})
+						const variator = isNaN(densidade_populacional) ? [255, 0, 0, 1] : [0, 255, 0, parseFloat(densidade_populacional) * (0.1)] // errors in red, please check
+
+						let styleFeature = styleCache[densidade_populacional]
+						if(!styleFeature) {
+							styleFeature = new Style({
+								fill: new Fill({
+									color: variator
+								})
+							});
+							styleCache[densidade_populacional] = styleFeature 
+						}
+						return styleFeature
 					}
 				}
 
