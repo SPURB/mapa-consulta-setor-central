@@ -1,5 +1,5 @@
 "use strict"
-// import 'ol/ol.css'
+import 'ol/ol.css'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
@@ -31,7 +31,7 @@ import {
 } from './domRenderers';
 
 import { 
-	commentBoxBlurEvents, 
+	commentBoxEvents,
 	commentBoxSubmit,
 	resetEventListener,
 	sidebarGoHome, 
@@ -103,7 +103,6 @@ docReady(() => {
 			projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
 			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 
-
 			const projectjId = layer.values_.projectId
 			const kmlData = layer.values_
 			if(projectjId !== 0) { // exclude the base
@@ -137,15 +136,13 @@ docReady(() => {
 				createInfo(projectData, colors, images)
 				toggleInfoClasses(isPortrait)
 
-
 				// Setup commentBox create element only once
 				if (!state.projectSelected) {
 					createCommentBox('info', false)
-					commentBoxBlurEvents('info')
+					commentBoxEvents('info')
 				} // setup errors only once
 
 				resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
-
 				commentBoxSubmit('info', state.idConsulta, projectData.ID, projectData.NOME) // change listener attributes at every click
 				state.projectSelected = true // change state to run setup only once
 		}
@@ -184,7 +181,7 @@ docReady(() => {
 		setTimeout(() => {
 			try {
 					resolve(
-						commentBoxBlurEvents('baseInfo'),
+						commentBoxEvents('baseInfo'),
 						commentBoxSubmit('baseInfo', state.idConsulta, 2, 'Mapa base'),
 					)
 				}
@@ -246,7 +243,7 @@ docReady(() => {
 	})
 
 	/*
-	* Ordered app initiation. This is done just once
+	* Ordered app initiation chain. This is done just once
 	*/
 	Promise.all([
 		/*
@@ -256,15 +253,16 @@ docReady(() => {
 		addCommentBox
 	])
 	/*
-	* Then add event listeners
+	* Then chain event listeners
 	*/
 	.then( () => pannelListeners )
 	.then( () => commentBoxListeners )
 	/*
-	 * And do other map events
+	 * and map events
 	*/
 	.then( () => fitToBaseLayer )
 	.then( () => addProjectLayers )
 	.then( () => addControls )
+	// TODO: fetch comments of state.idConsulta
 	.catch( error => console.error(error) )
 })

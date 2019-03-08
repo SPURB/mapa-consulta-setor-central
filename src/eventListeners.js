@@ -8,7 +8,6 @@ import {
 	getFiles,
 	createInfo,
 	createCommentBox,
-
 	toggleInfoClasses,
 	displayKmlInfo
 } from './domRenderers'
@@ -64,7 +63,7 @@ function sideBarToggleFonte(){
 }
 
 /**
- * Observe if the map was deformed. Resets to the original proportion is changed
+ * Observe if the map was deformed. Resets to the original proportion if changed
  * @param { Boolean } isPortrait The app window
  * @param { Object } map The Open Layers Map instance
  */
@@ -130,9 +129,9 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 			// Setup commentBox 
 			if (!state.projectSelected) { // Create element and event only once only once
 				createCommentBox('info', false)
-				commentBoxBlurEvents('info')
+				commentBoxEvents('info')
 			}
-			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
+			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener at every click
 			commentBoxSubmit('info', state.idConsulta, data.ID, data.NOME) // change listener attributes at every click
 		}
 
@@ -144,38 +143,44 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 }
 
 /**
-* Listen to blur events at the commentbox form input and text fields 
+* Listen to blur events at the commentbox form input and text fields
 * @param { String } idBase The base of id name
 * @returns { EventListener } Form field blur event listener. Add an remove classes ('error' or 'touched') to fields
 */
-function commentBoxBlurEvents(idBase) {
-	document.forms[idBase].setAttribute('novalidate', true)
-	document.forms[idBase].addEventListener('blur', event => {
-
-		const validateFormExist = event.target.form
-
-		// just proceed if this form have a 'validate' class
-		if ( validateFormExist === undefined || !validateFormExist.classList.contains('validate')) return; 
-
-		const fieldState = fieldErrors(event.target) // return isValid, message (if not valid)
-
-		if (fieldState.isValid) {
-			event.target.classList.remove('error')
-			event.target.classList.add('touched')
-		}
-
-		else {
-			event.target.classList.add('error')
-		}
-
-	}, true)
+function commentBoxEvents(idBase) {
+	let form = document.forms[idBase]
+	form.setAttribute('novalidate', true)
+	form.addEventListener('blur', event => setErrors(event), true)
+	form.addEventListener('keydown', e => setErrors(e), true)
 }
 
+/**
+ * Setup errors classes to form field targets
+ * @param { Event } event The addEventListener's event parameter
+ */
+function setErrors(event) {
+	const validateFormExist = event.target.form
+
+	// just proceed if this form have a 'validate' class
+	if ( validateFormExist === undefined || !validateFormExist.classList.contains('validate')) return; 
+
+	const fieldState = fieldErrors(event.target) // return isValid, message (if not valid)
+
+	if (fieldState.isValid) {
+		event.target.classList.remove('error')
+		event.target.classList.add('touched')
+	}
+
+	else {
+		event.target.classList.add('error')
+	}
+}
 
 /**
 * Add event listeners to toggle 'open' class to an element to hide 
-* @param { Node } triggers The element from DOM to listen event click
-* @param { Node } toHide The element to hide 
+* @param { HTMLElement } triggers The element from DOM to listen event click
+* @param { HTMLElement } toHide The element to hide 
+* @returns { EventListener }
 */ 
 function menuEvents (triggers, toHide){
 	const normalizedHTMLArr = [...triggers]
@@ -205,7 +210,7 @@ function resetEventListener(element){
 * @param { Number } idConsulta The consulta id
 * @param { Number } commentid The comment id
 * @param { String } commentcontext The base of id name of the form
-* @returns
+* @returns { EventListener } Event listener to #idBase-submit button
 */
 function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 	let formErrors = []
@@ -242,12 +247,12 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 		if(formErrors.length > 0) {
 			console.log('Errors:')
 			console.log(formErrors)
-			// make something with theese errors
+			// make something with theese errors. Create an error element
 
 			formErrors = [] // reset state to next click check
 		}
 
-		else { // this form do not have errors
+		else { // this form do not have errors. TODO: Remove created error an element if exist
 
 			let name = inputs.find( input => input.id === fieldNameId).value // João
 			const surname = inputs.find( input => input.id === fieldSurnameId).value // da Silva
@@ -269,8 +274,8 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 				'commentid': commentid,
 				'commentcontext': commentcontext
 			}
-			// apiPost('members', output);
-			console.log(output)
+			apiPost('members', output);
+			// console.log(output)
 		}
 		e.preventDefault()
 	}, false)
@@ -279,49 +284,53 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 
 /**
 * Check form field input errors
-* @param { Node } field The element input field to check for errors
+* @param { HTMLElement } field The element input field to check for errors
 * @returns { Object } if is Valid { isValid, id } . If is not valid { isValid, message, id }
 * isValid -> Boolean. This field is valid or not.
 * message -> String. The error message.
 */
 function fieldErrors(field){
 	const validity = field.validity
+
+	if( validity.valid ) { // form is valid
+		return {
+			isValid: true
+		} 
+	}
+
+	const type = field.type
 	let message = 'Campo inválido'
 
-	// TODO: Change message for each error and field types
-	// console.log(field.type) // field types
-	// text
-	// textarea
-	// email
+	if (type === 'email'){ message = 'Email inválido' }
 
-	// console.log(field.validity) // possible errors
-	// badInput: Boolean
-	// customError: Boolean
-	// patternMismatch: Boolean
-	// rangeOverflow: Boolean
-	// rangeUnderflow: Boolean
-	// stepMismatch: Boolean
-	// tooLong: Boolean
-	// tooShort: Boolean
-	// typeMismatch: Boolean
-	// valid: Boolean
-	// valueMissing: Boolean
+	// TODO: Complete all messages complements
+	// console.log(validity) // possible errors (Booleans): 
+	// badInput, customError, patternMismatch, rangeOverflow, rangeUnderflow, stepMismatch, tooLong, tooShort, typeMismatch, valid, valueMissing
+	const messagesComplements = [
+		['badInput', 'Padrão inválido.'],
+		['patternMismatch', 'Padrão inválido, corrija.'],
+		['tooLong', 'Muito longo, escreva menos.'],
+		['tooShort', 'Muito curto, escreva mais.'],
+		['valueMissing', 'Escreva algo.']
+	]
 
-	if(!validity.valid) {
-		return {
-			isValid: false, 
-			message: message
+	if ( !validity.valid ) {
+		for (let errorType in validity) {
+			if (validity[errorType]) { // if error exists
+				const complement = messagesComplements.find( type => type[0] === errorType) 
+				complement ? message += `. ${complement[1]}` : null // just set if is setted in messagesComplements
+			}
 		}
 	}
-	else {
-		return { 
-			isValid: true
-		}
+
+	return {
+		isValid: false, 
+		message: message
 	}
 }
 
 export { 
-	commentBoxBlurEvents, 
+	commentBoxEvents,
 	commentBoxSubmit,
 	resetEventListener,
 	fieldErrors, 

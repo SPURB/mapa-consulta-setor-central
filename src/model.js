@@ -39,7 +39,10 @@ function apiGet (table, id){
 function apiPost (table, data){
 	const url = `${table}_v1/`
 	api.post(url, data)
-		.then(response => response.data)
+		.then(response => {
+			if( table === 'members' ) { console.log(response.data) } // call some function to theese type of post
+			else { response.data }
+		})
 		.catch(error => error)
 }
 

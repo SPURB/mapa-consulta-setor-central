@@ -324,21 +324,21 @@ function createCommentBox (query, isProject) {
 	const emailPattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
 	const commentBox = `
 		<div class="comment-box">
-			<h3 class="comment-box-action-title">Comente aqui</h3>
+			<h3 class="comment-box-action-title">Comente aqui:</h3>
 			<form name="${query}" class="validate">
 				<div>
 					<label for="${query}-name">Nome</label>
-					<input type="text" class="${query}-field" id="${query}-name" minlength="2" maxlength="60" required></input>
+					<input type="text" class="${query}-field" id="${query}-name" minlength="2" maxlength="60" title="Seu nome" required></input>
 				</div>
 
 				<div>
 					<label for="${query}-surname">Sobrenome</label>
-					<input type="text" class="${query}-field" id="${query}-surname" minlength="1" maxlength="60" required></input>
+					<input type="text" class="${query}-field" id="${query}-surname" minlength="2" maxlength="60" title="Seu sobrenome" required></input>
 				</div>
 
 				<div>
 					<label for="${query}-organization">Organização (opcional)</label>
-					<input type="text" class="${query}-field" id="${query}-organization" minlength="2" maxlength="120"></input>
+					<input type="text" class="${query}-field" id="${query}-organization" minlength="2" maxlength="60" title="O nome da sua organização (opcional)"></input>
 				</div>
 
 				<div>
@@ -348,7 +348,7 @@ function createCommentBox (query, isProject) {
 
 				<div>
 					<label for="${query}-comment">Comentário</label>
-					<textarea type="text" class="${query}-field" id="${query}-comment" minlength="3" required></textarea>
+					<textarea type="text" class="${query}-field" id="${query}-comment" minlength="3" title="Sua contribuição" required></textarea>
 				</div>
 
 				<input type="submit" class="button" value="Comentar" id="${query}-submit">
@@ -384,6 +384,7 @@ function toggleInfoClasses(orientation){
 /**
 * Set initial state of app 
 * @param { String } stateStr 'error' or 'initial'
+* @returns initial classes to #info-kml, #info-error, #baseInfo, #info
 */ 
 function setInitialState(stateStr){
 	if(stateStr === 'initial'){
