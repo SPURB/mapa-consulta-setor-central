@@ -46,7 +46,7 @@ function parseNameToNumericalId(name){
 * @param { String } selector The element to inject
 */
 function renderElement(template, selector) {
-	var node = document.querySelector(selector);
+	var node = document.querySelector(selector)
 	if (!node) return
 	node.innerHTML = template
 }
@@ -328,38 +328,56 @@ function createCommentBox (query, isProject) {
 			<form name="${query}" class="validate">
 				<div>
 					<label for="${query}-name">Nome</label>
-					<input type="text" class="${query}-field" id="${query}-name" minlength="2" maxlength="60" title="Seu nome" required></input>
+					<input type="text" class="${query}-field" id="${query}-name" minlength="2" maxlength="60" title="Nome" required></input>
 				</div>
 
 				<div>
 					<label for="${query}-surname">Sobrenome</label>
-					<input type="text" class="${query}-field" id="${query}-surname" minlength="2" maxlength="60" title="Seu sobrenome" required></input>
+					<input type="text" class="${query}-field" id="${query}-surname" minlength="2" maxlength="60" title="Sobrenome" required></input>
 				</div>
 
 				<div>
 					<label for="${query}-organization">Organização (opcional)</label>
-					<input type="text" class="${query}-field" id="${query}-organization" minlength="2" maxlength="60" title="O nome da sua organização (opcional)"></input>
+					<input type="text" class="${query}-field" id="${query}-organization" minlength="2" maxlength="60" title="Organização (opcional)"></input>
 				</div>
 
 				<div>
 					<label for="${query}-email">Email</label>
-					<input type="email" class="${query}-field" id="${query}-email" title="Inclua um email válido" pattern='${emailPattern}' required></input> 
+					<input type="email" class="${query}-field" id="${query}-email" title="Email" pattern='${emailPattern}' required></input> 
 				</div>
 
 				<div>
-					<label for="${query}-comment">Comentário</label>
-					<textarea type="text" class="${query}-field" id="${query}-comment" minlength="3" title="Sua contribuição" required></textarea>
+					<label for="${query}-comment">Contribuição</label>
+					<textarea type="text" class="${query}-field" id="${query}-comment" minlength="3" title="Contribuição" required></textarea>
 				</div>
 
 				<input type="submit" class="button" value="Comentar" id="${query}-submit">
 			</form>
+			<div id=${query}-messages></div>
 		</div>
 	`
+			// <div id=${query}-errors></div>
+
 	const parser = new DOMParser()
 	const commentBoxNode = parser.parseFromString(commentBox, 'text/html').body.firstChild
 
 	const el = document.querySelector(`#${query}`)
 	el.appendChild(commentBoxNode)
+}
+
+/**
+ * Create error list
+ * @param { String } query The query selector of the element to dislay errors
+ * @param { Array } errors The comment box errors list
+ */
+function commentBoxDisplayErrors(query, errors) {
+	let errorsList = '<ul class="errors-list display">'
+	errors.forEach(error => errorsList += `<li id="${error.id}-error-message" class="display">${error.message}</li>` )
+	errorsList += '</ul>'
+	renderElement(errorsList, `#${query}`)
+	// console.log(query)
+	// console.log(errors)
+	// console.log(errorsList)
 }
 
 /**
@@ -419,5 +437,6 @@ export {
 	parseNameToNumericalId,
 	setInitialState,
 	createCommentBox,
+	commentBoxDisplayErrors, 
 	displayKmlInfo
 }

@@ -8,6 +8,7 @@ import {
 	getFiles,
 	createInfo,
 	createCommentBox,
+	commentBoxDisplayErrors,
 	toggleInfoClasses,
 	displayKmlInfo
 } from './domRenderers'
@@ -149,9 +150,26 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 */
 function commentBoxEvents(idBase) {
 	let form = document.forms[idBase]
-	form.setAttribute('novalidate', true)
-	form.addEventListener('blur', event => setErrors(event), true)
+	// form.setAttribute('novalidate', true)
+	form.addEventListener('blur', event => {
+		setErrors(event)
+		const errorsListItem = document.getElementById(`${event.target.id}-error-message`)
+		const error = event.target.classList.contains('error')
+
+		if(errorsListItem !== null && error) { errorsListItem.classList.add('display') }
+		if(errorsListItem !== null && !error) { errorsListItem.classList.remove('display') }
+
+	}, true)
 	form.addEventListener('keydown', e => setErrors(e), true)
+}
+
+/**
+ * Switch class element
+ * @param { String } query HTMLElement query selector  
+ * @param { String } className Class name
+ */
+function selectAndToggleClass(query, className){
+	document.querySelector(query).classList.toggle(className)
 }
 
 /**
@@ -166,10 +184,21 @@ function setErrors(event) {
 
 	const fieldState = fieldErrors(event.target) // return isValid, message (if not valid)
 
+	// const errorMessage = document.getElementById(`${event.target.id}-error-message`)
+	// errorMessage => errorMessage ? errorMessage : 'no errors'
+
 	if (fieldState.isValid) {
 		event.target.classList.remove('error')
-		event.target.classList.add('touched')
+		event.target.classList.add('valid')
 	}
+
+	// if (fieldState.isValid && errorMessage) {
+	// 	errorMessage.classList.remove("display")
+	// }
+
+	// if(!fieldState.isValid && errorMessage) {
+	// 	errorMessage.classList.add("display")
+	// }
 
 	else {
 		event.target.classList.add('error')
@@ -245,9 +274,8 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 		})
 
 		if(formErrors.length > 0) {
-			console.log('Errors:')
-			console.log(formErrors)
 			// make something with theese errors. Create an error element
+			commentBoxDisplayErrors(`${idBase}-messages`, formErrors)
 
 			formErrors = [] // reset state to next click check
 		}
@@ -291,33 +319,30 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 */
 function fieldErrors(field){
 	const validity = field.validity
-
 	if( validity.valid ) { // form is valid
 		return {
 			isValid: true
 		} 
 	}
 
-	const type = field.type
-	let message = 'Campo inválido'
-
-	if (type === 'email'){ message = 'Email inválido' }
+	let message = field.title ? field.title : 'Campo inválido'
 
 	// TODO: Complete all messages complements
 	// console.log(validity) // possible errors (Booleans): 
 	// badInput, customError, patternMismatch, rangeOverflow, rangeUnderflow, stepMismatch, tooLong, tooShort, typeMismatch, valid, valueMissing
 	const messagesComplements = [
 		['badInput', 'Padrão inválido.'],
-		['patternMismatch', 'Padrão inválido, corrija.'],
+		['patternMismatch', 'Padrão inválido.'],
 		['tooLong', 'Muito longo, escreva menos.'],
 		['tooShort', 'Muito curto, escreva mais.'],
-		['valueMissing', 'Escreva algo.']
+		['valueMissing', 'Escreva algo.'],
+		['typeMismatch', 'Tipo de valor incorreto']
 	]
 
 	if ( !validity.valid ) {
 		for (let errorType in validity) {
 			if (validity[errorType]) { // if error exists
-				const complement = messagesComplements.find( type => type[0] === errorType) 
+				const complement = messagesComplements.find( type => type[0] === errorType)
 				complement ? message += `. ${complement[1]}` : null // just set if is setted in messagesComplements
 			}
 		}

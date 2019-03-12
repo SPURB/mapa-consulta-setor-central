@@ -499,9 +499,10 @@ p {
 			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
 		}
 		&.error, 
-		&.touched {
+		&.valid {
 			background-color: #fff;
-			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
+			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25);
+			// border-color: #008015
 		}
 		&.error{ 
 			border-color: #EB5757;
@@ -517,7 +518,7 @@ p {
 	.button {
 		cursor: pointer;
 		margin-top: 1.5em;
-		margin-bottom:3em;
+		margin-bottom: 1em;
 		min-height: 60px;
 		text-transform: uppercase;
 		font-size:large;
@@ -529,6 +530,12 @@ p {
 			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
 		}
 	}
+}
+.errors-list{
+	display: none;
+	&.display{ display: block }
+	li { display: none; }
+	li.display { display: block }
 }
 /*
 * FIM comment-box	
