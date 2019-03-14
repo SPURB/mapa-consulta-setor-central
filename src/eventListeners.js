@@ -165,7 +165,7 @@ function commentBoxEvents(idBase) {
 
 /**
  * Switch class element
- * @param { String } query HTMLElement query selector  
+ * @param { String } query HTMLElement query selector
  * @param { String } className Class name
  */
 function selectAndToggleClass(query, className){
@@ -184,22 +184,10 @@ function setErrors(event) {
 
 	const fieldState = fieldErrors(event.target) // return isValid, message (if not valid)
 
-	// const errorMessage = document.getElementById(`${event.target.id}-error-message`)
-	// errorMessage => errorMessage ? errorMessage : 'no errors'
-
 	if (fieldState.isValid) {
 		event.target.classList.remove('error')
 		event.target.classList.add('valid')
 	}
-
-	// if (fieldState.isValid && errorMessage) {
-	// 	errorMessage.classList.remove("display")
-	// }
-
-	// if(!fieldState.isValid && errorMessage) {
-	// 	errorMessage.classList.add("display")
-	// }
-
 	else {
 		event.target.classList.add('error')
 	}
@@ -302,8 +290,8 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 				'commentid': commentid,
 				'commentcontext': commentcontext
 			}
-			apiPost('members', output);
-			// console.log(output)
+			// submitBtn.classList.add('fetching')
+			apiPost('members', output, idBase)
 		}
 		e.preventDefault()
 	}, false)
@@ -354,6 +342,23 @@ function fieldErrors(field){
 	}
 }
 
+/**
+* Add event listeners to elements created after backend response
+* @param { String } query HTMLElement query selector
+8 @returns { EventListener } 
+*/
+function responseMessageListener(query) {
+	const btn = document.getElementById(query)
+	if(!btn) { throw new Error('Response close button undefined') }
+
+	btn.addEventListener('click', () => {
+		let messageContainer = btn.parentNode
+		messageContainer.classList.remove('error')
+		messageContainer.classList.remove('success')
+		messageContainer.innerHTML = ''
+	}, false)
+}
+
 export { 
 	commentBoxEvents,
 	commentBoxSubmit,
@@ -364,5 +369,6 @@ export {
 	sideBarToggleFonte,
 	mapObserver,
 	layersController,
-	menuEvents
+	menuEvents,
+	responseMessageListener
 }

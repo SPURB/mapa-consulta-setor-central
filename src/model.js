@@ -3,6 +3,7 @@
  * Content from data-src/
  * to update data-src/projetos.json and colocalizados.json run -> 'npm run files'  
  */
+import { displayFetchingUI, displayResponseMessage } from './domRenderers.js'
 import { children as projetos } from '../data-src/projetos' 
 import * as colocalizados from  '../data-src/colocalizados'
 import axios from 'axios'
@@ -35,15 +36,27 @@ function apiGet (table, id){
  * Post comments (members) from the api
  * @param { String } table The api table name -> example: '/members'
  * @param { Object } data The object to register
- */
-function apiPost (table, data){
+ * @param { String } idBase The base of id name
+  */
+function apiPost(table, data, idBase) {
 	const url = `${table}_v1/`
+
+	displayFetchingUI(true, '.button') //display fecthing elements
+
 	api.post(url, data)
 		.then(response => {
-			if( table === 'members' ) { console.log(response.data) } // call some function to theese type of post
+			if( table === 'members' ) { 
+				console.log(response.data)  // call some function to theese type of post and create comment response success
+				displayResponseMessage('success', false, idBase)
+			}
 			else { response.data }
 		})
-		.catch(error => error)
+		.catch(error => {
+			displayResponseMessage('error', error, idBase) // add Comment response error page
+		})
+		.then( () => {
+			displayFetchingUI(false, '.button') // remove submit button 'feching' class
+		})
 }
 
 export { projetos, colocalizados, apiPost, apiGet }

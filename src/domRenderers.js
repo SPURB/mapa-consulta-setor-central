@@ -3,6 +3,7 @@ import { isNumber } from 'util'
 import { projetos } from './model'
 import { layerColors } from './layers/projectsKmls'
 import { containsExtent } from 'ol/extent'
+import { responseMessageListener } from './eventListeners';
 
 /**
 * Reduce projetos to single Base object
@@ -43,13 +44,14 @@ function parseNameToNumericalId(name){
 /**
 * Render a template to the DOM
 * @param { String } template The element
-* @param { String } selector The element to inject
+* @param { String } query The element query selector to inject into
 */
-function renderElement(template, selector) {
-	var node = document.querySelector(selector)
+function renderElement(template, query) {
+	var node = document.querySelector(query)
 	if (!node) return
 	node.innerHTML = template
 }
+
 
 /**
 * Create navigation options from data source (colocalizados.json)
@@ -96,7 +98,6 @@ function createList(colocalizados){
 	})
 	renderElement(list, '#projetos')
 }
-
 
 /**
 * @return { Array } List of ids setted by createList(colocalizados) 
@@ -324,6 +325,7 @@ function createCommentBox (query, isProject) {
 	const emailPattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
 	const commentBox = `
 		<div class="comment-box">
+			<div class="response-message"></div>
 			<h3 class="comment-box-action-title">Comente aqui:</h3>
 			<form name="${query}" class="validate">
 				<div>
@@ -375,9 +377,6 @@ function commentBoxDisplayErrors(query, errors) {
 	errors.forEach(error => errorsList += `<li id="${error.id}-error-message" class="display">${error.message}</li>` )
 	errorsList += '</ul>'
 	renderElement(errorsList, `#${query}`)
-	// console.log(query)
-	// console.log(errors)
-	// console.log(errorsList)
 }
 
 /**
@@ -421,6 +420,68 @@ function setInitialState(stateStr){
 	else { null }
 }
 
+/**
+* Display elements while fecthing
+* @param { Boolean } state Fetch error state
+* @param { String } query Element selector
+*/
+function displayFetchingUI(state, query){
+	let els = document.querySelectorAll(query)
+	if (els === undefined) {  return new Error('Element undefined') }
+	els = [...els]
+
+	// while fetching behaviors
+	if(query === '.button') {
+		els.forEach(button => { 
+			if(state) {
+				button.classList.add('fetching')
+				button.setAttribute('value', 'CARREGANDO')
+				button.disabled = true
+			}
+			else { 
+				button.classList.remove('fetching')
+				button.setAttribute('value', 'COMENTAR')
+				button.disabled = false
+			}
+		})
+	}
+	else {
+		return new Error(`Hey yow. Create some while fetching behavior to this ${query}`)
+	}
+}
+
+/**
+* Display backend message
+* @param { String } type Type of response: 'error' or 'success'
+* @param { Object } response The backend response. False -> backend error
+* @param { String } idBase The base of id name of the form. 'baseInfo' or 'info'
+* @returns HTMLElement with success/error message
+*/
+function displayResponseMessage(resType, response, idBase){
+	const title = resType === 'error' ? 'FALHA NO SISTEMA!': 'OBRIGADO!'
+	const message = resType === 'error' ? 'Tente novamente mais tarde.' : 'Seu comentário foi enviado para moderação'
+	const res = response ? response : ''
+	const buttonId = `${idBase}-close-response`
+	let base = document.getElementById(idBase)
+
+	base.querySelector('.response-message').classList.toggle(resType)
+	base.querySelector('.response-message').classList.add(idBase)
+
+	let template = `
+		<h6>${title}</h6>
+		<p>${message}</p>
+		<p>${res}</p>
+		<button id="${buttonId}">
+			<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+			<circle cx="20" cy="20" r="19" stroke="white" stroke-width="2"/>
+			<line x1="29.1925" y1="11.2789" x2="11.2791" y2="29.1923" stroke="white" stroke-width="2"/>
+			<line x1="28.7216" y1="29.1925" x2="10.8082" y2="11.2791" stroke="white" stroke-width="2"/>
+			</svg>
+		</button>
+	`
+	renderElement(template, `.response-message.${idBase}`)
+	responseMessageListener(buttonId)
+}
 export {
 	baseObject,
 	renderElement,
@@ -438,5 +499,7 @@ export {
 	setInitialState,
 	createCommentBox,
 	commentBoxDisplayErrors, 
-	displayKmlInfo
+	displayKmlInfo,
+	displayFetchingUI,
+	displayResponseMessage
 }

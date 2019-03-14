@@ -471,12 +471,11 @@ p {
 */
 .comment-box{
 	border-top: 1em solid #777777;
-	padding: 1.25em;
 	font-size: normal;
-	&.error { border-color: #EB5757 }
+	&.error { border-color: #EB5757 };
 	.comment-box-action-title{
 		padding: 0.25em 0 1em;
-		border-bottom: 1px solid #777777; 
+		border-bottom: 1px solid #777777
 	}
 }
 .comment-box form {
@@ -498,14 +497,13 @@ p {
 			background-color: #fff;
 			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
 		}
-		&.error, 
+		&.error,
 		&.valid {
 			background-color: #fff;
-			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25);
-			// border-color: #008015
+			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
 		}
 		&.error{ 
-			border-color: #EB5757;
+			border-color: #EB5757
 		}
 	}
 	textarea {
@@ -525,9 +523,16 @@ p {
 		font-weight: 700;
 		color: #777777;
 		background-color: #fff;
+		transition: all ease-in-out .15s;
 		&:hover, &:active, &:focus {
 			color: #333333;
 			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
+		}
+		&.fetching{
+			border: unset;
+			box-shadow: unset;
+			background: 0;
+			cursor: unset;
 		}
 	}
 }
