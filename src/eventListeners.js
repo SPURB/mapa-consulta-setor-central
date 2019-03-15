@@ -344,18 +344,23 @@ function fieldErrors(field){
 
 /**
 * Add event listeners to elements created after backend response
-* @param { String } query HTMLElement query selector
+* @param { String } idBase The base id name of the comment form. 'baseInfo' or 'info'
+* @param { String } resType Type of response: 'error' or 'success'
 8 @returns { EventListener } 
 */
-function responseMessageListener(query) {
-	const btn = document.getElementById(query)
-	if(!btn) { throw new Error('Response close button undefined') }
+function responseMessageListener(idBase, resType) {
+	const btn = document.getElementById(`${idBase}-close-response`)
+	if(!btn) { throw new Error(`Response close button (id: '${idBase}-close-response') undefined`) }
 
 	btn.addEventListener('click', () => {
 		let messageContainer = btn.parentNode
 		messageContainer.classList.remove('error')
 		messageContainer.classList.remove('success')
 		messageContainer.innerHTML = ''
+
+		if(resType === 'success') {
+			document.forms[idBase].reset() //reset idBase
+		}
 	}, false)
 }
 

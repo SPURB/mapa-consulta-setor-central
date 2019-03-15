@@ -452,16 +452,16 @@ function displayFetchingUI(state, query){
 
 /**
 * Display backend message
-* @param { String } type Type of response: 'error' or 'success'
+* @param { String } resType Type of response: 'error' or 'success'
 * @param { Object } response The backend response. False -> backend error
-* @param { String } idBase The base of id name of the form. 'baseInfo' or 'info'
+* @param { String } idBase The base id name of the comment form. 'baseInfo' or 'info'
 * @returns HTMLElement with success/error message
 */
 function displayResponseMessage(resType, response, idBase){
 	const title = resType === 'error' ? 'FALHA NO SISTEMA!': 'OBRIGADO!'
 	const message = resType === 'error' ? 'Tente novamente mais tarde.' : 'Seu comentário foi enviado para moderação'
 	const res = response ? response : ''
-	const buttonId = `${idBase}-close-response`
+	// const buttonId = `${idBase}-close-response`
 	let base = document.getElementById(idBase)
 
 	base.querySelector('.response-message').classList.toggle(resType)
@@ -471,7 +471,7 @@ function displayResponseMessage(resType, response, idBase){
 		<h6>${title}</h6>
 		<p>${message}</p>
 		<p>${res}</p>
-		<button id="${buttonId}">
+		<button id="${idBase}-close-response">
 			<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
 			<circle cx="20" cy="20" r="19" stroke="white" stroke-width="2"/>
 			<line x1="29.1925" y1="11.2789" x2="11.2791" y2="29.1923" stroke="white" stroke-width="2"/>
@@ -480,7 +480,7 @@ function displayResponseMessage(resType, response, idBase){
 		</button>
 	`
 	renderElement(template, `.response-message.${idBase}`)
-	responseMessageListener(buttonId)
+	responseMessageListener(idBase, resType)
 }
 export {
 	baseObject,

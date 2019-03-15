@@ -43,12 +43,10 @@ import {
 } from './eventListeners'
 
 docReady(() => {
-	const justBase = baseObject(projetos) // single'BASE' projetos Object
-	const baseLayers = returnBases(justBase, process.env.APP_URL, false) // open layer's BASE's layers
-	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
-	const noBase = noBaseProjetos(projetos) // projetos 
-	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
-	const isPortrait = window.matchMedia("(orientation: portrait)").matches // window.innerHeight < window.innerWidth
+	const baseLayers = returnBases(baseObject(projetos), process.env.APP_URL, false) // open layer's BASE's layers (bing maps and id === 0)
+	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0) // open layer's BASE (id === 0)
+	const projectLayers = returnLayers(noBaseProjetos(projetos), process.env.APP_URL, colocalizados) // open layer's projects layers
+	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
 	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
 
 	let state = {
