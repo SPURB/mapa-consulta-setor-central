@@ -150,7 +150,7 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 */
 function commentBoxEvents(idBase) {
 	let form = document.forms[idBase]
-	// form.setAttribute('novalidate', true)
+
 	form.addEventListener('blur', event => {
 		setErrors(event)
 		const errorsListItem = document.getElementById(`${event.target.id}-error-message`)
@@ -161,15 +161,6 @@ function commentBoxEvents(idBase) {
 
 	}, true)
 	form.addEventListener('keydown', e => setErrors(e), true)
-}
-
-/**
- * Switch class element
- * @param { String } query HTMLElement query selector
- * @param { String } className Class name
- */
-function selectAndToggleClass(query, className){
-	document.querySelector(query).classList.toggle(className)
 }
 
 /**
@@ -264,12 +255,10 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 		if(formErrors.length > 0) {
 			// make something with theese errors. Create an error element
 			commentBoxDisplayErrors(`${idBase}-messages`, formErrors)
-
 			formErrors = [] // reset state to next click check
 		}
 
 		else { // this form do not have errors. TODO: Remove created error an element if exist
-
 			let name = inputs.find( input => input.id === fieldNameId).value // João
 			const surname = inputs.find( input => input.id === fieldSurnameId).value // da Silva
 			const organization = inputs.find( input => input.id === fieldOrganizationId).value // Tabajara LTDA
@@ -319,11 +308,11 @@ function fieldErrors(field){
 	// console.log(validity) // possible errors (Booleans): 
 	// badInput, customError, patternMismatch, rangeOverflow, rangeUnderflow, stepMismatch, tooLong, tooShort, typeMismatch, valid, valueMissing
 	const messagesComplements = [
-		['badInput', 'Padrão inválido.'],
-		['patternMismatch', 'Padrão inválido.'],
-		['tooLong', 'Muito longo, escreva menos.'],
-		['tooShort', 'Muito curto, escreva mais.'],
-		['valueMissing', 'Escreva algo.'],
+		['badInput', 'Padrão inválido'],
+		['patternMismatch', 'Padrão inválido'],
+		['tooLong', 'Texto muito longo'],
+		['tooShort', 'Texto muito curto'],
+		['valueMissing', 'Escreva algo'],
 		['typeMismatch', 'Tipo de valor incorreto']
 	]
 
@@ -331,7 +320,7 @@ function fieldErrors(field){
 		for (let errorType in validity) {
 			if (validity[errorType]) { // if error exists
 				const complement = messagesComplements.find( type => type[0] === errorType)
-				complement ? message += `. ${complement[1]}` : null // just set if is setted in messagesComplements
+				complement ? message += ` <span>${complement[1]}</span>` : null // just set if is setted in messagesComplements
 			}
 		}
 	}
@@ -344,12 +333,13 @@ function fieldErrors(field){
 
 /**
 * Add event listeners to elements created after backend response
-* @param { String } idBase The base id name of the comment form. 'baseInfo' or 'info'
+* @param { String } idBase The base name of the comment form. 'baseInfo' or 'info'
 * @param { String } resType Type of response: 'error' or 'success'
 8 @returns { EventListener } 
 */
 function responseMessageListener(idBase, resType) {
 	const btn = document.getElementById(`${idBase}-close-response`)
+
 	if(!btn) { throw new Error(`Response close button (id: '${idBase}-close-response') undefined`) }
 
 	btn.addEventListener('click', () => {

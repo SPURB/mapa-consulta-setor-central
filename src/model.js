@@ -45,11 +45,11 @@ function apiPost(table, data, idBase) {
 
 	api.post(url, data)
 		.then(response => {
-			if( table === 'members' ) { 
-				console.log(response.data)  // call some function to theese type of post and create comment response success
+			if( table === 'members' ) {
+				// console.log(response.data)  // call some function to theese type of post and create comment response success
 				displayResponseMessage('success', false, idBase)
 			}
-			else { response.data }
+			else { return response.data }
 		})
 		.catch(error => {
 			displayResponseMessage('error', error, idBase) // add Comment response error page
