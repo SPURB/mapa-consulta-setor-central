@@ -319,11 +319,11 @@ function fieldErrors(field){
 	// console.log(validity) // possible errors (Booleans): 
 	// badInput, customError, patternMismatch, rangeOverflow, rangeUnderflow, stepMismatch, tooLong, tooShort, typeMismatch, valid, valueMissing
 	const messagesComplements = [
-		['badInput', 'Padrão inválido.'],
-		['patternMismatch', 'Padrão inválido.'],
-		['tooLong', 'Muito longo, escreva menos.'],
-		['tooShort', 'Muito curto, escreva mais.'],
-		['valueMissing', 'Escreva algo.'],
+		['badInput', 'Padrão inválido'],
+		['patternMismatch', 'Padrão inválido'],
+		['tooLong', 'Texto muito longo'],
+		['tooShort', 'Texto muito curto'],
+		['valueMissing', 'Escreva algo'],
 		['typeMismatch', 'Tipo de valor incorreto']
 	]
 
@@ -331,7 +331,7 @@ function fieldErrors(field){
 		for (let errorType in validity) {
 			if (validity[errorType]) { // if error exists
 				const complement = messagesComplements.find( type => type[0] === errorType)
-				complement ? message += `. ${complement[1]}` : null // just set if is setted in messagesComplements
+				complement ? message += ` <span>${complement[1]}</span>` : null // just set if is setted in messagesComplements
 			}
 		}
 	}

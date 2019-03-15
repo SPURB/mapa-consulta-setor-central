@@ -256,7 +256,7 @@ p {
 		}
 		.description {
 			font-family: 'Georgia';
-			padding: 1.25rem;
+			padding: 1.25rem 1.25rem 2.5rem 1.25rem;
 			background-color: #FFF;
 		}
 	}
@@ -470,69 +470,87 @@ p {
 * comment-box
 */
 .comment-box{
-	border-top: 1em solid #777777;
-	font-size: normal;
-	&.error { border-color: #EB5757 };
-	.comment-box-action-title{
-		padding: 0.25em 0 1em;
-		border-bottom: 1px solid #777777
+	position: relative;
+	background: #F5F5F5;
+	.comment-box-action-title {
+		background: #777;
+		line-height: 4rem;
+		padding: 0 1.25rem;
+		font-size: large;
+		font-weight: bold;
+		color: #FFF;
 	}
 }
 .comment-box form {
-	label, input, textarea, button{ 
-		display: flex;
-		width: 100%;
-		line-height: 2
-	}
-	input, textarea {
-		font-family: inherit;
-		border-radius: 3px;
-		border: 1px solid #BDBDBD;
-		background-color:#F5F5F5;
-		padding: 0 .5em;
-		font-size: 1em;
-		transition: all ease-in-out .25s;
-		min-height: 45px;
-		&:hover, &:active, &:focus {
-			background-color: #fff;
-			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
+	padding: 1.25rem;
+	div {		
+		label, input, textarea {
+			width: 100%;
+			margin-bottom: 1rem;
 		}
-		&.error,
-		&.valid {
-			background-color: #fff;
-			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
+		label {
+			font-size: smaller;
+			color: #777;
 		}
-		&.error{ 
-			border-color: #EB5757
+		input, textarea {
+			font-family: inherit;
+			font-size: 1rem;
+			line-height: 1.2;
+			height: 2rem;
+			padding: 0 .5rem;
+			border: 1px solid #BDBDBD;
+			border-radius: 2px;
+			color: #333;
+			transition: all ease-in-out .25s;
+			&:hover, &:active, &:focus {
+				background-color: #FFF;
+				border-color: #777;
+				box-shadow: 0 2px 2px rgba(0, 0, 0, .24)
+			}
+			&.error, &.valid {
+				background-color: #FFF;
+				box-shadow: 0 2px 2px rgba(0, 0, 0, .24)
+			}
+			&.error { 
+				border-color: #EB5757;
+			}
 		}
-	}
-	textarea {
-		min-height: 185px
-	}
-	label {
-		padding-top: 0.9em;
-		padding-bottom: 0.2em
+		textarea {
+			min-height: 8rem;
+			padding: .3rem .5rem;
+		}
 	}
 	.button {
+		margin-top: .5rem;
 		cursor: pointer;
-		margin-top: 1.5em;
-		margin-bottom: 1em;
-		min-height: 60px;
 		text-transform: uppercase;
-		font-size:large;
-		font-weight: 700;
-		color: #777777;
-		background-color: #fff;
+		font-family: inherit;
+		color: #FFF;
+		background-color: #777;
+		border-radius: 2px;
+		border: 2px solid rgba(0, 0, 0, .12);
+		width: 100%;
+		line-height: 2rem;
 		transition: all ease-in-out .15s;
 		&:hover, &:active, &:focus {
-			color: #333333;
-			box-shadow: 2px 2px 2px rgba(0,0,0, 0.25)
+			background-color: #333;
+			box-shadow: 0 2px 2px rgba(0, 0, 0, .24)
 		}
-		&.fetching{
-			border: unset;
+		&.fetching {
+			border-color: transparent;
 			box-shadow: unset;
-			background: 0;
-			cursor: unset;
+			cursor: default;
+			animation: blink ease-in-out infinite alternate 2s;
+			@keyframes blink {
+				from {
+					background-color: #777;
+					color: #FFF;
+				}
+				to {
+					background: transparent;
+					color: #777;
+				}
+			}
 		}
 	}
 }
@@ -541,6 +559,92 @@ p {
 	&.display{ display: block }
 	li { display: none; }
 	li.display { display: block }
+}
+.response-message {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	max-height: 0px;
+	color: #FFF;
+	transition: all ease-in .4s;
+	&.success, &.error {
+		max-height: 1000px;
+	}
+	h6 {
+		font-size: x-large;
+		font-weight: bold;
+	}
+	h6 + p {
+		border: 0;
+		opacity: 1;
+		margin: .5rem 1rem 1rem 1rem;
+	}
+	p {
+		font-size: small;
+		line-height: 1;
+		opacity: .4;
+	}
+	button {
+		border: none;
+		background: none;
+		cursor: pointer;
+		margin-top: 1rem;
+		opacity: .4;
+		transition: opacity ease-in .12s;
+		&:hover { opacity: 1; }
+	}
+	&.success { background-color: #008015; }
+	&.error { background-color: #EB5757; }
+}
+[id$="-messages"] {
+	.errors-list {
+		background: #EB5757;
+		font-weight: bold;
+		overflow: hidden;
+		color: #FFF;
+		&::before {
+			content: 'Por favor, revise o(s) campo(s) a seguir:';
+			display: block;
+			margin-bottom: .5rem;
+			border-radius: 2px;
+			padding: 8px 12px;
+			font-size: small;
+			line-height: 1.2;
+			background-color: rgba(0, 0, 0, .24);
+		}
+		&.display {
+			padding: 1.25rem;
+			animation: showErrors ease-in-out .4s;
+			@keyframes showErrors {
+				from {
+					max-height: 0;
+					opacity: 0;
+				}
+				to {
+					max-height: 400px;
+					opacity: 1;
+				}
+			}
+		}
+		li {
+			line-height: 1.2;
+			margin: 0 0 .5rem 0;
+			&:last-child { margin: 0; }
+			border-radius: 2px;
+			font-size: small;
+			text-transform: uppercase;
+			span {
+				display: block;
+				font-weight: normal;
+				text-transform: none;
+				opacity: .6;
+			}
+		}
+	}
 }
 /*
 * FIM comment-box	

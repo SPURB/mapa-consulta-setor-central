@@ -326,7 +326,8 @@ function createCommentBox (query, isProject) {
 	const commentBox = `
 		<div class="comment-box">
 			<div class="response-message"></div>
-			<h3 class="comment-box-action-title">Comente aqui:</h3>
+			<h3 class="comment-box-action-title">Comente</h3>
+			<div id=${query}-messages></div>
 			<form name="${query}" class="validate">
 				<div>
 					<label for="${query}-name">Nome</label>
@@ -355,7 +356,6 @@ function createCommentBox (query, isProject) {
 
 				<input type="submit" class="button" value="Comentar" id="${query}-submit">
 			</form>
-			<div id=${query}-messages></div>
 		</div>
 	`
 			// <div id=${query}-errors></div>
@@ -458,10 +458,10 @@ function displayFetchingUI(state, query){
 * @returns HTMLElement with success/error message
 */
 function displayResponseMessage(resType, response, idBase){
-	const title = resType === 'error' ? 'FALHA NO SISTEMA!': 'OBRIGADO!'
-	const message = resType === 'error' ? 'Tente novamente mais tarde.' : 'Seu comentário foi enviado para moderação'
+	const title = resType === 'error' ? 'Houve algum erro...': 'Obrigado!'
+	const message = resType === 'error' ? 'Tente novamente.' : 'Seu comentário foi enviado para moderação.'
 	const res = response ? response : ''
-	// const buttonId = `${idBase}-close-response`
+	const buttonId = `${idBase}-close-response`
 	let base = document.getElementById(idBase)
 
 	base.querySelector('.response-message').classList.toggle(resType)
@@ -473,9 +473,9 @@ function displayResponseMessage(resType, response, idBase){
 		<p>${res}</p>
 		<button id="${idBase}-close-response">
 			<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-			<circle cx="20" cy="20" r="19" stroke="white" stroke-width="2"/>
-			<line x1="29.1925" y1="11.2789" x2="11.2791" y2="29.1923" stroke="white" stroke-width="2"/>
-			<line x1="28.7216" y1="29.1925" x2="10.8082" y2="11.2791" stroke="white" stroke-width="2"/>
+			<circle cx="20" cy="20" r="18" stroke="#FFF" stroke-width="2"/>
+			<line x1="29.1925" y1="11.2789" x2="11.2791" y2="29.1923" stroke="#FFF" stroke-width="2"/>
+			<line x1="28.7216" y1="29.1925" x2="10.8082" y2="11.2791" stroke="#FFF" stroke-width="2"/>
 			</svg>
 		</button>
 	`
