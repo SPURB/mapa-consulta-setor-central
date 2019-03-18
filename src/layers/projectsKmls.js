@@ -1,4 +1,3 @@
-"use strict"
 import { Vector as VectorLayer } from 'ol/layer'
 import VectorSource from 'ol/source/Vector.js'
 import KML from 'ol/format/KML'
@@ -20,14 +19,15 @@ function returnLayers(projetos, app_url, colocalizados){
 		projetos.forEach(projeto => { 
 			const files = projeto.children
 			const projectId = parseNameToNumericalId(projeto.name) // return a integer, the id of the proje
-			const title = getProjectData(projectId, colocalizados)["NOME"] 
+			const title = getProjectData(projectId, colocalizados).NOME
 
 			files.forEach( file => { // Create projeto's layer
 
 				const customStyles = ['custom-horario', 'custom-antihorario', 'custom-vlt','custom-densidade']
 				let isCustom = false
 				customStyles.forEach( substring => {
-					file.name.includes(substring) ? isCustom = substring : null
+					// file.name.includes(substring) ? isCustom = substring : null
+					if(file.name.includes(substring)) { isCustom = substring }
 				})
 
 				if (file.extension === '.kml' && isCustom === 'custom-densidade') {
@@ -58,10 +58,11 @@ function returnLayers(projetos, app_url, colocalizados){
 					}
 				}
 
+				/* jshint ignore:start */
 				if (file.extension === '.kml' && isCustom === 'custom-vlt') {
 					setLayerColors(projectId,[0, 0, 0], 1)
 
-					var style = new Style({
+					var style = new Style({ 
 						stroke: new Stroke({
 							color: [0, 0, 0, 1],
 							width: 1.5
@@ -89,7 +90,6 @@ function returnLayers(projetos, app_url, colocalizados){
 						})
 					})
 				}
-
 				if (file.extension === '.kml' && isCustom) {
 					var source = new VectorSource({
 						url: app_url + file.path,
@@ -105,6 +105,7 @@ function returnLayers(projetos, app_url, colocalizados){
 						}) 
 					})
 				}
+				/* jshint ignore:end */
 
 				else if (file.extension === '.kml') {
 					const source = new VectorSource({
@@ -116,7 +117,7 @@ function returnLayers(projetos, app_url, colocalizados){
 					const green = getRandomInt(0,255)
 					const blue = getRandomInt(0,255)
 
-					setLayerColors(projectId,[red, green, blue], .25)
+					setLayerColors(projectId,[red, green, blue], 0.25)
 
 					const style = new Style({
 						stroke: new Stroke({

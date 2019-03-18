@@ -1,9 +1,8 @@
-"use strict";
 import { isNumber } from 'util'
 import { projetos } from './model'
 import { layerColors } from './layers/projectsKmls'
 import { containsExtent } from 'ol/extent'
-import { responseMessageListener } from './eventListeners';
+import { responseMessageListener } from './eventListeners'
 
 /**
 * Reduce projetos to single Base object
@@ -38,7 +37,7 @@ function parseNameToNumericalId(name){
 	projectId = projectId.replace(/[^\d]/g, '')  // "1", "2", "5"
 	projectId = parseInt(projectId) // 1, 2, 5
 	if (Number.isInteger(projectId)) return projectId
-	else { throw console.error('projectId must to be a Number') }
+	else { throw new Error('projectId must to be a Number') }
 }
 
 /**
@@ -117,8 +116,7 @@ function fitToId(view, layer, padding){
 		})
 	}
 	catch (error) {
-		console.error(error)
-		console.log(id)
+		throw new Error(`Error: ${error}`)
 	}
 }
 
@@ -128,7 +126,7 @@ Switch layer visibilty state
 * @param { Boolean } state Visibility state of this layer
 */
 function switchVisibilityState(layer, state) {
-	state ? layer.setOpacity(1) : layer.setOpacity(.1)
+	return state ? layer.setOpacity(1) : layer.setOpacity(0.1)
 }
 
 /** 
@@ -228,7 +226,8 @@ function getFiles(id, projetos){
 			}
 		}
 		else { 
-			console.error(id)
+			// console.error(id)
+			throw new Error(`id - ${id} - undefined`)
 		}
 	}
 }
@@ -417,7 +416,7 @@ function setInitialState(stateStr){
 		document.getElementById('baseInfo').classList.add('no-display')
 		document.getElementById('info').classList.add('no-display')
 	}
-	else { null }
+	// else { null }
 }
 
 /**

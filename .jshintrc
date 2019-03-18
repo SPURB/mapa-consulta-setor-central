@@ -1,4 +1,12 @@
 {
-  "asi": true,
-  "esnext": true
+	"asi": true,
+	"esnext": true,
+	"strict": false,
+	"globals": {
+		"window": true,
+		"document": true,
+		"setTimeout": true,
+		"DOMParser": true, 
+		"process": true
+	}
 }

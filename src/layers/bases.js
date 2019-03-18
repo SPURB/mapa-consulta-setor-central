@@ -1,4 +1,3 @@
-"use strict"
 import {  Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import BingMaps from 'ol/source/BingMaps.js'
 import VectorSource from 'ol/source/Vector.js'

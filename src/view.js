@@ -1,4 +1,3 @@
-"use strict"
 import 'ol/ol.css'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
@@ -98,7 +97,7 @@ docReady(() => {
 		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
 
 			//reset visibilty
-			projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
+			projectLayers.forEach( lyr => switchVisibilityState(lyr, true))
 			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 
 			const projectjId = layer.values_.projectId
@@ -180,7 +179,7 @@ docReady(() => {
 			try {
 					resolve(
 						commentBoxEvents('baseInfo'),
-						commentBoxSubmit('baseInfo', state.idConsulta, 2, 'Mapa base'),
+						commentBoxSubmit('baseInfo', state.idConsulta, 2, 'Mapa base')
 					)
 				}
 			catch(error) { reject(error) }
@@ -262,5 +261,7 @@ docReady(() => {
 	.then( () => addProjectLayers )
 	.then( () => addControls )
 	// TODO: fetch comments of state.idConsulta
-	.catch( error => console.error(error) )
+	.catch( error => { 
+		throw new Error(error)
+	})
 })

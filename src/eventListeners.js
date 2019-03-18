@@ -1,4 +1,3 @@
-"use strict";
 import { colocalizados, projetos, apiPost } from './model'
 import { getProjectData } from './layers/projectsKmls'
 import { 
@@ -304,8 +303,7 @@ function fieldErrors(field){
 
 	let message = field.title ? field.title : 'Campo inválido'
 
-	// TODO: Complete all messages complements
-	// console.log(validity) // possible errors (Booleans): 
+	// console.log(validity)
 	// badInput, customError, patternMismatch, rangeOverflow, rangeUnderflow, stepMismatch, tooLong, tooShort, typeMismatch, valid, valueMissing
 	const messagesComplements = [
 		['badInput', 'Padrão inválido'],
@@ -326,7 +324,7 @@ function fieldErrors(field){
 	}
 
 	return {
-		isValid: false, 
+		isValid: false,
 		message: message
 	}
 }

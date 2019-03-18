@@ -1,4 +1,3 @@
-"use strict"
 /**
  * Content from data-src/
  * to update data-src/projetos.json and colocalizados.json run -> 'npm run files'  
@@ -53,6 +52,7 @@ function apiPost(table, data, idBase) {
 		})
 		.catch(error => {
 			displayResponseMessage('error', error, idBase) // add Comment response error page
+			// displayResponseMessage('success', false, idBase)
 		})
 		.then( () => {
 			displayFetchingUI(false, '.button') // remove submit button 'feching' class
