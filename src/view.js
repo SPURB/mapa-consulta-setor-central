@@ -1,5 +1,4 @@
-"use strict"
-import 'ol/ol.css';
+import 'ol/ol.css'
 import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
@@ -9,7 +8,7 @@ import Select from 'ol/interaction/Select.js'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
-import { projetos, colocalizados  } from './model'
+import { projetos, colocalizados, apiGet  } from './model'
 import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
 import { returnBases } from './layers/bases'
 import {
@@ -22,29 +21,44 @@ import {
 	switchVisibilityState,
 	fitToId,
 	smallerExtent,
-	menuEvents,
 	getFiles,
 	createInfo,
 	createBaseInfo,
 	setInitialState,
+	createCommentBox,
 	displayKmlInfo
-} from './domRenderers'
+} from './domRenderers';
+
+import { 
+	commentBoxEvents,
+	commentBoxSubmit,
+	resetEventListener,
+	sidebarGoHome, 
+	sideBarToggleChildren,
+	sideBarToggleFonte,
+	mapObserver,
+	layersController,
+	menuEvents
+} from './eventListeners'
 
 docReady(() => {
-	const justBase = baseObject(projetos) // single'BASE' projetos Object
-	const baseLayers = returnBases(justBase, process.env.APP_URL, true) // open layer's BASE's layers
-	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
-	const noBase = noBaseProjetos(projetos) // projetos 
-	const projectLayers = returnLayers(noBase, process.env.APP_URL, colocalizados) // open layer's projects layers
-	const isPortrait = window.matchMedia("(orientation: portrait)").matches // window.innerHeight < window.innerWidth
+	const baseLayers = returnBases(baseObject(projetos), process.env.APP_URL, false) // open layer's BASE's layers (bing maps and id === 0)
+	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0) // open layer's BASE (id === 0)
+	const projectLayers = returnLayers(noBaseProjetos(projetos), process.env.APP_URL, colocalizados) // open layer's projects layers
+	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
 	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
+
+	let state = {
+		projectSelected: false, // project clicked at map or right sidebar?
+		idConsulta: 36
+	}
 
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],
 		projection: 'EPSG:3857',
 		zoom: 14,
 		minZoom: 12.7,
-		maxZoom: 28
+		maxZoom: 19
 	})
 
 	let appmap = new Map({
@@ -76,31 +90,6 @@ docReady(() => {
 		})
 	)
 
-
-	// var kmlsVals = []
-	// function forEachPointerMove(val){
-	// 	kmlsVals.push(val)
-
-	// 	if (kmlsVals.length > 1 && kmlsVals[0] !== kmlsVals [1]){
-	// 		displayKmlInfo(kmlsVals[1])
-		
-	// 	}
-	// 	if (kmlsVals.length > 2) {
-	// 		kmlsVals = []
-	// 	}
-	// }
-
-	// appmap.on('pointermove', function(evt) {
-	// 	if (evt.dragging) {
-	// 		return;
-	// 	}
-	// 	let pixel = appmap.getEventPixel(evt.originalEvent);
-	// 	appmap.forEachFeatureAtPixel(pixel, layer => {
-	// 		forEachPointerMove(layer.values_)
-	// 	})
-	// })
-
-
 	appmap.on('singleclick', evt => {
 		setInitialState('initial')
 
@@ -108,13 +97,12 @@ docReady(() => {
 		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
 
 			//reset visibilty
-			projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
+			projectLayers.forEach( lyr => switchVisibilityState(lyr, true))
 			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
-
 
 			const projectjId = layer.values_.projectId
 			const kmlData = layer.values_
-			if(projectjId !== 0) { // exclui a base
+			if(projectjId !== 0) { // exclude the base
 				idAndextents.push(
 				{
 					id: projectjId,
@@ -124,9 +112,10 @@ docReady(() => {
 			}
 		})
 		if (idAndextents.length >= 1) {
+
 			document.getElementById('map').classList.remove('no-panel')
 
-			const smaller = smallerExtent(idAndextents)
+			const smaller = smallerExtent(idAndextents) // resolve clicks in overlays, gets the smaller extent
 			view.fit(smaller.extent, { // fit to smaller extent 
 				padding: fitPadding
 			})
@@ -134,188 +123,145 @@ docReady(() => {
 			const info = document.getElementById("info")
 			info.classList.remove("hidden")
 
-			if (getProjectData(smaller.id, colocalizados)) {
-				const data = getProjectData(smaller.id, colocalizados)
+			const projectData = getProjectData(smaller.id, colocalizados) 
+
+			if (projectData) {
 				const images = getFiles(smaller.id, projetos)
 				const colors = layerColors[smaller.id]
 
 				displayKmlInfo(smaller.kmlData)
-				createInfo(data, colors, images)
-				toggleInfoClasses()
-			}
-			else { 
+				createInfo(projectData, colors, images)
+				toggleInfoClasses(isPortrait)
+
+				// Setup commentBox create element only once
+				if (!state.projectSelected) {
+					createCommentBox('info', false)
+					commentBoxEvents('info')
+				} // setup errors only once
+
+				resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
+				commentBoxSubmit('info', state.idConsulta, projectData.ID, projectData.NOME) // change listener attributes at every click
+				state.projectSelected = true // change state to run setup only once
+		}
+			else {
 					renderElement(`
 						<div class='erro'>Algo deu errado... 
 							<p class='info'>Projeto ID <span>${smaller.id}</span></p>
 						</div>`, "#info-error")
 					setInitialState('error')
-				}
+			}
 		}
 	})
 
 	/*
-	* Create all event listeners
+	* Create DOM elements
 	*/
-	let setListeners = new Promise( () => {
+	const addPannels = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
-			/*
-			* Sidebar events
-			* Sidebar (left) -> Go home
-			*/
-			let gohomeName = document.getElementById('gohomeName')
-			gohomeName.innerText = getProjectData('BASE', colocalizados).NOME
-			let gohome = document.getElementById('gohome')
-			gohome.addEventListener('click', () => {
+			createBaseInfo(getProjectData('BASE', colocalizados)) // sidebar first load
+			createList(colocalizados)
+			document.getElementById('gohomeName').innerText = getProjectData('BASE', colocalizados).NOME
+		},0)
+	})
 
-				document.getElementById('info').classList.add('hidden')
-				document.getElementById('gohome').classList.add('hidden')
-				document.getElementById('baseInfo').classList.remove('hidden')
-
-				// resetApp
-				setInitialState('initial')
-				fitToId(view, baseLayer, fitPadding)
-				projectLayers.forEach( lyr => switchVisibilityState(lyr, true) )
-				listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
-			})
-
-			/*
-			* Sidebar (left) -> Hide menu
-			*/
-			let hideshow = document.getElementById('toggleHidden')
-			hideshow.addEventListener('click', () => {
-				document.getElementById('info-kml').classList.add('no-display')
-				document.getElementById('map').classList.toggle('no-panel')
-				document.getElementById('infowrap').classList.toggle('hidden')
-				hideshow.classList.toggle('rotate')
-			})
-
-			/*
-			* Sidebar (left) -> Project picture info events - toggle source box
-			*/
-			let openFonteBt = document.getElementById('openFonte')
-			let closeFonteBt = document.getElementById('closeFonte')
-			openFonteBt.addEventListener('click', function(event) {
-				event.target.parentNode.classList.remove('closed')
-				event.target.parentNode.classList.add('open')
-			})
-			closeFonteBt.addEventListener('click', function(event) {
-				event.target.parentNode.classList.remove('open')
-				event.target.parentNode.classList.add('closed')
-			})
-
-			/*
-			* Sidebar (left) -> for landscape devices, resize map for sidebar hiding/showing
-			*/
-			if (isPortrait) {
-				let sidebar = document.getElementById('infowrap')
-				var observer = new MutationObserver(function(mutationsList) {
-					for(var mutation of mutationsList) {
-						if (mutation.type == 'attributes') {
-							setTimeout(function() { appmap.updateSize() }, 200)
-						}
-						else { return false }
-					}
-				})
-				observer.observe(sidebar, { attributes: true, childList: false, subtree: false })
-			}
-
-			/*
-			* Sidebar (right) -> Listeners for projetos checkboxes
-			*/
-			listCreated.forEach(id => {
-				id = Number(id)
-				const prjId = 'projeto-id_' + id 
-				const btnPojectId = 'btn-projeto-id_' + id
-				const gotoBtn = document.getElementById(btnPojectId)
-				const element = document.getElementById(prjId)
-				const layer = projectLayers.find( layer => layer.values_.projectId === id)
-
-				// fit to clicked project, change Sidebar (left) info, fit
-				gotoBtn.onclick = () => {
-					setInitialState('initial')
-					const data = getProjectData(id, colocalizados)
-					const colors = layerColors[id]
-					const images = getFiles(id, projetos)
-
-					// uncheck all itens except the clicked one at Sidebar (right) 
-					const othersIds = listCreated.filter( idItem => idItem !== id )
-					othersIds.forEach(idItem => {
-						let checkEl = 'projeto-id_' + idItem
-						document.getElementById(checkEl).checked = false
-					})
-					element.checked = true
-					
-					// hide all other layers
-					projectLayers.forEach( tohidelayer => {
-						switchVisibilityState(tohidelayer, false)
-					})
-					switchVisibilityState(layer, true)
-
-					// hide panel Sidebar (right)
-					document.getElementById('panel').classList.remove('open')
-					document.getElementById('map').classList.remove('no-panel')
-
-					// fit to clicked project, change Sidebar (left) info
-					createInfo(data, colors, images)
-					toggleInfoClasses()
-					const projectLayer = projectLayers.find( layer => layer.values_.projectId === id)
-					fitToId(view, projectLayer,fitPadding)
-					displayKmlInfo(projectLayer.values_)
-				}
-
-				// toggle layer visibility with checkboxes status at Sidebar (right)
-				element.onchange = () => {
-					switchVisibilityState(layer, element.checked)
-				}
-			})
+	const addCommentBox = new Promise ((resolve, reject) => {
+		setTimeout(() => {
+			try { resolve ( createCommentBox("baseInfo", state.projectSelected) ) }
+			catch (error) { reject(error) }
 		}, 0)
 	})
 
 	/*
-	* Fit to the first kml base layer
+	* Event listeners
 	*/
-	let fitToBaseLayer = new Promise( () => {
+	const commentBoxListeners = new Promise ((resolve, reject) => {
 		setTimeout(() => {
-			const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
-			fitToId(view, baseLayer, fitPadding) // fit to base layer
+			try {
+					resolve(
+						commentBoxEvents('baseInfo'),
+						commentBoxSubmit('baseInfo', state.idConsulta, 2, 'Mapa base')
+					)
+				}
+			catch(error) { reject(error) }
+		}, 1)
+	})
+
+	/*
+	* Create all other event listeners
+	*/
+	let pannelListeners = new Promise( (resolve, reject) => {
+		setTimeout(() => {
+			try{
+				resolve(
+					// left sidebar
+					sidebarGoHome(projectLayers, baseLayer, listCreated, view, fitPadding),
+					sideBarToggleChildren(),
+					sideBarToggleFonte(),
+
+					// map
+					mapObserver(isPortrait, appmap),
+
+					// right sidebar
+					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
+					layersController(listCreated, projectLayers, layerColors, view, fitPadding, state)
+				)
+			}
+			catch(error) { reject(error) }
+
+		}, 1)
+	})
+
+	/*
+	* Fit the view to base layer
+	*/
+	const fitToBaseLayer = new Promise( (resolve, reject) => {
+		const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
+		setTimeout(() => {
+			try { resolve(fitToId(view, baseLayer, fitPadding)) }
+			catch (error) { reject(error) }
 		}, 1500 )
 	})
 
 	/*
 	* Add non base layers to the map
 	*/
-	let addProjectLayers = new Promise( () => {
+	const addProjectLayers = new Promise( (resolve, reject) => {
 		setTimeout(() => {
-			projectLayers.forEach(layer => appmap.addLayer(layer)) // add project layers
-		}, 0)
+			try { resolve(projectLayers.forEach(layer => appmap.addLayer(layer))) } // add project layers 
+			catch (error) { reject(error) }
+		}, 1)
 	})
 
-	let addControls = new Promise ( () => {
+	const addControls = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
-			appmap.addControl(new ScaleLine())
-			appmap.addControl(new ZoomSlider())
-		}, 0)
+			try { resolve(appmap.addControl(new ScaleLine()), appmap.addControl(new ZoomSlider())) }
+			catch (error) { reject(error) }
+		}, 1)
 	})
 
 	/*
-	* Ordered app initiation 
+	* Ordered app initiation chain. This is done just once
 	*/
 	Promise.all([
 		/*
-		 * First create DOM elements
+		 * Create DOM elements
 		*/
-		createBaseInfo(getProjectData('BASE', colocalizados)), // sidebar first load
-		createList(colocalizados),
-		menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel"))
+		addPannels,
+		addCommentBox
 	])
 	/*
-	* Then add event listeners and create map events
+	* Then chain event listeners
 	*/
-	.then( () => setListeners)
+	.then( () => pannelListeners )
+	.then( () => commentBoxListeners )
+	/*
+	 * and map events
+	*/
 	.then( () => fitToBaseLayer )
 	.then( () => addProjectLayers )
-	.then( () => addControls)
-	.catch( error => console.error(error) )
+	.then( () => addControls )
+	// TODO: fetch comments of state.idConsulta
+	.catch( error => { 
+		throw new Error(error)
+	})
 })
-
-

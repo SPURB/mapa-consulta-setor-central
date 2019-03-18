@@ -1,8 +1,8 @@
-"use strict";
 import { isNumber } from 'util'
 import { projetos } from './model'
 import { layerColors } from './layers/projectsKmls'
 import { containsExtent } from 'ol/extent'
+import { responseMessageListener } from './eventListeners'
 
 /**
 * Reduce projetos to single Base object
@@ -37,19 +37,20 @@ function parseNameToNumericalId(name){
 	projectId = projectId.replace(/[^\d]/g, '')  // "1", "2", "5"
 	projectId = parseInt(projectId) // 1, 2, 5
 	if (Number.isInteger(projectId)) return projectId
-	else { throw console.error('projectId must to be a Number') }
+	else { throw new Error('projectId must to be a Number') }
 }
 
 /**
 * Render a template to the DOM
 * @param { String } template The element
-* @param { String } selector The element to inject
+* @param { String } query The element query selector to inject into
 */
-function renderElement(template, selector) {
-	var node = document.querySelector(selector);
+function renderElement(template, query) {
+	var node = document.querySelector(query)
 	if (!node) return
 	node.innerHTML = template
 }
+
 
 /**
 * Create navigation options from data source (colocalizados.json)
@@ -97,7 +98,6 @@ function createList(colocalizados){
 	renderElement(list, '#projetos')
 }
 
-
 /**
 * @return { Array } List of ids setted by createList(colocalizados) 
 */
@@ -116,8 +116,7 @@ function fitToId(view, layer, padding){
 		})
 	}
 	catch (error) {
-		console.error(error)
-		console.log(id)
+		throw new Error(`Error: ${error}`)
 	}
 }
 
@@ -127,7 +126,7 @@ Switch layer visibilty state
 * @param { Boolean } state Visibility state of this layer
 */
 function switchVisibilityState(layer, state) {
-	state ? layer.setOpacity(1) : layer.setOpacity(.1)
+	return state ? layer.setOpacity(1) : layer.setOpacity(0.1)
 }
 
 /** 
@@ -189,23 +188,6 @@ function smallerExtent(extents) {
 }
 
 /**
-* Add event listeners to toggle 'open' class to an element to hide 
-* @param { Node } triggers The element from DOM to listen event click
-* @param { Node } toHide The element to hide 
-*/ 
-function menuEvents (triggers, toHide){
-	const normalizedHTMLArr = Array.from(triggers)
-	normalizedHTMLArr[0].addEventListener('click', event =>{
-		toHide.classList.toggle('open')
-		normalizedHTMLArr[1].classList.remove('hide')
-	})
-	normalizedHTMLArr[1].addEventListener('click', event =>{
-		toHide.classList.toggle('open')
-		normalizedHTMLArr[0].classList.remove('hide')
-	})
-}
-
-/**
 * Return the files from each projetos.json
 * @param { Number } id The project id
 * @param { Object } projetos The projetos.json data
@@ -219,25 +201,34 @@ function getFiles(id, projetos){
 	}
 	else {
 		const idsFromNames = projetos.filter(projeto => {
-			let substId =  projeto.name.substring(0,3) 
-			substId = substId.replace(/[^\d]/g, '') 
-			substId = parseInt(substId)
-			if(substId !== 0 && substId === id){
+			let substringId =  projeto.name.substring(0,3)
+			substringId = substringId.replace(/[^\d]/g, '') 
+			substringId = parseInt(substringId)
+			if(substringId !== 0 && substringId === id){
 				return projeto
 			}
 		})
 		const files = idsFromNames[0].children
-		const images = files.filter( file => file.extension === '.png' || file.extension === '.png' || file.extension === '.jpg' || file.extension === '.svg' )
-		const hero = files.filter( hero => hero.name.slice(-8) === "hero" + hero.extension)
-		
+		const images = files.filter( file =>
+			file.extension === '.gif' ||
+			file.extension === '.png' ||
+			file.extension === '.jpg' ||
+			file.extension === '.jpeg' ||
+			file.extension === '.svg'
+		)
 
+		const hero = files.filter( hero => hero.name.includes(`hero${hero.extension}`))
+		
 		if(images.length > 0 && hero.length > 0){
 			return {
 				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
 				hero: hero[0].path
 			}
 		}
-		else return false
+		else { 
+			// console.error(id)
+			throw new Error(`id - ${id} - undefined`)
+		}
 	}
 }
 
@@ -245,6 +236,7 @@ function getFiles(id, projetos){
 * Create info box
 * @param { Object } data colocalizados.json item 
 * @param { String } projectColor rgba color string
+* @returns { HTMLDivElement } Create the div#info of selected project
 */ 
 function createInfo(data, projectColor, images){
 	let coverImg = document.getElementById('coverSec')
@@ -289,7 +281,7 @@ function createInfo(data, projectColor, images){
 }
 
 /**
-* Create initial info (images, strings) box with data from the larger project
+* Create initial info (images, strings) box with data from the larger projectgetProjectData 
 * @param { Object } data colocalizados.json item (return from getProjectData())
 */
 function createBaseInfo(data) {
@@ -320,15 +312,82 @@ function createBaseInfo(data) {
 }
 
 /**
-* Sidebar (left) -> Toggle classes of clicked project and the base project 
+* Create commentable form
+* @param { String } query The element query selector to inject the form
+* @param { Boolean } isProject Project was selected? -> state.projectSelected
+* @returns { HTMLDivElement } Them commentable box
 */
-function toggleInfoClasses(){
+function createCommentBox (query, isProject) {
+
+	if(isProject || document.body.contains(document.forms[query])) { return } // Stop function if project info box already created
+
+	const emailPattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+	const commentBox = `
+		<div class="comment-box">
+			<div class="response-message"></div>
+			<h3 class="comment-box-action-title">Comente</h3>
+			<div id=${query}-messages></div>
+			<form name="${query}" class="validate">
+				<div>
+					<label for="${query}-name">Nome</label>
+					<input type="text" class="${query}-field" id="${query}-name" minlength="2" maxlength="60" title="Nome" required></input>
+				</div>
+
+				<div>
+					<label for="${query}-surname">Sobrenome</label>
+					<input type="text" class="${query}-field" id="${query}-surname" minlength="2" maxlength="60" title="Sobrenome" required></input>
+				</div>
+
+				<div>
+					<label for="${query}-organization">Organização (opcional)</label>
+					<input type="text" class="${query}-field" id="${query}-organization" minlength="2" maxlength="60" title="Organização (opcional)"></input>
+				</div>
+
+				<div>
+					<label for="${query}-email">Email</label>
+					<input type="email" class="${query}-field" id="${query}-email" title="Email" pattern='${emailPattern}' required></input> 
+				</div>
+
+				<div>
+					<label for="${query}-comment">Contribuição</label>
+					<textarea type="text" class="${query}-field" id="${query}-comment" minlength="3" title="Contribuição" required></textarea>
+				</div>
+
+				<input type="submit" class="button" value="Comentar" id="${query}-submit">
+			</form>
+		</div>
+	`
+			// <div id=${query}-errors></div>
+
+	const parser = new DOMParser()
+	const commentBoxNode = parser.parseFromString(commentBox, 'text/html').body.firstChild
+
+	const el = document.querySelector(`#${query}`)
+	el.appendChild(commentBoxNode)
+}
+
+/**
+ * Create error list
+ * @param { String } query The query selector of the element to dislay errors
+ * @param { Array } errors The comment box errors list
+ */
+function commentBoxDisplayErrors(query, errors) {
+	let errorsList = '<ul class="errors-list display">'
+	errors.forEach(error => errorsList += `<li id="${error.id}-error-message" class="display">${error.message}</li>` )
+	errorsList += '</ul>'
+	renderElement(errorsList, `#${query}`)
+}
+
+/**
+* Sidebar (left) -> Toggle classes of clicked project and the base project 
+* @param { Boolean } orientation Current window media orientation
+* @returns { HTMLDivElement } Changes #baseInfo, #gohome, #infowrap and #toggleHidden classes
+*/
+function toggleInfoClasses(orientation){
 	document.getElementById('baseInfo').classList.add('hidden') // classes' changes for clicks on map
 	document.getElementById('gohome').classList.remove('hidden')
 
-	const orientationIsPortrait = window.matchMedia("(orientation: portrait)").matches 
-
-	if (orientationIsPortrait) {
+	if (orientation) {
 		document.getElementById('infowrap').classList.remove('hidden')
 		document.getElementById('toggleHidden').classList.add('rotate')
 	}
@@ -341,6 +400,7 @@ function toggleInfoClasses(){
 /**
 * Set initial state of app 
 * @param { String } stateStr 'error' or 'initial'
+* @returns initial classes to #info-kml, #info-error, #baseInfo, #info
 */ 
 function setInitialState(stateStr){
 	if(stateStr === 'initial'){
@@ -356,9 +416,70 @@ function setInitialState(stateStr){
 		document.getElementById('baseInfo').classList.add('no-display')
 		document.getElementById('info').classList.add('no-display')
 	}
-	else { null }
+	// else { null }
 }
 
+/**
+* Display elements while fecthing
+* @param { Boolean } state Fetch error state
+* @param { String } query Element selector
+*/
+function displayFetchingUI(state, query){
+	let els = document.querySelectorAll(query)
+	if (els === undefined) {  return new Error('Element undefined') }
+	els = [...els]
+
+	// while fetching behaviors
+	if(query === '.button') {
+		els.forEach(button => { 
+			if(state) {
+				button.classList.add('fetching')
+				button.setAttribute('value', 'CARREGANDO')
+				button.disabled = true
+			}
+			else { 
+				button.classList.remove('fetching')
+				button.setAttribute('value', 'COMENTAR')
+				button.disabled = false
+			}
+		})
+	}
+	else {
+		return new Error(`Hey yow. Create some while fetching behavior to this ${query}`)
+	}
+}
+
+/**
+* Display backend message
+* @param { String } resType Type of response: 'error' or 'success'
+* @param { Object } response The backend response. False -> backend error
+* @param { String } idBase The base id name of the comment form. 'baseInfo' or 'info'
+* @returns HTMLElement with success/error message
+*/
+function displayResponseMessage(resType, response, idBase){
+	const title = resType === 'error' ? 'Houve algum erro...': 'Obrigado!'
+	const message = resType === 'error' ? 'Tente novamente.' : 'Seu comentário foi enviado para moderação.'
+	const res = response ? response : ''
+	let base = document.getElementById(idBase)
+
+	base.querySelector('.response-message').classList.toggle(resType)
+	base.querySelector('.response-message').classList.add(idBase)
+
+	let template = `
+		<h6>${title}</h6>
+		<p>${message}</p>
+		<p>${res}</p>
+		<button id="${idBase}-close-response">
+			<svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+			<circle cx="20" cy="20" r="18" stroke="#FFF" stroke-width="2"/>
+			<line x1="29.1925" y1="11.2789" x2="11.2791" y2="29.1923" stroke="#FFF" stroke-width="2"/>
+			<line x1="28.7216" y1="29.1925" x2="10.8082" y2="11.2791" stroke="#FFF" stroke-width="2"/>
+			</svg>
+		</button>
+	`
+	renderElement(template, `.response-message.${idBase}`)
+	responseMessageListener(idBase, resType)
+}
 export {
 	baseObject,
 	renderElement,
@@ -368,12 +489,15 @@ export {
 	switchVisibilityState,
 	fitToId,
 	smallerExtent,
-	menuEvents,
 	getFiles,
 	createInfo,
 	createBaseInfo,
 	noBaseProjetos,
 	parseNameToNumericalId,
 	setInitialState,
-	displayKmlInfo
+	createCommentBox,
+	commentBoxDisplayErrors, 
+	displayKmlInfo,
+	displayFetchingUI,
+	displayResponseMessage
 }

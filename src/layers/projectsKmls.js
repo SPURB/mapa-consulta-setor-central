@@ -1,4 +1,3 @@
-"use strict"
 import { Vector as VectorLayer } from 'ol/layer'
 import VectorSource from 'ol/source/Vector.js'
 import KML from 'ol/format/KML'
@@ -16,23 +15,54 @@ import { parseNameToNumericalId } from '../domRenderers'
 function returnLayers(projetos, app_url, colocalizados){
 	try{
 		let kmlLayers = []
+
 		projetos.forEach(projeto => { 
 			const files = projeto.children
 			const projectId = parseNameToNumericalId(projeto.name) // return a integer, the id of the proje
-			const title = getProjectData(projectId, colocalizados)["NOME"] 
+			const title = getProjectData(projectId, colocalizados).NOME
 
 			files.forEach( file => { // Create projeto's layer
 
-				const customStyles = ['custom-horario', 'custom-antihorario', 'custom-vlt']
+				const customStyles = ['custom-horario', 'custom-antihorario', 'custom-vlt','custom-densidade']
 				let isCustom = false
 				customStyles.forEach( substring => {
-					file.name.includes(substring) ? isCustom = substring : null
+					// file.name.includes(substring) ? isCustom = substring : null
+					if(file.name.includes(substring)) { isCustom = substring }
 				})
 
+				if (file.extension === '.kml' && isCustom === 'custom-densidade') {
+					setLayerColors(projectId, [0, 255, 0], 1)
+
+					var source = new VectorSource({
+						url: app_url + file.path,
+						format: new KML({ 
+							extractStyles: false
+						})
+					})
+
+					let styleCache = {}
+					var style = feature => {
+						const densidade_populacional = feature.get('Dens_const')
+						const variator = isNaN(densidade_populacional) ? [255, 0, 0, 1] : [0, 255, 0, parseFloat(densidade_populacional) * (0.1)] // errors in red, please check
+
+						let styleFeature = styleCache[densidade_populacional]
+						if(!styleFeature) {
+							styleFeature = new Style({
+								fill: new Fill({
+									color: variator
+								})
+							});
+							styleCache[densidade_populacional] = styleFeature 
+						}
+						return styleFeature
+					}
+				}
+
+				/* jshint ignore:start */
 				if (file.extension === '.kml' && isCustom === 'custom-vlt') {
 					setLayerColors(projectId,[0, 0, 0], 1)
 
-					var style = new Style({
+					var style = new Style({ 
 						stroke: new Stroke({
 							color: [0, 0, 0, 1],
 							width: 1.5
@@ -53,7 +83,6 @@ function returnLayers(projetos, app_url, colocalizados){
 
 				if (file.extension === '.kml' && isCustom === 'custom-antihorario') {
 					setLayerColors(projectId,[255, 0, 0], 1)
-
 					var style = new Style({
 						stroke: new Stroke({
 							color: [255, 0, 0, 1],
@@ -61,21 +90,22 @@ function returnLayers(projetos, app_url, colocalizados){
 						})
 					})
 				}
-
 				if (file.extension === '.kml' && isCustom) {
-					const source = new VectorSource({
+					var source = new VectorSource({
 						url: app_url + file.path,
 						format: new KML({ extractStyles: false })
 					})
+
 					kmlLayers.push({
 						layer: new VectorLayer({
 							title: title,
 							source: source,
-							style: style, 
+							style: style,
 							projectId: projectId
 						}) 
 					})
 				}
+				/* jshint ignore:end */
 
 				else if (file.extension === '.kml') {
 					const source = new VectorSource({
@@ -87,7 +117,7 @@ function returnLayers(projetos, app_url, colocalizados){
 					const green = getRandomInt(0,255)
 					const blue = getRandomInt(0,255)
 
-					setLayerColors(projectId,[red, green, blue], .25)
+					setLayerColors(projectId,[red, green, blue], 0.25)
 
 					const style = new Style({
 						stroke: new Stroke({
