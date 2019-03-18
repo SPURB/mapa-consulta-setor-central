@@ -605,18 +605,18 @@ p {
 		overflow: hidden;
 		color: #FFF;
 		&::before {
-			content: 'Por favor, revise o(s) campo(s) a seguir:';
-			display: block;
-			margin-bottom: .5rem;
+			background-color: rgba(0, 0, 0, 0.24);
 			border-radius: 2px;
-			padding: 8px 12px;
+			content: "Por favor, revise o(s) campo(s) a seguir:";
+			display: block;
 			font-size: small;
 			line-height: 1.2;
-			background-color: rgba(0, 0, 0, .24);
+			margin-bottom: 0.5rem;
+			padding: 8px 12px;
 		}
 		&.display {
 			padding: 1.25rem;
-			animation: showErrors ease-in-out .4s;
+			animation: showErrors ease-in-out 0.4s;
 			@keyframes showErrors {
 				from {
 					max-height: 0;
@@ -628,13 +628,14 @@ p {
 				}
 			}
 		}
+
 		li {
-			line-height: 1.2;
-			margin: 0 0 .5rem;
-			&:last-child { margin: 0; }
 			border-radius: 2px;
 			font-size: small;
+			line-height: 1.2;
+			margin: 0 0 0.5rem;
 			text-transform: uppercase;
+			&:last-child { margin: 0; }
 
 			span {
 				display: block;
@@ -645,7 +646,7 @@ p {
 		}
 	}
 }
-// FIM comment-box	
+// FIM comment-box
 
 #info-kml.no-display{
 	height: 0;
