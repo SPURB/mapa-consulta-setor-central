@@ -21,6 +21,6 @@
 		"xlsx": "0.14.1"
 	},
 	"dependencies": {
-		"axios": "^0.18.0"
+		"axios": "0.18.0"
 	}
 }
