@@ -14,6 +14,7 @@
 		"babel-register": "6.26.0",
 		"directory-tree": "2.2.1",
 		"document-ready": "2.0.2",
+		"dotenv": "^7.0.0",
 		"fs-extra": "7.0.1",
 		"node-sass": "4.11.0",
 		"ol": "5.3.1",
@@ -21,6 +22,8 @@
 		"xlsx": "0.14.1"
 	},
 	"dependencies": {
-		"axios": "0.18.0"
+		"axios": "0.18.0",
+		"get-sheet-done": "^0.1.5",
+		"node-fetch": "^2.3.0"
 	}
 }

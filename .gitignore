@@ -12,6 +12,8 @@ yarn-error.log*
 !/data-src/projetos/4_usina-de-asfalto
 projetos.json
 colocalizados.json
+/data-src/json/*.json
+/data-src/config.json
 
 *.xlsx
 !/data-src/Colocalizados.sample.xlsx
