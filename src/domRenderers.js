@@ -5,18 +5,6 @@ import { containsExtent } from 'ol/extent'
 import { responseMessageListener } from './eventListeners'
 
 /**
-* Reduce projetos to single Base object
-* @param { Array } projetos The projetos from './model'
-* @return { Object } The base folder example { children: [ {…}, {…} ], name: "00_base", path: "data-src/projetos/00_base", size: 1, type: "directory"}
-*/
-function baseObject (projetos) {
-	return projetos.reduce( projeto =>{ 
-		const projectId = parseNameToNumericalId(projeto.name)
-		return projectId === 0 ? projeto : 'no base folder 00_project-name/'
-	})
-}
-
-/**
 * Filter projetos removing base layers
 * @param { Array } projetos The projetos from './model'
 * @return { Array } The filtered projetos
@@ -33,7 +21,7 @@ function noBaseProjetos(projetos){
 * @return { Number } The project id
 */
 function parseNameToNumericalId(name){
-	let projectId = name.substring(0,3) // "1_a", "2_m", "05_"
+	let projectId = name.substring(0,7) // "1_a", "2_m", "05_"
 	projectId = projectId.replace(/[^\d]/g, '')  // "1", "2", "5"
 	projectId = parseInt(projectId) // 1, 2, 5
 	if (Number.isInteger(projectId)) return projectId
@@ -481,7 +469,6 @@ function displayResponseMessage(resType, response, idBase){
 	responseMessageListener(idBase, resType)
 }
 export {
-	baseObject,
 	renderElement,
 	createList,
 	listCreated,

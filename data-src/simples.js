@@ -2,6 +2,7 @@ global.fetch = require('node-fetch')
 const config = require('./config.json')
 import * as GetSheetDone from 'get-sheet-done'
 import fs from 'fs'
+import { createFile } from './helpers'
 
 function simples(){
 	GetSheetDone.labeledCols(config.google_sheet_id, 3) // KML_simples
@@ -21,15 +22,17 @@ function simples(){
 					"FONTE": "SP Urbanismo" //fake input
 				}
 			})
-			const json = JSON.stringify(output)
-			const filePath = './data-src/json/simples.json'
-			
-			fs.writeFile( filePath, json, 'utf8', err => {
-				if(err){
-					console.log(err);
-				}
+
+			let basesOutput = []
+			let simplesOutput = []
+
+			output.forEach(item => {
+				if(item.ID === 201 || item.ID === 202){ basesOutput.push(item) } // 201 e 202 base layers
+				else { simplesOutput.push(item) }
 			})
-			console.log(filePath + ' atualizado')
+
+			createFile(basesOutput, './data-src/json/bases.json')
+			createFile(simplesOutput, './data-src/json/simples.json')
 
 		})
 		.catch(err => console.error(err)

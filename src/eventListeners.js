@@ -1,4 +1,4 @@
-import { colocalizados, projetos, apiPost } from './model'
+import { simples, projetos, apiPost } from './model'
 import { getProjectData } from './layers/projectsKmls'
 import { 
 	setInitialState,
@@ -97,7 +97,7 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 		// fit to clicked project, change Sidebar (left) info, fit
 		gotoBtn.onclick = () => {
 			setInitialState('initial')
-			const data = getProjectData(id, colocalizados)
+			const data = getProjectData(id, simples)
 			const colors = layerColors[id]
 			const images = getFiles(id, projetos)
 

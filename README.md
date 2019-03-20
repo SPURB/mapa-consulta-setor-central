@@ -1,5 +1,10 @@
 # Projetos da Operação Urbana Centro
 
+## Pré-requisito para desenvolvimento
+* [http-server](https://github.com/indexzero/http-server). 
+
+## Intruções para desenvolvimento
+
 1. Instale as dependências
 ```
 npm install
@@ -10,17 +15,19 @@ npm install
 BING_API_KEY=chave-bing-mapas
 APP_URL=http://seu-host/levantamento-operacao-urbana-centro
 ```
-> É necessário incluir data-src em um server http com cors liberado (ou no mesmo host). Sugestão para facilitar desenvolvimento: [http-server](https://github.com/indexzero/http-server). 
-> Para gerar uma chave no [bing maps](https://docs.microsoft.com/en-us/bingmaps/getting-started/bing-maps-dev-center-help/getting-a-bing-maps-key)
+> Instruções para gerar uma chave no [bing maps](https://docs.microsoft.com/en-us/bingmaps/getting-started/bing-maps-dev-center-help/getting-a-bing-maps-key)
 
-3. Altere e renomeie `data-src/Colocalizados.sample.xlsx` para `data-src/Colocalizados.xlsx` e altere a tabela `output` com as informações do projeto.
+3. Inclua os arquivos em `data-src/projetos/id_nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
 
-4. Inclua os arquivos em `data-src/projetos/id_nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
-
-5. Rode o comando:
+4. Rode o comando:
 
 ```
 npm run files
+```
+
+5. Inicie o http-server com cors liberado
+```
+http-server --cors
 ```
 
 6. Inicie a aplicação para desenvolvimento
@@ -31,26 +38,14 @@ npm run start
 7. Publique o projeto no diretório `dist/`
 ``` 
 npm run build
-```
-
-8. Personalize estilos em determinados kmls
-```
-# arquivo nome do arquivo .kml
-data-src/projetos/nome-do-projeto/arquivo-kml_custom-dashed.kml
-
-# src/layers/projectsKmls.js aletere a constante customStyles 
-const customStyles = [...,'custom-dashed']
 
 ```
-e crie o estilo 
-```projectsKmls.js
-if (file.extension === '.kml' && isCustom === 'custom-dashed') {
-    var style = new Style({
-        stroke: new Stroke({
-            color: [0, 0, 0, 1],
-            width: 1.5,
-            lineDash: [.1, 5]
-        })
-    })
-}
+
+>Dados originais
+```
+dados
+https://docs.google.com/spreadsheets/d/11W0_h0AcOxGvziGuZTolvEmdOS9VfNxP4WT-Sm_x80M/edit?usp=sharing
+
+kmls
+\\spurbsp01\Gestao_Projetos\Projetos\OUC_Centro_RevisaoLei12349_97\01_Projeto_Urbanistico\91_Entregas\PIU_Setor_Central_Consulta_2019_03\KML
 ```

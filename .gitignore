@@ -10,13 +10,7 @@ yarn-error.log*
 !/data-src/projetos/00_piu-central
 !/data-src/projetos/1_largo-do-arouche
 !/data-src/projetos/4_usina-de-asfalto
-projetos.json
-colocalizados.json
 /data-src/json/*.json
-/data-src/config.json
-
-*.xlsx
-!/data-src/Colocalizados.sample.xlsx
 
 Thumbs.db
 *.db

@@ -3,8 +3,11 @@
  * to update data-src/projetos.json and colocalizados.json run -> 'npm run files'  
  */
 import { displayFetchingUI, displayResponseMessage } from './domRenderers.js'
-import { children as projetos } from '../data-src/projetos' 
-import * as colocalizados from  '../data-src/colocalizados'
+// import { children as projetos } from '../data-src/projetos'
+// import * as colocalizados from  '../data-src/colocalizados'
+import { children as projetos } from '../data-src/json/projetos'
+import * as simples from  '../data-src/json/simples'
+import * as bases from  '../data-src/json/bases'
 import axios from 'axios'
 
 /**
@@ -59,4 +62,4 @@ function apiPost(table, data, idBase) {
 		})
 }
 
-export { projetos, colocalizados, apiPost, apiGet }
+export { projetos, simples, bases, apiPost, apiGet }
