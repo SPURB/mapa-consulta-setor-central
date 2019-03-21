@@ -60,4 +60,15 @@ function getProjectData(id, colocalizados){
 }
 
 
-export{ setLayer, getProjectData }
+function createColors(bases){
+	let output = {}
+
+	bases.default.forEach(base => {
+		output[base.ID] = base.CORES
+	})
+
+	return output
+}
+
+
+export{ setLayer, getProjectData, createColors }

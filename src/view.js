@@ -10,8 +10,8 @@ import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
 import { projetos, simples, bases  } from './model'
 // import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
-import { getProjectData } from './layers/helpers'
-import { createBaseParams, returnBases } from './layers/bases'
+import { getProjectData, createColors } from './layers/helpers'
+import { createBaseInfos, returnBases } from './layers/bases'
 import { returnSimples, layerColors } from './layers/simples'
 import {
 	noBaseProjetos,
@@ -48,48 +48,19 @@ docReady(() => {
 		projectSelected: false, // project clicked at map or right sidebar?
 		idConsulta: 36,
 		baseLayerID: 201, // project main layer id,
-		basesIDs: [ 202 ], // other bases
+		basesIDs: [ 202, 204 ], // other bases
 		bing: false,
 		appUrl: process.env.APP_URL
 	}
+	const idColors = createColors(bases) // all colors { id: [rgba] } idColors.id will return the id color
 
-	/**
-	 * ****************************************
-	 * start getBaseParams // start BASE LAYERS
-	 * ****************************************
-	 * TODO: simplify create getBaseParams in src/layers/bases.js
-	 * getBaseParams(baseinfoId, [basesIds], projetos) // return { info{}, infos[], colors{} }
-	 */
-	// const baseParams = createBaseParams(baseinfoId, bases, state.baseLayerID, state.basesIDs)
 
-	// console.log(baseParams)
+	const baseInfos = createBaseInfos(projetos, state.baseLayerID, state.basesIDs)
+	const baseLayers = returnBases({ info: baseInfos.info, id: state.baseLayerID }, baseInfos.infos, state.appUrl, idColors, state.bing) // open layer's BASE's layers
+	const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerID)
 
-	const baseInfo = projetos.find(projeto => parseNameToNumericalId(projeto.name) === state.baseLayerID)
-
-	// create base layers constants
-	let baseInfos = [] // projetos.json the bases object ids (pushed above)
-	state.basesIDs.forEach(id => {
-		baseInfos.push(projetos.find(projeto => parseNameToNumericalId(projeto.name) === id)) // find project instance in 
-	})
-	baseInfos = baseInfos.map(projeto => { return { info:projeto, id:parseNameToNumericalId(projeto.name) }}) // add id to baseInfos
-	/* 
-	* end getBaseParams
-	*/
-
-	//create base layers open layers instances
-	const baseLayers = returnBases({ info: baseInfo, id: state.baseLayerID }, baseInfos, state.appUrl, state.bing) // open layer's BASE's layers
-	const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerID) // open layer's BASE (id === 201)
-	// end BASE LAYERS
-
-	/**
-	 * **************************
-	 * ** start simples layers **
-	 * **************************
-	*/
 	const simplesLayers = returnSimples(projetos, simples, state.appUrl)
-	/* 
-	* end simples layers
-	*/
+
 
 	// const projectLayers = returnLayers(noBaseProjetos(projetos), process.env.APP_URL, simples) // open layer's projects layers
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
@@ -116,22 +87,22 @@ docReady(() => {
 	/*
 	* map events
 	*/
-	// appmap.addInteraction(
-	// 	new Select({
-	// 		condition: pointerMove,
-	// 		layers: simplesLayers, // filter interactables
-	// 		style: new Style({
-	// 			stroke: new Stroke({
-	// 				color: [0, 255, 0, 1],
-	// 				width: 3
-	// 			}),
-	// 			fill: new Fill({
-	// 				color: [255, 255, 255, 0.5]
-	// 			})
-	// 		}),
-	// 		hitTolerance: 10
-	// 	})
-	// )
+	appmap.addInteraction(
+		new Select({
+			condition: pointerMove,
+			layers: simplesLayers, // filter interactables
+			style: new Style({
+				stroke: new Stroke({
+					color: [0, 255, 0, 1],
+					width: 3
+				}),
+				fill: new Fill({
+					color: [255, 255, 255, 0.5]
+				})
+			}),
+			hitTolerance: 10
+		})
+	)
 
 	appmap.on('singleclick', evt => {
 		setInitialState('initial')

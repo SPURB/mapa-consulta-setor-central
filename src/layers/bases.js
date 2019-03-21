@@ -7,8 +7,20 @@ import { parseNameToNumericalId } from '../domRenderers'
 /**
  * 
  */
-function createBaseParams(projetos){
-	console.log(projetos)
+function createBaseInfos(projetos, id, ids){
+	const info = projetos.find(projeto => parseNameToNumericalId(projeto.name) === id)
+
+	let infos = []
+	ids.forEach(id => {
+		infos.push(projetos.find(projeto => parseNameToNumericalId(projeto.name) === id))
+	})
+	
+	infos = infos.map(projeto => { return { info:projeto, id:parseNameToNumericalId(projeto.name) }})
+
+	return { 
+		info: info,
+		infos: infos
+	}
 }
 
 /**
@@ -19,17 +31,20 @@ function createBaseParams(projetos){
 * @param { Boolean } bing True if render bingMaps
 * @return { Array } Array of new Layers's (from Open Layers) to create de base	
 */
-function returnBases(projeto, otherProjetos, app_url, bing){
+function returnBases(projeto, otherProjetos, app_url, idColors, bing){
 	let kmlLayers = []
 	const files = projeto.info.children
 
 	files.forEach( file => {
 		const path = app_url + file.path
-
+		const strId = projeto.id.toString()
+		const color = idColors[strId]
+	
 		if(file.extension === '.kml'){
 			kmlLayers.unshift({
 				layer: setLayer(file, path, projeto.id, {
-					lineDash: [5]
+					lineDash: [5],
+					color: color
 				})
 			})
 		}
@@ -37,16 +52,17 @@ function returnBases(projeto, otherProjetos, app_url, bing){
 
 	otherProjetos
 		.forEach(projeto => {
-			console.log(projeto)
-			let customDistritosStyle = projeto.id === 202 ?
-				{ color: [0, 0, 0, 0.1] } :
-				false
+			const strId = projeto.id.toString()
+			const color = idColors[strId]
 
 			projeto.info.children.forEach(file => {
 				const url = app_url + file.path
 				if(file.extension === '.kml'){
 					kmlLayers.unshift({
-						layer: setLayer(file, url, projeto.id, customDistritosStyle)
+						layer: setLayer(file, url, projeto.id, {
+							color: color,
+							width: 0.1
+						})
 					})
 				}
 			})
@@ -69,4 +85,4 @@ function returnBases(projeto, otherProjetos, app_url, bing){
 	return layers
 }
 
-export { createBaseParams, returnBases }
+export { createBaseInfos, returnBases }
