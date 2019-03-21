@@ -16,7 +16,7 @@ function returnLayers(projetos, app_url, colocalizados){
 	try{
 		let kmlLayers = []
 
-		projetos.forEach(projeto => { 
+		projetos.forEach(projeto => {
 			const files = projeto.children
 			const projectId = parseNameToNumericalId(projeto.name) // return a integer, the id of the proje
 			const title = getProjectData(projectId, colocalizados).NOME

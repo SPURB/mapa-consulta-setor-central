@@ -9,12 +9,14 @@ function simples(){
 		.then((data) => {
 			const simples = data.data
 			let output = simples
-			.map(projeto => { 
+			.map(projeto => {
+				const rgba = projeto.rgba.split(',').map(color => Number(color)) // normalize colors
 				return {
 					"ID": Number(projeto.iddokml),
 					"INDICADOR": projeto.indicador,
 					"NOME": projeto.titulodacamadanomapainterativo,
 					"DESCRIÇÃO": projeto.descricaodacamada,
+					"CORES": rgba,
 					"ANO": 2019, //fake input
 					"SECRETARIA": "MSP", //fake input
 					"STATUS": 0, //fake input
@@ -22,6 +24,7 @@ function simples(){
 					"FONTE": "SP Urbanismo" //fake input
 				}
 			})
+			.filter(projeto => projeto["ID"] > 0)
 
 			let basesOutput = []
 			let simplesOutput = []

@@ -189,7 +189,7 @@ function getFiles(id, projetos){
 	}
 	else {
 		const idsFromNames = projetos.filter(projeto => {
-			let substringId =  projeto.name.substring(0,3)
+			let substringId =  projeto.name.substring(0,7)
 			substringId = substringId.replace(/[^\d]/g, '') 
 			substringId = parseInt(substringId)
 			if(substringId !== 0 && substringId === id){

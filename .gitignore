@@ -6,11 +6,7 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/data-src/projetos/*
-!/data-src/projetos/00_piu-central
-!/data-src/projetos/1_largo-do-arouche
-!/data-src/projetos/4_usina-de-asfalto
-/data-src/json/*.json
+/data-src/json/*
 
 Thumbs.db
 *.db

@@ -9,8 +9,10 @@ import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
 import { projetos, simples, bases  } from './model'
-import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
-import { returnBases } from './layers/bases'
+// import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
+import { getProjectData } from './layers/helpers'
+import { createBaseParams, returnBases } from './layers/bases'
+import { returnSimples, layerColors } from './layers/simples'
 import {
 	noBaseProjetos,
 	renderElement,
@@ -46,19 +48,48 @@ docReady(() => {
 		projectSelected: false, // project clicked at map or right sidebar?
 		idConsulta: 36,
 		baseLayerID: 201, // project main layer id,
-		basesIDs: [ 202 ], 
-		bing: false
+		basesIDs: [ 202 ], // other bases
+		bing: false,
+		appUrl: process.env.APP_URL
 	}
 
-	// create base layers constants
-	const baseInfos = [] // projetos.json the bases object ids (pushed above)
-	state.basesIDs.forEach(id => baseInfos.push(projetos.find( projeto => parseNameToNumericalId(projeto.name) === id))) 
+	/**
+	 * ****************************************
+	 * start getBaseParams // start BASE LAYERS
+	 * ****************************************
+	 * TODO: simplify create getBaseParams in src/layers/bases.js
+	 * getBaseParams(baseinfoId, [basesIds], projetos) // return { info{}, infos[], colors{} }
+	 */
+	// const baseParams = createBaseParams(baseinfoId, bases, state.baseLayerID, state.basesIDs)
 
-	const baseInfo = projetos.find( projeto => parseNameToNumericalId(projeto.name) === state.baseLayerID)
+	// console.log(baseParams)
+
+	const baseInfo = projetos.find(projeto => parseNameToNumericalId(projeto.name) === state.baseLayerID)
+
+	// create base layers constants
+	let baseInfos = [] // projetos.json the bases object ids (pushed above)
+	state.basesIDs.forEach(id => {
+		baseInfos.push(projetos.find(projeto => parseNameToNumericalId(projeto.name) === id)) // find project instance in 
+	})
+	baseInfos = baseInfos.map(projeto => { return { info:projeto, id:parseNameToNumericalId(projeto.name) }}) // add id to baseInfos
+	/* 
+	* end getBaseParams
+	*/
 
 	//create base layers open layers instances
-	const baseLayers = returnBases({ info: baseInfo, id: state.baseLayerID }, baseInfos, process.env.APP_URL, state.bing) // open layer's BASE's layers
+	const baseLayers = returnBases({ info: baseInfo, id: state.baseLayerID }, baseInfos, state.appUrl, state.bing) // open layer's BASE's layers
 	const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerID) // open layer's BASE (id === 201)
+	// end BASE LAYERS
+
+	/**
+	 * **************************
+	 * ** start simples layers **
+	 * **************************
+	*/
+	const simplesLayers = returnSimples(projetos, simples, state.appUrl)
+	/* 
+	* end simples layers
+	*/
 
 	// const projectLayers = returnLayers(noBaseProjetos(projetos), process.env.APP_URL, simples) // open layer's projects layers
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
@@ -88,7 +119,7 @@ docReady(() => {
 	// appmap.addInteraction(
 	// 	new Select({
 	// 		condition: pointerMove,
-	// 		layers: projectLayers,
+	// 		layers: simplesLayers, // filter interactables
 	// 		style: new Style({
 	// 			stroke: new Stroke({
 	// 				color: [0, 255, 0, 1],
@@ -109,14 +140,20 @@ docReady(() => {
 		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
 
 			//reset visibilty
-			// projectLayers.forEach( lyr => switchVisibilityState(lyr, true))
+			simplesLayers.forEach( lyr => switchVisibilityState(lyr, true))
 			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 
 			const projectjId = layer.values_.projectId
 			const kmlData = layer.values_
-			if(projectjId !== state.baseLayerID) { // exclude the base
-				idAndextents.push(
-				{
+
+			const isBase = () => { // exclusion rules. Unclickable layers
+				if (projectjId === state.baseLayerID) return true // project layer
+				if (state.basesIDs.includes(projectjId)) return true // base layers
+				else return false
+			}
+
+			if(!isBase()) {
+				idAndextents.push({
 					id: projectjId,
 					extent: layer.getSource().getExtent(),
 					kmlData: kmlData
@@ -135,7 +172,7 @@ docReady(() => {
 			const info = document.getElementById("info")
 			info.classList.remove("hidden")
 
-			const projectData = getProjectData(smaller.id, simples) 
+			const projectData = getProjectData(smaller.id, simples)
 
 			if (projectData) {
 				const images = getFiles(smaller.id, projetos)
@@ -215,7 +252,7 @@ docReady(() => {
 
 					// right sidebar
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
-					// layersController(listCreated, projectLayers, layerColors, view, fitPadding, state)
+					layersController(listCreated, simplesLayers, layerColors, view, fitPadding, state)
 				)
 			}
 			catch(error) { reject(error) }
@@ -237,12 +274,12 @@ docReady(() => {
 	/*
 	* Add non base layers to the map
 	*/
-	// const addProjectLayers = new Promise( (resolve, reject) => {
-	// 	setTimeout(() => {
-	// 		try { resolve(projectLayers.forEach(layer => appmap.addLayer(layer))) } // add project layers 
-	// 		catch (error) { reject(error) }
-	// 	}, 1)
-	// })
+	const addProjectLayers = new Promise( (resolve, reject) => {
+		setTimeout(() => {
+			try { resolve(simplesLayers.forEach(layer => appmap.addLayer(layer))) } // add project layers 
+			catch (error) { reject(error) }
+		}, 1)
+	})
 
 	const addControls = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
@@ -270,7 +307,7 @@ docReady(() => {
 	 * and map events
 	*/
 	.then( () => fitToBaseLayer )
-	// .then( () => addProjectLayers )
+	.then( () => addProjectLayers )
 	.then( () => addControls )
 	// TODO: fetch comments of state.idConsulta
 	.catch( error => { 
