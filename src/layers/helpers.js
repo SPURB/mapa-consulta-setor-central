@@ -6,13 +6,16 @@ import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
 /**
  * Return open layer source and file from kml file
- * @param { Object } file projetos.json single object
+ * @param { String } name Layer name
  * @param { String } path kml file complete path
  * @param { Number } id project id
  * @param { Object } custom custom open layer styles. Availables: color(Array), width(Number), lineDash(Number), fillCollor(Array)
  * @returns { Object } Open Layer layer instance
  */
-function setLayer(file, path, id, custom = false){
+function setLayer(name, path, id, custom = false){
+
+	// console.log(name, path, id)
+
 	const source = new VectorSource({
 		url: path,
 		format: new KML({ extractStyles: false })
@@ -36,7 +39,7 @@ function setLayer(file, path, id, custom = false){
 	})
 
 	return new VectorLayer({
-		title: file.name,
+		title: name,
 		source: source,
 		style: style,
 		projectId: id // !!! this is important !!!
@@ -59,16 +62,4 @@ function getProjectData(id, colocalizados){
 	return output
 }
 
-
-function createColors(bases){
-	let output = {}
-
-	bases.default.forEach(base => {
-		output[base.ID] = base.CORES
-	})
-
-	return output
-}
-
-
-export{ setLayer, getProjectData, createColors }
+export{ setLayer, getProjectData }

@@ -8,13 +8,15 @@ import Select from 'ol/interaction/Select.js'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
-import { projetos, simples, bases  } from './model'
+
+import { projetos, simples, complexos, complexosIds, cores, bases  } from './model'
 // import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
-import { getProjectData, createColors } from './layers/helpers'
+import { getProjectData } from './layers/helpers'
 import { createBaseInfos, returnBases } from './layers/bases'
-import { returnSimples, layerColors } from './layers/simples'
+import { returnSimples } from './layers/simples'
+import { returnComplexos } from './layers/complexos'
 import {
-	noBaseProjetos,
+	// noBaseProjetos,
 	renderElement,
 	createList,
 	listCreated,
@@ -24,7 +26,7 @@ import {
 	smallerExtent,
 	getFiles,
 	createInfo,
-	parseNameToNumericalId,
+	// parseNameToNumericalId,
 	createBaseInfo,
 	setInitialState,
 	createCommentBox,
@@ -48,24 +50,23 @@ docReady(() => {
 		projectSelected: false, // project clicked at map or right sidebar?
 		idConsulta: 36,
 		baseLayerID: 201, // project main layer id,
-		basesIDs: [ 202, 204 ], // other bases
+		basesIDs: [ 202, 204, 203, 205 ], // other bases
 		bing: false,
 		appUrl: process.env.APP_URL
 	}
-	const idColors = createColors(bases) // all colors { id: [rgba] } idColors.id will return the id color
-
 
 	const baseInfos = createBaseInfos(projetos, state.baseLayerID, state.basesIDs)
-	const baseLayers = returnBases({ info: baseInfos.info, id: state.baseLayerID }, baseInfos.infos, state.appUrl, idColors, state.bing) // open layer's BASE's layers
+	const baseLayers = returnBases({ info: baseInfos.info, id: state.baseLayerID }, baseInfos.infos, state.appUrl, cores, state.bing) // open layer's BASE's layers
 	const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerID)
-
 	const simplesLayers = returnSimples(projetos, simples, state.appUrl)
 
+	const complexosLayers = returnComplexos(projetos, complexos.default, complexosIds, state.appUrl)
+
+	console.log(complexosLayers)
 
 	// const projectLayers = returnLayers(noBaseProjetos(projetos), process.env.APP_URL, simples) // open layer's projects layers
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
 	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
-
 
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],
@@ -147,7 +148,7 @@ docReady(() => {
 
 			if (projectData) {
 				const images = getFiles(smaller.id, projetos)
-				const colors = layerColors[smaller.id]
+				const colors = cores[smaller.id]
 
 				displayKmlInfo(smaller.kmlData)
 				createInfo(projectData, colors, images)
@@ -178,8 +179,8 @@ docReady(() => {
 	*/
 	const addPannels = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
-			createBaseInfo(getProjectData(state.baseLayerID, bases)) // sidebar first load
-			createList(simples)
+			createBaseInfo(getProjectData(state.baseLayerID, bases), projetos) // sidebar first load
+			createList(simples, cores)
 			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerID, bases).NOME
 		},0)
 	})
@@ -214,7 +215,7 @@ docReady(() => {
 			try{
 				resolve(
 					// left sidebar
-					sidebarGoHome(baseLayers, baseLayer, listCreated, view, fitPadding),
+					sidebarGoHome(simplesLayers, baseLayer, listCreated, view, fitPadding),
 					sideBarToggleChildren(),
 					sideBarToggleFonte(),
 
@@ -223,7 +224,7 @@ docReady(() => {
 
 					// right sidebar
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
-					layersController(listCreated, simplesLayers, layerColors, view, fitPadding, state)
+					layersController(listCreated, simplesLayers, cores, view, fitPadding, state)
 				)
 			}
 			catch(error) { reject(error) }
@@ -247,7 +248,7 @@ docReady(() => {
 	*/
 	const addProjectLayers = new Promise( (resolve, reject) => {
 		setTimeout(() => {
-			try { resolve(simplesLayers.forEach(layer => appmap.addLayer(layer))) } // add project layers 
+			try { resolve(simplesLayers.forEach(layer => appmap.addLayer(layer))) } // add simple layers 
 			catch (error) { reject(error) }
 		}, 1)
 	})

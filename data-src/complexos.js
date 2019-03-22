@@ -10,7 +10,7 @@ function complexo(){
 			.map(projeto => {
 				return {
 					"ID": Number(projeto.iddokml),
-					"INDICADOR": projeto.indicador, 
+					"INDICADOR": projeto.indicador,
 					"NOME": projeto.titulodacamadanomapainterativo,
 					"DESCRIÇÃO": projeto.descricaodacamada,
 					"VALORES": [ projeto.nomedacoluna, projeto.valorvisivel ],
@@ -24,28 +24,33 @@ function complexo(){
 
 			const uniqueIds = output
 				.map(project => project.ID)
-				.filter((value, id, array) => array.indexOf(value) === id && id)
+				.filter((value, id, array) => array.indexOf(value) === id)
 
 			let outputIds = JSON.stringify({ ids: uniqueIds })
 
-			fs.writeFile(`./data-src/json/complexos.json`, outputIds, err => {
+			fs.writeFile(`./data-src/json/complexosIds.json`, outputIds, err => {
+				if(err) console.error(err)
+				else{ console.log(`./data-src/json/complexosIds.json` + ' atualizado') }
+			})
+
+			fs.writeFile(`./data-src/json/complexos.json`, JSON.stringify(output), err => {
 				if(err) console.error(err)
 				else{ console.log(`./data-src/json/complexos.json` + ' atualizado') }
 			})
 
-			uniqueIds.forEach(id => {
-					const projectPerId = output.filter(project => project.ID === id)
-					const json = JSON.stringify(projectPerId)
-					const filePath = `./data-src/json/${id}.json`
 
-					fs.writeFile(filePath, json, 'utf8', err => {
-						if(err){
-							console.error(err)
-						}
-						else{ console.log(filePath + ' atualizado') }
-					})
+			// uniqueIds.forEach(id => {
+			// 		const projectPerId = output.filter(project => project.ID === id)
+			// 		const json = JSON.stringify(projectPerId)
+			// 		const filePath = `./data-src/json/${id}.json`
 
-			})
+			// 		fs.writeFile(filePath, json, 'utf8', err => {
+			// 			if(err){
+			// 				console.error(err)
+			// 			}
+			// 			else{ console.log(filePath + ' atualizado') }
+			// 		})
+			// })
 
 		}).catch(err => console.error(err)
 	)

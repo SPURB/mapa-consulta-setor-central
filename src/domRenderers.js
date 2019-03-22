@@ -1,6 +1,4 @@
 import { isNumber } from 'util'
-import { projetos } from './model'
-import { layerColors } from './layers/projectsKmls'
 import { containsExtent } from 'ol/extent'
 import { responseMessageListener } from './eventListeners'
 
@@ -43,9 +41,10 @@ function renderElement(template, query) {
 /**
 * Create navigation options from data source (colocalizados.json)
 * @param { Object } colocalizados The colocalizados.json data
+* @param { Object } layerColors The cores.json data
 * @returns { Node } the <options> rendered in "#projetos"
 */
-function createList(colocalizados){
+function createList(colocalizados, layerColors){
 	let cleanList = [] 
 	let list = ""
 
@@ -272,7 +271,7 @@ function createInfo(data, projectColor, images){
 * Create initial info (images, strings) box with data from the larger projectgetProjectData 
 * @param { Object } data colocalizados.json item (return from getProjectData())
 */
-function createBaseInfo(data) {
+function createBaseInfo(data, projetos) {
 	let concatenation = ''
 	const nome = data.NOME
 	const bgImgPath = process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path

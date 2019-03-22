@@ -18,7 +18,8 @@ function returnSimples(projetos, simples, app_url){
 		.map(projeto => {
 			return { 
 				id: parseNameToNumericalId(projeto.name),
-				files: projeto.children
+				files: projeto.children,
+				name: projeto.INDICADOR
 			}
 		})
 		.filter(projeto => ids.includes(projeto.id))
@@ -33,7 +34,7 @@ function returnSimples(projetos, simples, app_url){
 			const url = app_url + file.path
 				if(file.extension === '.kml'){
 					kmlLayers.push({
-						layer: setLayer(file, url, projeto.id)
+						layer: setLayer(file.name, url, projeto.id)
 					})
 				}
 		})
@@ -43,10 +44,10 @@ function returnSimples(projetos, simples, app_url){
 }
 
 
-/**
-* @return { Object } Setted by setRandomColor(id) to associate id and random colors
-*/
-let simpleLayersColors = {}
+// /**
+// * @return { Object } Setted by setRandomColor(id) to associate id and random colors
+// */
+// let simpleLayersColors = {}
 
 /**
 * Set layerColors
@@ -55,8 +56,8 @@ let simpleLayersColors = {}
 * @param { Number } alpha Float number representing the opacity
 * @return { Object } { "id": [r, g, b, a]}
 */
-function setLayerColors( id, rgb, alpha) {
-	layerColors[id] = [ rgb[0], rgb[1], rgb[2], alpha ]
-}
+// function setLayerColors( id, rgb, alpha) {
+// 	layerColors[id] = [ rgb[0], rgb[1], rgb[2], alpha ]
+// }
 
-export { returnSimples, simpleLayersColors }
+export { returnSimples } //simpleLayersColors }
