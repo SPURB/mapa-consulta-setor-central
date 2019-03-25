@@ -59,12 +59,14 @@ docReady(() => {
 	const baseLayers = returnBases({ info: baseInfos.info, id: state.baseLayerID }, baseInfos.infos, state.appUrl, cores, state.bing) // open layer's BASE's layers
 	const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerID)
 	const simplesLayers = returnSimples(projetos, simples, state.appUrl)
-
 	const complexosLayers = returnComplexos(projetos, complexos.default, complexosIds, state.appUrl)
 
-	console.log(complexosLayers)
+	const allLayers = [...simplesLayers, ...complexosLayers]
+	const allLayersData = [...simples.default, ...complexos.default]
 
-	// const projectLayers = returnLayers(noBaseProjetos(projetos), process.env.APP_URL, simples) // open layer's projects layers
+	// console.log(allLayers)
+	// console.log(allLayersData)
+
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
 	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
 
@@ -180,7 +182,7 @@ docReady(() => {
 	const addPannels = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
 			createBaseInfo(getProjectData(state.baseLayerID, bases), projetos) // sidebar first load
-			createList(simples, cores)
+			createList(allLayersData, cores)
 			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerID, bases).NOME
 		},0)
 	})
@@ -246,12 +248,12 @@ docReady(() => {
 	/*
 	* Add non base layers to the map
 	*/
-	const addProjectLayers = new Promise( (resolve, reject) => {
-		setTimeout(() => {
-			try { resolve(simplesLayers.forEach(layer => appmap.addLayer(layer))) } // add simple layers 
-			catch (error) { reject(error) }
-		}, 1)
-	})
+	// const addProjectLayers = new Promise( (resolve, reject) => {
+	// 	setTimeout(() => {
+	// 		try { resolve(simplesLayers.forEach(layer => appmap.addLayer(layer))) } // add simple layers 
+	// 		catch (error) { reject(error) }
+	// 	}, 1)
+	// })
 
 	const addControls = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
@@ -279,7 +281,7 @@ docReady(() => {
 	 * and map events
 	*/
 	.then( () => fitToBaseLayer )
-	.then( () => addProjectLayers )
+	// .then( () => addProjectLayers )
 	.then( () => addControls )
 	// TODO: fetch comments of state.idConsulta
 	.catch( error => { 

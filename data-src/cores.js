@@ -16,11 +16,11 @@ function cores(){
 						let id = Number(projeto.iddokml)
 						const colors = projeto.rgba
 						const rgba = colors.split(',').map(color => Number(color))
-						if(table === 3) outputColors[id] = rgba
-						if(table === 4) {
+						// if(table === 3) outputColors[id] = rgba
+						// if(table === 4) {
 							const indicador = projeto.indicador 
 							outputColors[indicador] = rgba
-						}
+						// }
 					})
 				counter++ 
 			})

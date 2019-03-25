@@ -45,16 +45,17 @@ function renderElement(template, query) {
 * @returns { Node } the <options> rendered in "#projetos"
 */
 function createList(colocalizados, layerColors){
-	let cleanList = [] 
+	console.log(layerColors)
+	// let cleanList = [] 
 	let list = ""
 
-	for (let projeto of Object.values(colocalizados)){ 
-		if(isNumber(projeto.ID)){
-			cleanList.push(projeto)
-		}
-	}
-	cleanList.forEach( item => {
-		if(layerColors[item.ID] === undefined){
+	// for (let projeto of Object.values(colocalizados)){ 
+	// 	if(isNumber(projeto.ID)){
+	// 		cleanList.push(projeto)
+	// 	}
+	// }
+	colocalizados.forEach( item => {
+		if(layerColors[item.INDICADOR] === undefined){
 			list += `
 				<li>
 					<p>${item.NOME}</p>
@@ -62,15 +63,15 @@ function createList(colocalizados, layerColors){
 			`
 		}
 		else{
-			const r = layerColors[item.ID][0]
-			const g = layerColors[item.ID][1]
-			const b = layerColors[item.ID][2]
-			const a = layerColors[item.ID][3]
+			const r = layerColors[item.INDICADOR][0]
+			const g = layerColors[item.INDICADOR][1]
+			const b = layerColors[item.INDICADOR][2]
+			const a = layerColors[item.INDICADOR][3]
 
-			const projectId = 'projeto-id_' + item.ID
-			const btnProjectId = 'btn-projeto-id_' + item.ID
+			const projectId = 'projeto-id_' + item.INDICADOR
+			const btnProjectId = 'btn-projeto-id_' + item.INDICADOR
 
-			listCreated.push(item.ID)
+			listCreated.push(item.INDICADOR)
 
 			list += `
 				<li style='border-left-color:rgba(${r}, ${g}, ${b}, ${a})'>
