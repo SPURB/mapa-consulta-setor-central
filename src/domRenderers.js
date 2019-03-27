@@ -45,7 +45,7 @@ function renderElement(template, query) {
 * @returns { Node } the <options> rendered in "#projetos"
 */
 function createList(colocalizados, layerColors){
-	console.log(layerColors)
+	// console.log(layerColors)
 	// let cleanList = [] 
 	let list = ""
 

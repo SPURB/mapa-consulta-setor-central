@@ -8,11 +8,11 @@ import Fill from 'ol/style/Fill'
  * Return open layer source and file from kml file
  * @param { String } name Layer name
  * @param { String } path kml file complete path
- * @param { Number } id project id
+ * @param { Object } project Attributes
  * @param { Object } custom custom open layer styles. Availables: color(Array), width(Number), lineDash(Number), fillCollor(Array)
  * @returns { Object } Open Layer layer instance
  */
-function setLayer(name, path, id, custom = false){
+function setLayer(name, path, project, custom = false){
 
 	// console.log(name, path, id)
 
@@ -42,7 +42,8 @@ function setLayer(name, path, id, custom = false){
 		title: name,
 		source: source,
 		style: style,
-		projectId: id // !!! this is important !!!
+		projectId: project.id, // !!! this is important !!!,
+		projectIndicador: project.indicador
 	})
 }
 

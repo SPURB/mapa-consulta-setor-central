@@ -49,23 +49,37 @@ docReady(() => {
 	let state = {
 		projectSelected: false, // project clicked at map or right sidebar?
 		idConsulta: 36,
-		baseLayerID: 201, // project main layer id,
-		basesIDs: [ 202, 204, 203, 205 ], // other bases
+		baseLayerObj: {id: 201, indicador: 'A33' }, // project main layer id,
+		baseLayerObjects: [ 
+				{id: 202, indicador: 'A34'},
+				{id: 204, indicador:'A2'}, 
+				{id:203, indicador:'A1'}, 
+				{id: 205, indicador:'A3'} ], // other bases
 		bing: false,
 		appUrl: process.env.APP_URL
 	}
 
-	const baseInfos = createBaseInfos(projetos, state.baseLayerID, state.basesIDs)
-	const baseLayers = returnBases({ info: baseInfos.info, id: state.baseLayerID }, baseInfos.infos, state.appUrl, cores, state.bing) // open layer's BASE's layers
-	const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerID)
+	const baseInfos = createBaseInfos(projetos, state.baseLayerObj.id, state.baseLayerObjects)
+	const baseLayers = returnBases({
+			info: baseInfos.info,
+			id: state.baseLayerObj.id,
+			indicador: state.baseLayerObj.indicador
+		}, 
+		baseInfos.infos,
+		state.appUrl,
+		cores,
+		state.bing
+	) // open layer's BASE's layers
+	const baseLayer = baseLayers.find(layer => layer.values_.projectIndicador === state.baseLayerObj.indicador)
+
 	const simplesLayers = returnSimples(projetos, simples, state.appUrl)
 	const complexosLayers = returnComplexos(projetos, complexos.default, complexosIds, state.appUrl)
 
 	const allLayers = [...simplesLayers, ...complexosLayers]
 	const allLayersData = [...simples.default, ...complexos.default]
 
-	// console.log(allLayers)
-	// console.log(allLayersData)
+	console.log(allLayers)
+	console.log(allLayersData)
 
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
 	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
@@ -121,8 +135,10 @@ docReady(() => {
 			const kmlData = layer.values_
 
 			const isBase = () => { // exclusion rules. Unclickable layers
-				if (projectjId === state.baseLayerID) return true // project layer
-				if (state.basesIDs.includes(projectjId)) return true // base layers
+				const bIds = state.baseLayerObjects.map(base => base.id)
+	
+				if (projectjId === state.baseLayerObj.id) return true // project layer
+				if (bIds.includes(projectjId)) return true // base layers
 				else return false
 			}
 
@@ -181,9 +197,9 @@ docReady(() => {
 	*/
 	const addPannels = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
-			createBaseInfo(getProjectData(state.baseLayerID, bases), projetos) // sidebar first load
+			createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
 			createList(allLayersData, cores)
-			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerID, bases).NOME
+			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerObj.id, bases).NOME
 		},0)
 	})
 
@@ -238,7 +254,7 @@ docReady(() => {
 	* Fit the view to base layer
 	*/
 	const fitToBaseLayer = new Promise( (resolve, reject) => {
-		const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerID)
+		const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerObj.id)
 		setTimeout(() => {
 			try { resolve(fitToId(view, baseLayer, fitPadding)) }
 			catch (error) { reject(error) }

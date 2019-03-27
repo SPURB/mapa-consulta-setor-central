@@ -5,17 +5,26 @@ import { parseNameToNumericalId } from '../domRenderers'
 
 
 /**
- * 
+ * Return projeto from projetos.json ({info}) -> main base
+ * and collection of projetos from json - other bases
  */
 function createBaseInfos(projetos, id, ids){
 	const info = projetos.find(projeto => parseNameToNumericalId(projeto.name) === id)
 
 	let infos = []
-	ids.forEach(id => {
-		infos.push(projetos.find(projeto => parseNameToNumericalId(projeto.name) === id))
+	ids.forEach(item => {
+		infos.push(projetos.find(projeto => parseNameToNumericalId(projeto.name) === item.id))
 	})
-	
-	infos = infos.map(projeto => { return { info:projeto, id:parseNameToNumericalId(projeto.name) }})
+
+	infos = infos.map(projeto => { 
+		const id = parseNameToNumericalId(projeto.name) 
+		const indicador = ids.find(item => item.id === id).indicador
+		return { 
+			info: projeto, 
+			id: id,
+			indicador: indicador
+		}
+	})
 
 	return { 
 		info: info,
@@ -42,7 +51,7 @@ function returnBases(projeto, otherProjetos, app_url, idColors, bing){
 	
 		if(file.extension === '.kml'){
 			kmlLayers.unshift({
-				layer: setLayer(file, path, projeto.id, {
+				layer: setLayer(file, path, projeto, {
 					lineDash: [5],
 					color: color
 				})
@@ -59,7 +68,7 @@ function returnBases(projeto, otherProjetos, app_url, idColors, bing){
 				const url = app_url + file.path
 				if(file.extension === '.kml'){
 					kmlLayers.unshift({
-						layer: setLayer(file, url, projeto.id, {
+						layer: setLayer(file, url, projeto, {
 							color: color,
 							width: 0.1
 						})

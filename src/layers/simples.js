@@ -9,55 +9,31 @@ import { parseNameToNumericalId } from '../domRenderers'
 * @return { Array } Array of new Layers's (from Open Layers) to create de base
 */
 function returnSimples(projetos, simples, app_url){
+
 	let kmlLayers = []
 	
-	let ids = []
-	Object.values(simples).forEach(value => { if(value.ID) ids.push(value.ID) }) //set valid ids
-
-	const idsAndFiles = projetos
-		.map(projeto => {
-			return { 
-				id: parseNameToNumericalId(projeto.name),
-				files: projeto.children,
-				name: projeto.INDICADOR
-			}
+	let validObjs = []
+	Object.values(simples).forEach(value => { if(value.ID) { 
+		validObjs.push({ 
+			id: value.ID,
+			name: value.NOME,
+			indicador: value.INDICADOR
 		})
-		.filter(projeto => ids.includes(projeto.id))
+	} }) 
 
-	idsAndFiles.forEach(projeto => {
-
-// 		let customDistritosStyle = projeto.id === 202 ?
-// 			{ color: [0, 0, 0, 0.1] } :
-// 			false
-
-		projeto.files.forEach(file => {
-			const url = app_url + file.path
-				if(file.extension === '.kml'){
-					kmlLayers.push({
-						layer: setLayer(file.name, url, projeto.id)
-					})
-				}
+	validObjs.forEach(valid => {
+		const files = projetos.find(obj => parseNameToNumericalId(obj.name) === valid.id).children
+		files.forEach(file => {
+			if(file.extension === '.kml') {
+				const url = app_url + file.path
+				kmlLayers.push({
+					layer: setLayer(valid.name, url, {id: valid.id, indicador: valid.indicador})
+				})
+			}
 		})
 	})
 	const layers = kmlLayers.map(vector => vector.layer)
 	return layers
 }
 
-
-// /**
-// * @return { Object } Setted by setRandomColor(id) to associate id and random colors
-// */
-// let simpleLayersColors = {}
-
-/**
-* Set layerColors
-* @param { Number } id Project id
-* @param { Array } rgb Numbers representing the rgb value. Ex -> [red, green, blue]
-* @param { Number } alpha Float number representing the opacity
-* @return { Object } { "id": [r, g, b, a]}
-*/
-// function setLayerColors( id, rgb, alpha) {
-// 	layerColors[id] = [ rgb[0], rgb[1], rgb[2], alpha ]
-// }
-
-export { returnSimples } //simpleLayersColors }
+export { returnSimples }
