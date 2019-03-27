@@ -11,6 +11,9 @@ import * as bases from  '../data-src/json/bases'
 import * as cores from  '../data-src/json/cores'
 import { ids as complexosIds } from '../data-src/json/complexosIds'
 
+// console.log(projetos)
+// console.log(simples)
+
 /**
  * Axios instance. Header setup
 */
