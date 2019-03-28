@@ -3,13 +3,14 @@
  */
 import axios from 'axios'
 import { displayFetchingUI, displayResponseMessage } from './domRenderers.js'
-import { children as projetos } from '../data-src/json/projetos'
-
+import * as projetosObj from '../data-src/json/projetos'
 import * as simples from  '../data-src/json/simples'
 import * as complexos from '../data-src/json/complexos'
 import * as bases from  '../data-src/json/bases'
 import * as cores from  '../data-src/json/cores'
 import { ids as complexosIds } from '../data-src/json/complexosIds'
+
+const projetos = projetosObj.default
 
 /**
  * Axios instance. Header setup

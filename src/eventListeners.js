@@ -1,5 +1,5 @@
 import { simples, projetos, apiPost } from './model'
-import { getProjectData } from './layers/projectsKmls'
+import { getProjectData } from './layers/helpers'
 import { 
 	setInitialState,
 	fitToId,
@@ -86,8 +86,9 @@ function mapObserver(isPortrait, map) {
 * Sidebar (right) -> Listeners for projetos checkboxes
 */
 function layersController (listCreated, projectLayers, layerColors, view, fitPadding, state){
+	
 	listCreated.forEach(id => {
-		id = Number(id)
+		// id = Number(id)
 		const prjId = 'projeto-id_' + id 
 		const btnPojectId = 'btn-projeto-id_' + id
 		const gotoBtn = document.getElementById(btnPojectId)

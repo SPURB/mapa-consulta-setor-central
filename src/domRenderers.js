@@ -184,10 +184,13 @@ function smallerExtent(extents) {
 function getFiles(id, projetos){
 	if (id === 'BASE') {
 		/* "'ID':'BASE'" in colocalizados relates to "id: 0" in projetos */
-		let baseproject = projetos.filter(projeto => parseInt(projeto.name.substring(0,3).replace(/[^\d]/g, '')) === 0)
+		let baseproject = projetos.filter(projeto => parseInt(projeto.name.substring(0,7).replace(/[^\d]/g, '')) === 201)
 		return baseproject
 	}
 	else {
+		// console.log(id)
+		// console.log(projetos)
+
 		const idsFromNames = projetos.filter(projeto => {
 			let substringId =  projeto.name.substring(0,7)
 			substringId = substringId.replace(/[^\d]/g, '') 
@@ -196,6 +199,9 @@ function getFiles(id, projetos){
 				return projeto
 			}
 		})
+
+		// console.log(idsFromNames)
+
 		const files = idsFromNames[0].children
 		const images = files.filter( file =>
 			file.extension === '.gif' ||
