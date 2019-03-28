@@ -1,10 +1,9 @@
 global.fetch = require('node-fetch')
 const config = require('./config.json')
 import * as GetSheetDone from 'get-sheet-done'
-import fs from 'fs'
+import { createFile } from './helpers'
 
 function mapas(){
-
 	GetSheetDone.labeledCols(config.google_sheet_id, 5) // Mapas
 		.then(data => {
 			let output = []
@@ -32,31 +31,10 @@ function mapas(){
 				})
 			})
 
-			const json = JSON.stringify(output)
-			fs.writeFile(`./data-src/json/mapas.json`, json, err => {
-				if (err) console.err(err)
-				else console.log('./data-src/json/mapas.json atualizado')
-			})
+			createFile(output, './data-src/json/mapas.json')
 		})
 		.catch(err => console.error(err)
 	)
-
-
-	// GetSheetDone.labeledCols(config.google_sheet_id, 6) // Mapas_nomes
-	// 	.then(data => {
-	// 		const nomes = data.data
-	// 		.map(mapa => {
-	// 			return {
-	// 				"INDICADOR": mapa.indicador,
-	// 				"ID": Number(mapa.iddomapaqgis)
-	// 			}
-	// 		})
-
-	// 		const unique = raw
-	// 			.map(mapa => mapa.ID)
-	// 			.filter((value, id, array) => array.indexOf(value) === id && id)
-	// 	})
-
 }
 
 mapas()

@@ -1,10 +1,8 @@
 global.fetch = require('node-fetch')
 const config = require('./config.json')
 import * as GetSheetDone from 'get-sheet-done'
-
-import fs from 'fs'
 import directoryTree from 'directory-tree'
-import { parseNameToNumericalId } from './helpers'
+import { parseNameToNumericalId, createFile } from './helpers'
 
 /**
 * Create .data-src/json/projetos.json a tree of directories and files of data-src/projetos
@@ -13,7 +11,6 @@ import { parseNameToNumericalId } from './helpers'
 * @return { File } A json file from the folders directory tree 
 */
 function getTree(input){
-	// const files = JSON.stringify( directoryTree(input, { normalizePath: true, extensions: /\.(jpg|gif|png|svg|kml)$/ }) )
 	const tree = directoryTree(input, { normalizePath: true, extensions: /\.(jpg|gif|png|svg|kml)$/ })
 	let files = tree.children.map(file => {
 		return { 
@@ -25,19 +22,6 @@ function getTree(input){
 		}
 	})
 	return files
-	// console.log(files)
-
-	// console.log(files)
-
-	// for (let file in protoFiles) {
-	// 	console.log(file)
-	// 	// console.log(parseNameToNumericalId(file.name))
-	// }
-
-	// fs.writeFile(output, files, 'utf8', err => {
-	// 	if(err) console.error(err)
-	// 	else console.log(output, 'atualizado')
-	// })
 }
 
 
@@ -45,48 +29,55 @@ function getTree(input){
  * Return { indicador: id }
  * @param {Array} tables [Number, Number]
  */
-function idsAndIndicadores(tables, input){ //[3, 4] // 3 -> KML_simples; 4-> Complexo
-	let output = []
+function createProjetos(tables, input){ //[3, 4] // 3 -> KML_simples; 4-> Complexo
+	let projetos = []
 	let counter = 0
 	tables.forEach(table => {
 		GetSheetDone.labeledCols(config.google_sheet_id, table)
 			.then((data) => {
 				data.data
 					.forEach(projeto => {
-						// output[projeto.indicador] = Number(projeto.iddokml)
 						let obj = {}
-						obj[projeto.indicador] = Number(projeto.iddokml)
-						output.push(obj)
+						obj[Number(projeto.iddokml)] = projeto.indicador
+						if(Object.values(obj)) projetos.push(obj)
 					})
 				counter++ 
 				if(counter === tables.length){
-					return output
+					return projetos
+				}
+				else false
+			})
+
+			.then( ids => {
+				if (ids) {
+					const tree = getTree(input)
+					const outputTree = tree.map(directory => {
+						const dirId = directory.id.toString()
+
+						const filteredIds = ids.filter(id => Object.keys(id)[0] === dirId)
+						let indicadores
+
+						if(filteredIds.length > 0) {
+							indicadores = filteredIds.map(obj => Object.values(obj)[0])
+						}
+						else indicadores = false
+
+						return {
+							id: directory.id,
+							indicadores: indicadores,
+							name: directory.name,
+							path: directory.path,
+							children: directory.children,
+							type: directory.type
+						}
+					})
+					return outputTree
 				}
 			})
-
-			.then( output => {
-				console.log(output)
-				// const tree = getTree(input)
-				// tree.map(directory => {
-					
-
-
-				// 	// return {
-				// 	// 	id: directory.id,
-				// 	// 	name: directory.name,
-				// 	// 	path: directory.path,
-				// 	// 	children: directory.children,
-				// 	// 	type: directory.type
-				// 	// }
-				// })
-
-			})
+			.then(output => createFile(output, './data-src/json/projetos.json'))
 			.catch(err => console.error(err)
 		)
 	})
 }
 
-idsAndIndicadores([3,4], './data-src/projetos')
-
-// console.log(getTree('./data-src/projetos'))
-//output , './data-src/json/projetos.json'
+createProjetos([3,4], './data-src/projetos')

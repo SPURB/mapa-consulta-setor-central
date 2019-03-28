@@ -1,7 +1,7 @@
 global.fetch = require('node-fetch')
 const config = require('./config.json')
 import * as GetSheetDone from 'get-sheet-done'
-import fs from 'fs'
+import { createFile } from './helpers'
 
 function complexo(){
 	GetSheetDone.labeledCols(config.google_sheet_id, 4) // KML_complexo
@@ -26,31 +26,8 @@ function complexo(){
 				.map(project => project.ID)
 				.filter((value, id, array) => array.indexOf(value) === id)
 
-			let outputIds = JSON.stringify({ ids: uniqueIds })
-
-			fs.writeFile(`./data-src/json/complexosIds.json`, outputIds, err => {
-				if(err) console.error(err)
-				else{ console.log(`./data-src/json/complexosIds.json` + ' atualizado') }
-			})
-
-			fs.writeFile(`./data-src/json/complexos.json`, JSON.stringify(output), err => {
-				if(err) console.error(err)
-				else{ console.log(`./data-src/json/complexos.json` + ' atualizado') }
-			})
-
-
-			// uniqueIds.forEach(id => {
-			// 		const projectPerId = output.filter(project => project.ID === id)
-			// 		const json = JSON.stringify(projectPerId)
-			// 		const filePath = `./data-src/json/${id}.json`
-
-			// 		fs.writeFile(filePath, json, 'utf8', err => {
-			// 			if(err){
-			// 				console.error(err)
-			// 			}
-			// 			else{ console.log(filePath + ' atualizado') }
-			// 		})
-			// })
+			createFile({ ids: uniqueIds }, './data-src/json/complexosIds.json')
+			createFile(output, './data-src/json/complexos.json')
 
 		}).catch(err => console.error(err)
 	)
