@@ -197,8 +197,8 @@ docReady(() => {
 	*/
 	const addPannels = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
-
 			createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
+			// createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
 			createList(allLayersData, cores)
 			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerObj.id, bases).NOME
 		},0)
@@ -234,7 +234,7 @@ docReady(() => {
 			try{
 				resolve(
 					// left sidebar
-					sidebarGoHome(simplesLayers, baseLayer, listCreated, view, fitPadding),
+					sidebarGoHome(simplesLayers, baseLayer, listCreated, view, fitPadding, appmap),
 					sideBarToggleChildren(),
 					sideBarToggleFonte(),
 
@@ -243,7 +243,7 @@ docReady(() => {
 
 					// right sidebar
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
-					layersController(listCreated, simplesLayers, cores, view, fitPadding, state)
+					layersController(listCreated, simplesLayers, cores, view, fitPadding, state, appmap, allLayersData)
 				)
 			}
 			catch(error) { reject(error) }

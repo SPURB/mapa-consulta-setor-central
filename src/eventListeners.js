@@ -1,4 +1,4 @@
-import { simples, projetos, apiPost } from './model'
+import { simples, projetos, indicadores, apiPost } from './model'
 import { getProjectData } from './layers/helpers'
 import { 
 	setInitialState,
@@ -15,7 +15,7 @@ import {
 /**
 * Sidebar (top left) - Render initial base layer info and resets map to the initial state
 */
-function sidebarGoHome (layers, baseLayer, list, view, fitPadding){
+function sidebarGoHome (layers, baseLayer, list, view, fitPadding, map){
 	let gohome = document.getElementById('gohome')
 	gohome.addEventListener('click', () => {
 		document.getElementById('info').classList.add('hidden')
@@ -25,7 +25,7 @@ function sidebarGoHome (layers, baseLayer, list, view, fitPadding){
 		// resetApp
 		setInitialState('initial')
 		fitToId(view, baseLayer, fitPadding)
-		layers.forEach( lyr => switchVisibilityState(lyr, true) )
+		layers.forEach( lyr => switchVisibilityState(lyr, true, map) )
 		list.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 	})
 }
@@ -85,25 +85,29 @@ function mapObserver(isPortrait, map) {
 /*
 * Sidebar (right) -> Listeners for projetos checkboxes
 */
-function layersController (listCreated, projectLayers, layerColors, view, fitPadding, state){
-	
-	listCreated.forEach(id => {
-		// id = Number(id)
-		const prjId = 'projeto-id_' + id 
-		const btnPojectId = 'btn-projeto-id_' + id
+function layersController(listCreated, projectLayers, layerColors, view, fitPadding, state, map, dataSheet){
+
+	// console.log(listCreated)
+	listCreated.forEach(indicador => {
+		const prjId = 'projeto-id_' + indicador
+		const btnPojectId = 'btn-projeto-id_' + indicador
 		const gotoBtn = document.getElementById(btnPojectId)
 		const element = document.getElementById(prjId)
-		const layer = projectLayers.find( layer => layer.values_.projectId === id)
+		const layer = projectLayers.find( layer => layer.values_.projectIndicador === indicador)
+
 
 		// fit to clicked project, change Sidebar (left) info, fit
 		gotoBtn.onclick = () => {
 			setInitialState('initial')
-			const data = getProjectData(id, simples)
-			const colors = layerColors[id]
-			const images = getFiles(id, projetos)
+			const idKml = indicadores[indicador]
+			const data = projetos.find(projeto => projeto.id === idKml)
+			const dataSheetitem = dataSheet.find(sheet => sheet.INDICADOR === indicador)
+			// console.log(dataSheetitem)
+			const colors = layerColors[indicador]
+			const images = getFiles(indicador, projetos, false, indicadores)
 
 			// uncheck all itens except the clicked one at Sidebar (right) 
-			const othersIds = listCreated.filter( idItem => idItem !== id )
+			const othersIds = listCreated.filter( idItem => idItem !== indicador )
 			othersIds.forEach(idItem => {
 				let checkEl = 'projeto-id_' + idItem
 				document.getElementById(checkEl).checked = false
@@ -112,20 +116,24 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 			
 			// hide all other layers
 			projectLayers.forEach( tohidelayer => {
-				switchVisibilityState(tohidelayer, false)
+				switchVisibilityState(tohidelayer, false, map)
 			})
-			switchVisibilityState(layer, true)
+			switchVisibilityState(layer, true, map)
 
 			// hide panel Sidebar (right)
 			document.getElementById('panel').classList.remove('open')
 			document.getElementById('map').classList.remove('no-panel')
 
 			// fit to clicked project, change Sidebar (left) info
-			createInfo(data, colors, images)
+			createInfo(dataSheetitem, colors, images)
 			toggleInfoClasses()
-			const projectLayer = projectLayers.find( layer => layer.values_.projectId === id)
-			fitToId(view, projectLayer, fitPadding)
-			displayKmlInfo(projectLayer.values_)
+
+			// const projectLayer = projectLayers.find(layer => layer.values_.projectId === indicador)
+			
+
+
+			fitToId(view, layer, fitPadding)
+			displayKmlInfo(layer.values_)
 
 			// Setup commentBox 
 			if (!state.projectSelected) { // Create element and event only once only once
@@ -138,7 +146,7 @@ function layersController (listCreated, projectLayers, layerColors, view, fitPad
 
 		// toggle layer visibility with checkboxes status at Sidebar (right)
 		element.onchange = () => {
-			switchVisibilityState(layer, element.checked)
+			switchVisibilityState(layer, element.checked, map)
 		}
 	})
 }

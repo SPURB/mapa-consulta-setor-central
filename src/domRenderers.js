@@ -40,21 +40,13 @@ function renderElement(template, query) {
 
 /**
 * Create navigation options from data source (colocalizados.json)
-* @param { Object } colocalizados The colocalizados.json data
+* @param { Object } allLayersData A big Object with layers info
 * @param { Object } layerColors The cores.json data
 * @returns { Node } the <options> rendered in "#projetos"
 */
-function createList(colocalizados, layerColors){
-	// console.log(layerColors)
-	// let cleanList = [] 
+function createList(allLayersData, layerColors){
 	let list = ""
-
-	// for (let projeto of Object.values(colocalizados)){ 
-	// 	if(isNumber(projeto.ID)){
-	// 		cleanList.push(projeto)
-	// 	}
-	// }
-	colocalizados.forEach( item => {
+	allLayersData.forEach( item => {
 		if(layerColors[item.INDICADOR] === undefined){
 			list += `
 				<li>
@@ -75,7 +67,7 @@ function createList(colocalizados, layerColors){
 
 			list += `
 				<li style='border-left-color:rgba(${r}, ${g}, ${b}, ${a})'>
-					<input type='checkbox' id='${projectId}' checked>
+					<input type='checkbox' id='${projectId}'>
 					<label for=${projectId}>${item.NOME}</label>
 					<button id="${btnProjectId}">></button>
 				</li>
@@ -109,12 +101,13 @@ function fitToId(view, layer, padding){
 }
 
 /** 
-Switch layer visibilty state
+Switch layer
 * @param  { Object } layer The layer to change the state
 * @param { Boolean } state Visibility state of this layer
+* @param { Object } map The Open Layers new Map instance
 */
-function switchVisibilityState(layer, state) {
-	return state ? layer.setOpacity(1) : layer.setOpacity(0.1)
+function switchVisibilityState(layer, state, map) {
+	return state ? map.addLayer(layer) : map.removeLayer(layer)
 }
 
 /** 
@@ -177,32 +170,20 @@ function smallerExtent(extents) {
 
 /**
 * Return the files from each projetos.json
-* @param { Number } id The project id
+* @param { Number } indicador The project indicador
 * @param { Object } projetos The projetos.json data
 * @return { Object } { hero, images }
 */
-function getFiles(id, projetos){
-	if (id === 'BASE') {
-		/* "'ID':'BASE'" in colocalizados relates to "id: 0" in projetos */
-		let baseproject = projetos.filter(projeto => parseInt(projeto.name.substring(0,7).replace(/[^\d]/g, '')) === 201)
+function getFiles(indicador, projetos, baseId = false, indicadores = {}){
+	if (indicador === baseId) { // base id is 201
+		let baseproject = projetos.filter(projeto => projeto.id === indicador)
 		return baseproject
 	}
 	else {
-		// console.log(id)
-		// console.log(projetos)
+		const id = indicadores[indicador]
+		const projeto = projetos.find(projeto => projeto.id === id)
 
-		const idsFromNames = projetos.filter(projeto => {
-			let substringId =  projeto.name.substring(0,7)
-			substringId = substringId.replace(/[^\d]/g, '') 
-			substringId = parseInt(substringId)
-			if(substringId !== 0 && substringId === id){
-				return projeto
-			}
-		})
-
-		// console.log(idsFromNames)
-
-		const files = idsFromNames[0].children
+		const files = projeto.children
 		const images = files.filter( file =>
 			file.extension === '.gif' ||
 			file.extension === '.png' ||
@@ -220,7 +201,6 @@ function getFiles(id, projetos){
 			}
 		}
 		else { 
-			// console.error(id)
 			throw new Error(`id - ${id} - undefined`)
 		}
 	}
@@ -281,7 +261,7 @@ function createInfo(data, projectColor, images){
 function createBaseInfo(data, projetos) {
 	let concatenation = ''
 	const nome = data.NOME
-	const bgImgPath = process.env.APP_URL + getFiles('BASE', projetos)[0].children[0].path
+	const bgImgPath = process.env.APP_URL + getFiles(data.ID, projetos, data.ID)[0].children[0].path
 
 	concatenation += `<h1 class='baseInfo-title'>${nome}</h1>`
 	concatenation += `<div class='cover' style='background-image: url("${bgImgPath}");'></div>` 

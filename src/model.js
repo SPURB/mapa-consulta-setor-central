@@ -4,6 +4,7 @@
 import axios from 'axios'
 import { displayFetchingUI, displayResponseMessage } from './domRenderers.js'
 import * as projetosObj from '../data-src/json/projetos'
+import * as indicadores from '../data-src/json/indicadores'
 import * as simples from  '../data-src/json/simples'
 import * as complexos from '../data-src/json/complexos'
 import * as bases from  '../data-src/json/bases'
@@ -71,6 +72,7 @@ export {
 	simples,
 	complexos,
 	complexosIds,
+	indicadores,
 	bases,
 	cores,
 	apiPost,

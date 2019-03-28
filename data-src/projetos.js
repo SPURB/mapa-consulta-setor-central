@@ -30,7 +30,8 @@ function getTree(input){
  * @param {Array} tables [Number, Number]
  */
 function createProjetos(tables, input){ //[3, 4] // 3 -> KML_simples; 4-> Complexo
-	let projetos = []
+	let ids = []
+	let indicadores = {}
 	let counter = 0
 	tables.forEach(table => {
 		GetSheetDone.labeledCols(config.google_sheet_id, table)
@@ -39,11 +40,17 @@ function createProjetos(tables, input){ //[3, 4] // 3 -> KML_simples; 4-> Comple
 					.forEach(projeto => {
 						let obj = {}
 						obj[Number(projeto.iddokml)] = projeto.indicador
-						if(Object.values(obj)) projetos.push(obj)
+
+						if(Object.values(obj)) { 
+							indicadores[projeto.indicador] = Number(projeto.iddokml)
+							ids.push(obj)
+						}
+
 					})
 				counter++ 
 				if(counter === tables.length){
-					return projetos
+					createFile(indicadores, './data-src/json/indicadores.json')
+					return ids
 				}
 				else false
 			})
