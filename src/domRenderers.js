@@ -39,7 +39,7 @@ function renderElement(template, query) {
 
 
 /**
-* Create navigation options from data source (colocalizados.json)
+* Create navigation options from data source
 * @param { Object } allLayersData A big Object with layers info
 * @param { Object } layerColors The cores.json data
 * @returns { Node } the <options> rendered in "#projetos"
@@ -91,14 +91,27 @@ Fit to id. Change current view fitting to a id
 */
 function fitToId(view, layer, padding){
 	try {
-		view.fit(layer.getSource().getExtent(), {
-			padding: padding
-		})
+		view.fit(layer.getSource().getExtent(), { padding: padding })
 	}
 	catch (error) {
 		throw new Error(`Error: ${error}`)
 	}
 }
+
+// function fitToNewId(appmap, indicador, padding, indicadorBase) {
+// 	const layers = appmap.getLayers().getArray()
+// 	const clickedLayer = layers.find(layer => layer.get('projectIndicador') === indicador)
+// 	const extent = clickedLayer.getSource().getExtent()
+
+// 	if(extent[0]!==Infinity) appmap.getView().fit(extent, { padding: padding })
+
+// 	else {
+// 		const baseLayer = layers.find(baseLay => baseLay.get('projectIndicador') === indicadorBase)
+// 		const baseExtent =  baseLayer.getSource().getExtent()
+// 		appmap.getView().fit(baseExtent, { padding: padding })
+// 		console.error(new Error())
+// 	}
+// }
 
 /** 
 Switch layer
@@ -109,6 +122,20 @@ Switch layer
 function switchVisibilityState(layer, state, map) {
 	return state ? map.addLayer(layer) : map.removeLayer(layer)
 }
+
+/** 
+Switch layers and menu
+* @param { Boolean } state Visibility state of this layer
+* @param { Object } layers The layer to change the state
+* @param { Object } map The Open Layers new Map instance
+* @param { Array } list The indicadores Array of strings
+* @returns switch layers state
+*/
+function switchlayers(state, layers, map, list){
+	layers.forEach(lyr => switchVisibilityState(lyr, state, map))
+	list.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = state )
+}
+
 
 /** 
 * Create info-kml data
@@ -131,7 +158,6 @@ function displayKmlInfo(kmlAttributes) {
 		'visible',
 		'maxResolution',
 		'minResolution'
-
 	]
 	let info = document.getElementById("info-kml")
 
@@ -143,14 +169,15 @@ function displayKmlInfo(kmlAttributes) {
 
 	for (let key in kmlAttributes) {
 		if(exceptions.includes(key) === false){
-			concatenation += `<span>${key}</span><p>${kmlAttributes[key]}</p>`
+			let keyTitle = key === 'projectIndicador' ? 'Identificador' : key
+			keyTitle = keyTitle === 'title' ? 'Título' : keyTitle
+ 			concatenation += `<span>${keyTitle}</span><p>${kmlAttributes[key]}</p>`
 		}
 	}
 
 	if ( concatenation!=='' ){ info.innerHTML = concatenation }
 	else { info.classList.add('no-display') }
 }
-
 
 /**
 * Return the smaller extent from a Array of extents
@@ -167,6 +194,7 @@ function smallerExtent(extents) {
 	})
 	return dontContain
 }
+
 
 /**
 * Return the files from each projetos.json
@@ -377,20 +405,26 @@ function toggleInfoClasses(orientation){
 * @returns initial classes to #info-kml, #info-error, #baseInfo, #info
 */ 
 function setInitialState(stateStr){
+	const infoError = document.getElementById('info-error')
+	const baseInfo = document.getElementById('baseInfo')
+	const gohome = document.getElementById('gohome')
+	const info = document.getElementById('info')
+
 	if(stateStr === 'initial'){
-		document.getElementById('info-kml').classList.add('no-display')
-		document.getElementById('info-error').classList.add('no-display')
-		document.getElementById('baseInfo').classList.remove('no-display')
-		document.getElementById('info').classList.remove('no-display')
+		document.getElementById('panel').classList.remove('open')
+		infoError.classList.add('no-display')
+		baseInfo.classList.remove('no-display', 'hidden')
+		gohome.classList.add('hidden')
+		info.classList.remove('no-display')
+		info.classList.add('hidden')
 	}
 	if(stateStr === 'error'){
-		document.getElementById('info-kml').classList.add('no-display')
-		document.getElementById('gohome').classList.remove('hidden')
-		document.getElementById('info-error').classList.remove('no-display')
-		document.getElementById('baseInfo').classList.add('no-display')
-		document.getElementById('info').classList.add('no-display')
+		gohome.classList.remove('hidden')
+		infoError.classList.remove('no-display')
+		baseInfo.classList.add('no-display')
+		info.classList.add('no-display')
 	}
-	// else { null }
+	document.getElementById('info-kml').classList.add('no-display')
 }
 
 /**
@@ -460,7 +494,9 @@ export {
 	listCreated,
 	toggleInfoClasses,
 	switchVisibilityState,
+	switchlayers,
 	fitToId,
+	// fitToNewId,
 	smallerExtent,
 	getFiles,
 	createInfo,

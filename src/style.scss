@@ -133,7 +133,15 @@ p {
 		padding: .1rem .4rem;
 		border:none;
 		color: #c0c0c0;
+		height: 0;
+		width: 0;
+		opacity: 0;
 		transition: all ease-in-out .15s;
+		&.selected { 
+			height: 70px;
+			width: 25px;
+			opacity: 1;
+		}
 		&:hover{
 			background-color: #565353;
 			color: white;
@@ -141,7 +149,10 @@ p {
 			padding: .15rem .5rem;
 		}
 	}
-	label { margin-left: .5rem }
+	label { 
+		margin-left: .5rem;
+		cursor: pointer
+	}
 	&:last-child { margin-bottom: 0; }
 }
 

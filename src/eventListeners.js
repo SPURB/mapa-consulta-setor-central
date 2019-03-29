@@ -3,7 +3,9 @@ import { getProjectData } from './layers/helpers'
 import { 
 	setInitialState,
 	fitToId,
+	// fitToNewId,
 	switchVisibilityState,
+	switchlayers,
 	getFiles,
 	createInfo,
 	createCommentBox,
@@ -18,15 +20,9 @@ import {
 function sidebarGoHome (layers, baseLayer, list, view, fitPadding, map){
 	let gohome = document.getElementById('gohome')
 	gohome.addEventListener('click', () => {
-		document.getElementById('info').classList.add('hidden')
-		document.getElementById('gohome').classList.add('hidden')
-		document.getElementById('baseInfo').classList.remove('hidden')
-
-		// resetApp
 		setInitialState('initial')
 		fitToId(view, baseLayer, fitPadding)
-		layers.forEach( lyr => switchVisibilityState(lyr, true, map) )
-		list.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
+		switchlayers(false, layers, map, list)
 	})
 }
 
@@ -86,15 +82,18 @@ function mapObserver(isPortrait, map) {
 * Sidebar (right) -> Listeners for projetos checkboxes
 */
 function layersController(listCreated, projectLayers, layerColors, view, fitPadding, state, map, dataSheet){
-
-	// console.log(listCreated)
 	listCreated.forEach(indicador => {
 		const prjId = 'projeto-id_' + indicador
-		const btnPojectId = 'btn-projeto-id_' + indicador
-		const gotoBtn = document.getElementById(btnPojectId)
+		const btnProjectId = 'btn-projeto-id_' + indicador
+		const gotoBtn = document.getElementById(btnProjectId)
 		const element = document.getElementById(prjId)
 		const layer = projectLayers.find( layer => layer.values_.projectIndicador === indicador)
 
+		// toggle layer visibility with checkboxes status at Sidebar (right)
+		element.onchange = () => {
+			switchVisibilityState(layer, element.checked, map)
+			element.checked ? gotoBtn.classList.add('selected') : gotoBtn.classList.remove('selected')
+		}
 
 		// fit to clicked project, change Sidebar (left) info, fit
 		gotoBtn.onclick = () => {
@@ -102,7 +101,6 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			const idKml = indicadores[indicador]
 			const data = projetos.find(projeto => projeto.id === idKml)
 			const dataSheetitem = dataSheet.find(sheet => sheet.INDICADOR === indicador)
-			// console.log(dataSheetitem)
 			const colors = layerColors[indicador]
 			const images = getFiles(indicador, projetos, false, indicadores)
 
@@ -113,6 +111,11 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 				document.getElementById(checkEl).checked = false
 			})
 			element.checked = true
+
+			// reset gotobtn except the clicked one
+			const selectedButtons = [...document.getElementsByClassName('selected')]
+				.filter(button => button.id !== btnProjectId)
+			selectedButtons.forEach(button => button.classList.remove('selected'))
 			
 			// hide all other layers
 			projectLayers.forEach( tohidelayer => {
@@ -129,9 +132,6 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			toggleInfoClasses()
 
 			// const projectLayer = projectLayers.find(layer => layer.values_.projectId === indicador)
-			
-
-
 			fitToId(view, layer, fitPadding)
 			displayKmlInfo(layer.values_)
 
@@ -142,11 +142,6 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			}
 			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener at every click
 			commentBoxSubmit('info', state.idConsulta, data.ID, data.NOME) // change listener attributes at every click
-		}
-
-		// toggle layer visibility with checkboxes status at Sidebar (right)
-		element.onchange = () => {
-			switchVisibilityState(layer, element.checked, map)
 		}
 	})
 }

@@ -10,7 +10,7 @@ function createFile(output, path){
 
 	fs.writeFile( path, json, 'utf8', err => {
 		if(err) console.log(err);
-		else console.log(`${path}`)
+		else console.log(`sucesso! ${path}`)
 	})
 }
 

@@ -5,6 +5,7 @@ import axios from 'axios'
 import { displayFetchingUI, displayResponseMessage } from './domRenderers.js'
 import * as projetosObj from '../data-src/json/projetos'
 import * as indicadores from '../data-src/json/indicadores'
+import * as mapasObj from '../data-src/json/mapas'
 import * as simples from  '../data-src/json/simples'
 import * as complexos from '../data-src/json/complexos'
 import * as bases from  '../data-src/json/bases'
@@ -12,6 +13,7 @@ import * as cores from  '../data-src/json/cores'
 import { ids as complexosIds } from '../data-src/json/complexosIds'
 
 const projetos = projetosObj.default
+const mapaData = mapasObj.default
 
 /**
  * Axios instance. Header setup
@@ -69,6 +71,7 @@ function apiPost(table, data, idBase) {
 
 export { 
 	projetos,
+	mapaData,
 	simples,
 	complexos,
 	complexosIds,

@@ -8,13 +8,21 @@ import Select from 'ol/interaction/Select.js'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
-
-import { projetos, simples, complexos, complexosIds, cores, bases  } from './model'
 // import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
 import { getProjectData } from './layers/helpers'
 import { createBaseInfos, returnBases } from './layers/bases'
 import { returnSimples } from './layers/simples'
 import { returnComplexos } from './layers/complexos'
+import { 
+	projetos,
+	mapaData,
+	simples,
+	complexos,
+	complexosIds,
+	cores, 
+	bases
+} from './model'
+
 import {
 	// noBaseProjetos,
 	renderElement,
@@ -198,8 +206,11 @@ docReady(() => {
 	const addPannels = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
 			createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
-			// createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
 			createList(allLayersData, cores)
+
+			console.log('criar botões')
+			console.log(mapaData) // criar botões de mapas
+
 			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerObj.id, bases).NOME
 		},0)
 	})
@@ -234,7 +245,7 @@ docReady(() => {
 			try{
 				resolve(
 					// left sidebar
-					sidebarGoHome(simplesLayers, baseLayer, listCreated, view, fitPadding, appmap),
+					sidebarGoHome(allLayers, baseLayer, listCreated, view, fitPadding, appmap),
 					sideBarToggleChildren(),
 					sideBarToggleFonte(),
 
@@ -243,7 +254,8 @@ docReady(() => {
 
 					// right sidebar
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
-					layersController(listCreated, simplesLayers, cores, view, fitPadding, state, appmap, allLayersData)
+					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
+					// mapButtonsControlloer(mapaData) -> criar eventlisteners de botões de mapas
 				)
 			}
 			catch(error) { reject(error) }
