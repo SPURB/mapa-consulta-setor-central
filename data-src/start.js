@@ -4,6 +4,7 @@ require('babel-register')({
 })
 
 // Import the rest of our application.
+module.exports = require('./setupEnv.js')
 module.exports = require('./projetos.js')
 module.exports = require('./mapas.js')
 module.exports = require('./simples.js') //create simples.json and bases.json
