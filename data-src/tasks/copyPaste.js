@@ -13,3 +13,4 @@ function copyPaste(source, destination) {
 }
 
 copyPaste('data-src/projetos', 'dist/data-src/projetos');
+copyPaste('data-src/legendas', 'dist/data-src/legendas');

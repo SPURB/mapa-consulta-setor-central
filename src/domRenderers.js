@@ -1,6 +1,7 @@
 import { isNumber } from 'util'
 import { containsExtent } from 'ol/extent'
 import { responseMessageListener } from './eventListeners'
+import { mapaData } from './model';
 
 /**
 * Filter projetos removing base layers
@@ -247,26 +248,36 @@ function getFiles(indicador, projetos, baseId = false, indicadores = {}){
 				hero: hero[0].path
 			}
 		}
+		if(images.length > 0){
+			return {
+				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+				hero: false
+			}
+		}
 		else { 
-			throw new Error(`id - ${id} - undefined`)
+			return {
+				images: false,
+				hero: false
+			}
 		}
 	}
 }
 
 /**
 * Create info box
-* @param { Object } data colocalizados.json item 
+* @param { Object } data A dataset item 
 * @param { String } projectColor rgba color string
+* @param { String } path Optional image path
 * @returns { HTMLDivElement } Create the div#info of selected project
 */ 
-function createInfo(data, projectColor, images){
+function createInfo(data, projectColor, path = false) {
 	let coverImg = document.getElementById('coverSec')
 	const concatColor = `background-color: rgba(${projectColor[0]}, ${projectColor[1]}, ${projectColor[2]}, ${projectColor[3]})`
 	let concatenation = ''
 
-	if (images.images) {
-		const coverImgPath = process.env.APP_URL + images.images[0].path
-
+	if (path) {
+		coverSec.style.display = "block"
+		const coverImgPath = process.env.APP_URL + path
 		coverImg.style.backgroundImage = `url("${coverImgPath}")`
 
 		let autorStr = `Autor <b>${data.AUTOR}</b>`
@@ -280,10 +291,10 @@ function createInfo(data, projectColor, images){
 		renderElement(autorStr, '#fonteAutor')
 		renderElement(fonteStr, '#fonteFonte')
 	}
+	else { coverSec.style.display = "none" }
 
 	concatenation += `<div class='info-legend' style='${concatColor}'></div>`
 	concatenation += "<div class='data' id='projectData'>"
-
 	for(let val in data){
 		if(data[val] !== 0) {
 			switch(val) {
@@ -301,10 +312,23 @@ function createInfo(data, projectColor, images){
 	renderElement(concatenation, "#infoCont")
 }
 
+function createMapInfo(mapData){
+	window.location.hash = mapData.id
+	let concatenation = ''
+	if(mapData.name === undefined && mapaData.legenda === undefined) { console.error(`${mapData}'s keys are undefined`) }
+	if(mapaData) {
+		const coverImgPath = process.env.APP_URL + mapData.legenda
+		concatenation = `<img src="${coverImgPath}" alt="Legenda de ${mapData.name}">`
+	}
+	concatenation += `<h4 class="project-title">${mapData.name}</h4>`
+	renderElement(concatenation, "#selectedMapInfo")
+}
+
 /**
 * Create initial info (images, strings) box with data from the larger projectgetProjectData 
 * @param { Object } data colocalizados.json item (return from getProjectData())
 */
+
 function createBaseInfo(data, projetos) {
 	let concatenation = ''
 	const nome = data.NOME
@@ -520,6 +544,7 @@ export {
 	smallerExtent,
 	getFiles,
 	createInfo,
+	createMapInfo,
 	createBaseInfo,
 	noBaseProjetos,
 	parseNameToNumericalId,

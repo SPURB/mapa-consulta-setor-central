@@ -8,6 +8,7 @@ import {
 	switchlayers,
 	getFiles,
 	createInfo,
+	createMapInfo,
 	createCommentBox,
 	commentBoxDisplayErrors,
 	toggleInfoClasses,
@@ -78,21 +79,6 @@ function mapObserver(isPortrait, map) {
 	}
 }
 
-// function onLayerChange(query, projectLayers, olMap){
-// 	let  camadasList = [...document.querySelector(query).children]
-// 		.map(item => {
-// 			return {
-// 				input: item.getElementsByTagName("input")[0],
-// 				button: item.getElementsByTagName("button")[0]
-// 			}
-// 		})
-// 		.forEach(el => {
-// 			el.input.onchange = () =>{
-// 				el.input.checked ? el.button.classList.add('selected') : el.button.classList.remove('selected')
-// 			}
-// 		})
-// }
-
 /*
 * Sidebar (right) -> Listeners for projetos checkboxes
 */
@@ -107,7 +93,6 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 		// toggle layer visibility with checkboxes status at Sidebar (right)
 		element.onchange = () => {
 			switchVisibilityState(layer, element.checked, map)
-			// element.checked ? gotoBtn.classList.add('selected') : gotoBtn.classList.remove('selected')
 		}
 
 		// fit to clicked project, change Sidebar (left) info, fit
@@ -143,14 +128,21 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			document.getElementById('map').classList.remove('no-panel')
 
 			// fit to clicked project, change Sidebar (left) info
-			createInfo(dataSheetitem, colors, images)
-			toggleInfoClasses()
+			// createInfo(dataSheetitem, colors, images.hero)
+			const path = images => {
+				if(images.hero) return images.hero
+				if(!images.hero && images.images) return images.images[0].path
+				else return false
+			}
 
+			createInfo(dataSheetitem, colors, path(images))
+
+			toggleInfoClasses()
 			fitToId(view, layer, fitPadding)
 			displayKmlInfo(layer.values_)
 
 			// Setup commentBox 
-			if (!state.projectSelected) { // Create element and event only once only once
+			if (!state.projectSelected) { // Create element and event only once
 				createCommentBox('info', false)
 				commentBoxEvents('info')
 			}
@@ -171,8 +163,6 @@ function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseInd
 	const buttons = [...document.querySelector(query).children] // [li, li ...]
 		.map(item => item.firstChild)
 
-	// const indicadoresFromLayers = allLayers.map(l => l.get("projectIndicador"))
-
 	buttons.forEach(item => {
 		item.addEventListener('click', event => {
 			switchlayers(false, allLayers, olMap)
@@ -192,6 +182,8 @@ function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseInd
 				if(!output && !isBase) console.error(`nota para dev: checar ${indicador} na planilha.`)
 			})
 
+			const contentNoLayers = { id: content.id, name: content.name, legenda: content.legenda }
+			createMapInfo(contentNoLayers)
 			switchlayers(true, validLayers, olMap)
 		})
 	})

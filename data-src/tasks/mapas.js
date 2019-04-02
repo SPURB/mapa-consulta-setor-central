@@ -1,5 +1,5 @@
 global.fetch = require('node-fetch')
-const config = require('./config.json')
+const config = require('../config.json')
 import * as GetSheetDone from 'get-sheet-done'
 import { createFile, parseNameToNumericalId } from './helpers'
 
@@ -33,19 +33,21 @@ function mapas(){
 		})
 		.then( mapsArrayNoNames => {
 			let outPutObject = {}
-			let parsedResponse
 
 			GetSheetDone.labeledCols(config.google_sheet_id, 6) // Mapas_nome
 				.then(data => {
 					data.data.forEach(item => {
 						const idNumber = parseNameToNumericalId(item.iddomapaqgis)
-						outPutObject[idNumber] = item.nome
+						outPutObject[idNumber] = { 
+							name: item.nome,
+							legenda: item.legenda
+						}
 					})
-					// console.log(outPutObject)
 
 					const mapsArrayWithNames = mapsArrayNoNames
 						.map(item =>{
-							item.name = outPutObject[item.id]
+							item.name = outPutObject[item.id].name
+							item.legenda = 'data-src/legendas/' + outPutObject[item.id].legenda
 							return item
 						})
 					createFile(mapsArrayWithNames, './data-src/json/mapas.json')

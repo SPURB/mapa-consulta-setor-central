@@ -1,5 +1,5 @@
 global.fetch = require('node-fetch')
-const config = require('./config.json')
+const config = require('../config.json')
 import * as GetSheetDone from 'get-sheet-done'
 import { createFile } from './helpers'
 

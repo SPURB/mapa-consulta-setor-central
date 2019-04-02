@@ -5,7 +5,7 @@
 	"scripts": {
 		"start": "parcel ./index.html",
 		"watch": "parcel watch ./index.html",
-		"build": "parcel build --public-url . index.html && node data-src/copyPaste.js",
+		"build": "parcel build --public-url . index.html && node data-src/tasks/copyPaste.js",
 		"files": "node data-src/start.js",
 		"tests": "parcel ./tests.html"
 	},

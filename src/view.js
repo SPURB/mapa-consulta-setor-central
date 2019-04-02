@@ -30,6 +30,8 @@ import {
 	createMapsBtns,
 	listCreated,
 	toggleInfoClasses,
+	createMapInfo,
+	switchlayers,
 	switchVisibilityState,
 	fitToId,
 	smallerExtent,
@@ -64,7 +66,7 @@ docReady(() => {
 		baseLayerObjects: [ 
 				{id: 202, indicador: 'A34'},
 				{id: 204, indicador:'A2'}, 
-				{id:203, indicador:'A1'}, 
+				{id: 203, indicador:'A1'}, 
 				{id: 205, indicador:'A3'} ], // other bases
 		bing: false,
 		appUrl: process.env.APP_URL
@@ -88,9 +90,6 @@ docReady(() => {
 
 	const allLayers = [...simplesLayers, ...complexosLayers]
 	const allLayersData = [...simples.default, ...complexos.default]
-
-	// console.log(allLayers)
-	// console.log(allLayersData)
 
 	let indicadoresBases = state.baseLayerObjects
 		.map(item => item.indicador )
@@ -184,7 +183,7 @@ docReady(() => {
 	// 			const colors = cores[smaller.id]
 
 	// 			displayKmlInfo(smaller.kmlData)
-	// 			createInfo(projectData, colors, images)
+	// 			createInfo(projectData, colors, images.images[0])
 	// 			toggleInfoClasses(isPortrait)
 
 	// 			// Setup commentBox create element only once
@@ -260,7 +259,6 @@ docReady(() => {
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
 					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
 					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases)
-					// onLayerChange("#projetos", allLayers, appmap)
 				)
 			}
 			catch(error) { reject(error) }
@@ -269,7 +267,7 @@ docReady(() => {
 	})
 
 	/*
-	* Fit the view to base layer
+	* Fit the view to base layer and run hash location map
 	*/
 	const fitToBaseLayer = new Promise( (resolve, reject) => {
 		const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerObj.id)
@@ -278,15 +276,32 @@ docReady(() => {
 			catch (error) { reject(error) }
 		}, 1500 )
 	})
+	.then(() =>{
+		let hashLocation = window.location.hash.replace("#","")
+		hashLocation = Number(hashLocation)
+		const mapDataLocated = mapaData.find(data => data.id === hashLocation)
+
+		if(mapDataLocated) {
+			const validLayers = mapDataLocated.layers
+				.map(indicador => allLayers.find(layer => layer.get("projectIndicador") === indicador))
+				.filter(layer => layer !== undefined)
+			switchlayers(true, validLayers, appmap)
+			createMapInfo(mapDataLocated)
+		}
+
+	})
 
 	/*
 	* Add non base layers to the map
 	*/
 	// const addProjectLayers = new Promise( (resolve, reject) => {
 	// 	setTimeout(() => {
-	// 		try { resolve(simplesLayers.forEach(layer => appmap.addLayer(layer))) } // add simple layers 
+	// 		try { 
+	// 			const location = window.location.hash
+	// 			console.log(location)
+	// 		} // setup a map from #hash
 	// 		catch (error) { reject(error) }
-	// 	}, 1)
+	// 	}, 5)
 	// })
 
 	const addControls = new Promise ( (resolve, reject) => {
