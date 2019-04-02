@@ -27,6 +27,7 @@ import {
 	// noBaseProjetos,
 	renderElement,
 	createList,
+	createMapsBtns,
 	listCreated,
 	toggleInfoClasses,
 	switchVisibilityState,
@@ -44,11 +45,13 @@ import {
 import { 
 	commentBoxEvents,
 	commentBoxSubmit,
-	resetEventListener,
+	// resetEventListener,
+	mapsBtnClickEvent,
 	sidebarGoHome, 
 	sideBarToggleChildren,
 	sideBarToggleFonte,
 	mapObserver,
+	// onLayerChange,
 	layersController,
 	menuEvents
 } from './eventListeners'
@@ -88,6 +91,10 @@ docReady(() => {
 
 	// console.log(allLayers)
 	// console.log(allLayersData)
+
+	let indicadoresBases = state.baseLayerObjects
+		.map(item => item.indicador )
+	indicadoresBases.unshift(state.baseLayerObj.indicador)
 
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
 	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
@@ -207,10 +214,7 @@ docReady(() => {
 		setTimeout(() => {
 			createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
 			createList(allLayersData, cores)
-
-			console.log('criar botões')
-			console.log(mapaData) // criar botões de mapas
-
+			createMapsBtns(mapaData, "#mapas", "mapas-")
 			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerObj.id, bases).NOME
 		},0)
 	})
@@ -245,7 +249,7 @@ docReady(() => {
 			try{
 				resolve(
 					// left sidebar
-					sidebarGoHome(allLayers, baseLayer, listCreated, view, fitPadding, appmap),
+					sidebarGoHome(allLayers, baseLayer, view, fitPadding, appmap),
 					sideBarToggleChildren(),
 					sideBarToggleFonte(),
 
@@ -255,7 +259,8 @@ docReady(() => {
 					// right sidebar
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
 					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
-					// mapButtonsControlloer(mapaData) -> criar eventlisteners de botões de mapas
+					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases)
+					// onLayerChange("#projetos", allLayers, appmap)
 				)
 			}
 			catch(error) { reject(error) }

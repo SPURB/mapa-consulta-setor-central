@@ -39,10 +39,26 @@ function renderElement(template, query) {
 
 
 /**
+ * Create maps buttons
+ * @param { Array } buttonsContentArray An array of objects
+ * @param { String } query The query to select
+ * @param { String } idPrefix Prefix to the button id
+ * @returns { HTMLCollection } A list of buttons inside que query selector element
+ */
+function createMapsBtns(buttonsContentArray, query, idPrefix){
+	let list = ''
+	buttonsContentArray.forEach(buttonObject => {
+		list += `<li><button id="${idPrefix}${buttonObject.id}">${buttonObject.name}</button></li>`
+		}
+	)
+	renderElement(list, query)
+}
+
+/**
 * Create navigation options from data source
 * @param { Object } allLayersData A big Object with layers info
 * @param { Object } layerColors The cores.json data
-* @returns { Node } the <options> rendered in "#projetos"
+* @returns { HTMLAllCollection } the <li> rendered in "#projetos"
 */
 function createList(allLayersData, layerColors){
 	let list = ""
@@ -66,7 +82,7 @@ function createList(allLayersData, layerColors){
 			listCreated.push(item.INDICADOR)
 
 			list += `
-				<li style='border-left-color:rgba(${r}, ${g}, ${b}, ${a})'>
+				<li style='border-left-color:rgba(${r}, ${g}, ${b}, ${a})' id="${item.INDICADOR}">
 					<input type='checkbox' id='${projectId}'>
 					<label for=${projectId}>${item.NOME}</label>
 					<button id="${btnProjectId}">></button>
@@ -120,22 +136,25 @@ Switch layer
 * @param { Object } map The Open Layers new Map instance
 */
 function switchVisibilityState(layer, state, map) {
+	const indicador = layer.get("projectIndicador")
+	const input = document.getElementById('projeto-id_'+ indicador)
+	const button = document.getElementById('btn-projeto-id_' + indicador)
+	input.checked = state
+	state ? button.classList.add('selected') : button.classList.remove('selected')
+
 	return state ? map.addLayer(layer) : map.removeLayer(layer)
 }
 
 /** 
 Switch layers and menu
 * @param { Boolean } state Visibility state of this layer
-* @param { Object } layers The layer to change the state
+* @param { Object } layers The layers to change the state
 * @param { Object } map The Open Layers new Map instance
-* @param { Array } list The indicadores Array of strings
 * @returns switch layers state
 */
-function switchlayers(state, layers, map, list){
+function switchlayers(state, layers, map){
 	layers.forEach(lyr => switchVisibilityState(lyr, state, map))
-	list.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = state )
 }
-
 
 /** 
 * Create info-kml data
@@ -491,6 +510,7 @@ function displayResponseMessage(resType, response, idBase){
 export {
 	renderElement,
 	createList,
+	createMapsBtns,
 	listCreated,
 	toggleInfoClasses,
 	switchVisibilityState,

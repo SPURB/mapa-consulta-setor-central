@@ -17,12 +17,12 @@ import {
 /**
 * Sidebar (top left) - Render initial base layer info and resets map to the initial state
 */
-function sidebarGoHome (layers, baseLayer, list, view, fitPadding, map){
+function sidebarGoHome (layers, baseLayer, view, fitPadding, map){
 	let gohome = document.getElementById('gohome')
 	gohome.addEventListener('click', () => {
 		setInitialState('initial')
 		fitToId(view, baseLayer, fitPadding)
-		switchlayers(false, layers, map, list)
+		switchlayers(false, layers, map)
 	})
 }
 
@@ -78,6 +78,21 @@ function mapObserver(isPortrait, map) {
 	}
 }
 
+// function onLayerChange(query, projectLayers, olMap){
+// 	let  camadasList = [...document.querySelector(query).children]
+// 		.map(item => {
+// 			return {
+// 				input: item.getElementsByTagName("input")[0],
+// 				button: item.getElementsByTagName("button")[0]
+// 			}
+// 		})
+// 		.forEach(el => {
+// 			el.input.onchange = () =>{
+// 				el.input.checked ? el.button.classList.add('selected') : el.button.classList.remove('selected')
+// 			}
+// 		})
+// }
+
 /*
 * Sidebar (right) -> Listeners for projetos checkboxes
 */
@@ -92,7 +107,7 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 		// toggle layer visibility with checkboxes status at Sidebar (right)
 		element.onchange = () => {
 			switchVisibilityState(layer, element.checked, map)
-			element.checked ? gotoBtn.classList.add('selected') : gotoBtn.classList.remove('selected')
+			// element.checked ? gotoBtn.classList.add('selected') : gotoBtn.classList.remove('selected')
 		}
 
 		// fit to clicked project, change Sidebar (left) info, fit
@@ -131,7 +146,6 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			createInfo(dataSheetitem, colors, images)
 			toggleInfoClasses()
 
-			// const projectLayer = projectLayers.find(layer => layer.values_.projectId === indicador)
 			fitToId(view, layer, fitPadding)
 			displayKmlInfo(layer.values_)
 
@@ -143,6 +157,43 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener at every click
 			commentBoxSubmit('info', state.idConsulta, data.ID, data.NOME) // change listener attributes at every click
 		}
+	})
+}
+/**
+ * @param { Array } buttonsContentArray An array of objects
+ * @param { String } query The query of que list to liten events
+ * @param { Object } olMap A open layers new Map instance
+ * @param { Array } allLayers An Array of open Layers new Layer instance
+ * @param { Array } baseIndicadores An Array of strings
+ * @returns { EventListener }
+ */
+function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseIndicadores) {
+	const buttons = [...document.querySelector(query).children] // [li, li ...]
+		.map(item => item.firstChild)
+
+	// const indicadoresFromLayers = allLayers.map(l => l.get("projectIndicador"))
+
+	buttons.forEach(item => {
+		item.addEventListener('click', event => {
+			switchlayers(false, allLayers, olMap)
+
+			const id = parseInt(event.target.id.match(/\d+/g).map(Number))
+			const content = buttonsContentArray.find(item => item.id === id)
+			let validLayers = []
+			let validIndicadores = []
+
+			content.layers.forEach(indicador => {
+				const output = allLayers.find(validLayer => validLayer.get("projectIndicador") === indicador)
+				const isBase = baseIndicadores.includes(indicador)
+				if(output) {
+					validLayers.push(output)
+					validIndicadores.push(indicador)
+				}
+				if(!output && !isBase) console.error(`nota para dev: checar ${indicador} na planilha.`)
+			})
+
+			switchlayers(true, validLayers, olMap)
+		})
 	})
 }
 
@@ -360,6 +411,8 @@ export {
 	commentBoxEvents,
 	commentBoxSubmit,
 	resetEventListener,
+	mapsBtnClickEvent,
+	// onLayerChange,
 	fieldErrors, 
 	sidebarGoHome, 
 	sideBarToggleChildren,
