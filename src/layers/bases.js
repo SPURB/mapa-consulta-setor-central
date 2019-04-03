@@ -83,7 +83,8 @@ function returnBases(projeto, otherProjetos, app_url, idColors, bing){
 		const bingMaps = new TileLayer({
 			title:"Base Bing Maps",
 			source: new BingMaps({
-			imagerySet: 'CanvasGray',
+			//https://docs.microsoft.com/en-us/bingmaps/rest-services/imagery/get-a-static-map
+			imagerySet: 'CanvasGray', // Aerial, AerialWithLabels, AerialWithLabelsOnDemand, CanvasDark, CanvasLight, CanvasGray, Road, Streetside 
 			culture: 'pt-BR',
 			key: process.env.BING_API_KEY,
 			type: 'base'

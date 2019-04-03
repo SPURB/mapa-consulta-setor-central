@@ -19,7 +19,7 @@ import {
 	simples,
 	complexos,
 	complexosIds,
-	cores, 
+	cores,
 	bases
 } from './model'
 
@@ -59,8 +59,10 @@ import {
 } from './eventListeners'
 
 docReady(() => {
+
 	let state = {
 		projectSelected: false, // project clicked at map or right sidebar?
+		mapSelected: false,
 		idConsulta: 36,
 		baseLayerObj: {id: 201, indicador: 'A33' }, // project main layer id,
 		baseLayerObjects: [ 
@@ -85,8 +87,8 @@ docReady(() => {
 	) // open layer's BASE's layers
 	const baseLayer = baseLayers.find(layer => layer.values_.projectIndicador === state.baseLayerObj.indicador)
 
-	const simplesLayers = returnSimples(projetos, simples, state.appUrl)
-	const complexosLayers = returnComplexos(projetos, complexos.default, complexosIds, state.appUrl)
+	const simplesLayers = returnSimples(projetos, simples, state.appUrl, cores)
+	const complexosLayers = returnComplexos(projetos, complexos.default, complexosIds, state.appUrl, cores)
 
 	const allLayers = [...simplesLayers, ...complexosLayers]
 	const allLayersData = [...simples.default, ...complexos.default]
@@ -258,7 +260,7 @@ docReady(() => {
 					// right sidebar
 					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
 					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
-					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases)
+					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state)
 				)
 			}
 			catch(error) { reject(error) }
@@ -269,7 +271,7 @@ docReady(() => {
 	/*
 	* Fit the view to base layer and run hash location map
 	*/
-	const fitToBaseLayer = new Promise( (resolve, reject) => {
+	const firstLoad = new Promise( (resolve, reject) => {
 		const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerObj.id)
 		setTimeout(() => {
 			try { resolve(fitToId(view, baseLayer, fitPadding)) }
@@ -285,24 +287,13 @@ docReady(() => {
 			const validLayers = mapDataLocated.layers
 				.map(indicador => allLayers.find(layer => layer.get("projectIndicador") === indicador))
 				.filter(layer => layer !== undefined)
+
 			switchlayers(true, validLayers, appmap)
 			createMapInfo(mapDataLocated)
+			createCommentBox("mapInfoCommentbox", state.mapSelected)
+			state.mapSelected = true
 		}
-
 	})
-
-	/*
-	* Add non base layers to the map
-	*/
-	// const addProjectLayers = new Promise( (resolve, reject) => {
-	// 	setTimeout(() => {
-	// 		try { 
-	// 			const location = window.location.hash
-	// 			console.log(location)
-	// 		} // setup a map from #hash
-	// 		catch (error) { reject(error) }
-	// 	}, 5)
-	// })
 
 	const addControls = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
@@ -329,8 +320,7 @@ docReady(() => {
 	/*
 	 * and map events
 	*/
-	.then( () => fitToBaseLayer )
-	// .then( () => addProjectLayers )
+	.then( () => firstLoad )
 	.then( () => addControls )
 	// TODO: fetch comments of state.idConsulta
 	.catch( error => { 

@@ -1,5 +1,8 @@
-import { setLayer } from './helpers'
-import { parseNameToNumericalId, commentBoxDisplayErrors } from '../domRenderers'
+import { setLayer, setComplexLayer } from './helpers'
+import { parseNameToNumericalId } from '../domRenderers'
+import Fill from 'ol/style/Fill'
+import Style from 'ol/style/Style'
+
 
 /**
 * Create complexos.json layers
@@ -7,9 +10,10 @@ import { parseNameToNumericalId, commentBoxDisplayErrors } from '../domRenderers
 * @param { Object } complexos The complexos.json data
 * @param { Number } ids The complexo layer kml id
 * @param { String } app_url Url of this app (not attached to this app)
+* @return { Object } cores The indicadores colors { indicador: [r, g, b, a] }
 * @return { Array } Array of new Layers's (from Open Layers) to create de base
 */
-function returnComplexos(projetos, complexos, ids, app_url){
+function returnComplexos(projetos, complexos, ids, app_url, cores){
 	let kmlLayers = []
 	const idsAndFiles = projetos
 		.map(projeto => {
@@ -38,12 +42,10 @@ function returnComplexos(projetos, complexos, ids, app_url){
 		const name = complexo.NOME
 		const kml = valid.kml
 		const id = complexo.ID
-
-		kmlLayers.push(setLayer(name, kml, {id: id, indicador:complexo.INDICADOR }))
+		
+		kmlLayers.push(setComplexLayer(name, kml, id, complexo.INDICADOR, cores[complexo.INDICADOR]))
 	})
 	return kmlLayers
 }
-
-
 
 export { returnComplexos }

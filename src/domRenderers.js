@@ -312,6 +312,10 @@ function createInfo(data, projectColor, path = false) {
 	renderElement(concatenation, "#infoCont")
 }
 
+/**
+ * Create a sidebar with map content in #selectedMapInfo
+ * @param { Object } mapData An item from mapData array { id, name, legenda }
+ */
 function createMapInfo(mapData){
 	window.location.hash = mapData.id
 	let concatenation = ''
@@ -402,7 +406,6 @@ function createCommentBox (query, isProject) {
 			</form>
 		</div>
 	`
-			// <div id=${query}-errors></div>
 
 	const parser = new DOMParser()
 	const commentBoxNode = parser.parseFromString(commentBox, 'text/html').body.firstChild

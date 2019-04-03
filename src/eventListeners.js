@@ -157,9 +157,10 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
  * @param { Object } olMap A open layers new Map instance
  * @param { Array } allLayers An Array of open Layers new Layer instance
  * @param { Array } baseIndicadores An Array of strings
+ * @param { Object } state One map was selected?
  * @returns { EventListener }
  */
-function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseIndicadores) {
+function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseIndicadores, state) {
 	const buttons = [...document.querySelector(query).children] // [li, li ...]
 		.map(item => item.firstChild)
 
@@ -185,6 +186,10 @@ function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseInd
 			const contentNoLayers = { id: content.id, name: content.name, legenda: content.legenda }
 			createMapInfo(contentNoLayers)
 			switchlayers(true, validLayers, olMap)
+
+			createCommentBox("mapInfoCommentbox", state.mapSelected)
+			resetEventListener(document.getElementById('mapInfoCommentbox-submit')) // recreate the button to reset eventListener at every click
+			commentBoxSubmit('mapInfoCommentbox', state.idConsulta, content.id, content.name) // change listener attributes at every click
 		})
 	})
 }
@@ -325,7 +330,6 @@ function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
 				'commentid': commentid,
 				'commentcontext': commentcontext
 			}
-			// submitBtn.classList.add('fetching')
 			apiPost('members', output, idBase)
 		}
 		e.preventDefault()

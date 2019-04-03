@@ -50,8 +50,6 @@ function apiPost(table, data, idBase) {
 
 	displayFetchingUI(true, '.button') //display fecthing elements
 
-	console.log(data)
-
 	api.post(url, data)
 		.then(response => {
 			if( table === 'members' ) {
