@@ -11,15 +11,14 @@ import {
 	createMapInfo,
 	createCommentBox,
 	commentBoxDisplayErrors,
-	toggleInfoClasses,
 	displayKmlInfo
 } from './domRenderers'
 
 /**
-* Sidebar (top left) - Render initial base layer info and resets map to the initial state
+* Sidebar - Render initial base layer info and resets map to the initial state
 */
 function sidebarGoHome (layers, baseLayer, view, fitPadding, map){
-	let gohome = document.getElementById('gohome')
+	let gohome = document.getElementById('inicio')
 	gohome.addEventListener('click', () => {
 		setInitialState('initial')
 		fitToId(view, baseLayer, fitPadding)
@@ -28,21 +27,34 @@ function sidebarGoHome (layers, baseLayer, view, fitPadding, map){
 }
 
 /**
- * Sidebar (left top) -> Hide all left menu
- */
-function sideBarToggleChildren(){
-	let hideshow = document.getElementById('toggleHidden')
-	hideshow.addEventListener('click', () => {
-		document.getElementById('info-kml').classList.add('no-display')
-		document.getElementById('map').classList.toggle('no-panel')
-		document.getElementById('infowrap').classList.toggle('hidden')
-		hideshow.classList.toggle('rotate')
-	})
+* Sidebar -> navigate in tabs
+* @param { undefinded } - if no param is defined, navigate on clicks; if a number N is defined as param, the Nth child of '#tabContent' will be active
+*/
+function sidebarNavigate(param){
+	let tabs = document.getElementById('tabs')
+	let tabsArr = Array.from(tabs.children)
+	if (typeof(param) !== 'number') {
+		tabs.addEventListener('click', (event) => {
+			tabsArr.map((index) => {
+				document.getElementById(index.getAttribute('data-id')).classList.add('hidden')
+				index.classList.remove('active')
+			})
+			document.getElementById(event.target.getAttribute('data-id')).classList.remove('hidden')
+			event.target.classList.add('active')
+		})
+	} else if (typeof(param) === 'number') {
+		tabsArr.map((index) => {
+			index.classList.remove('active')
+			document.getElementById(index.getAttribute('data-id')).classList.add('hidden')
+		})
+		tabsArr[param - 1].classList.add('active')
+		document.getElementById(tabsArr[param - 1].getAttribute('data-id')).classList.remove('hidden')
+	}
 }
 
 
 /*
-* Sidebar (left) -> Project picture info events - toggle source box
+* Sidebar -> Project picture info events - toggle source box
 */
 function sideBarToggleFonte(){
 	let openFonteBt = document.getElementById('openFonte')
@@ -57,6 +69,15 @@ function sideBarToggleFonte(){
 		event.target.parentNode.classList.remove('open')
 		event.target.parentNode.classList.add('closed')
 	})	
+}
+
+/**
+* For mobile devices, expand/contract the map height, toggling document body class '.mapLarge'
+*/
+function toggleMapMobile() {
+	document.getElementById('toggleMapMobile').addEventListener('click', () => {
+		document.body.classList.toggle('mapLarge')
+	})
 }
 
 /**
@@ -80,7 +101,7 @@ function mapObserver(isPortrait, map) {
 }
 
 /*
-* Sidebar (right) -> Listeners for projetos checkboxes
+* "Camadas" tab ('#legenda-projetos') -> Listeners for '#projetos' checkboxes
 */
 function layersController(listCreated, projectLayers, layerColors, view, fitPadding, state, map, dataSheet){
 	listCreated.forEach(indicador => {
@@ -90,21 +111,21 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 		const element = document.getElementById(prjId)
 		const layer = projectLayers.find( layer => layer.values_.projectIndicador === indicador)
 
-		// toggle layer visibility with checkboxes status at Sidebar (right)
+		// toggle layer visibility with checkboxes (sliders) status at the tab "Camadas"
 		element.onchange = () => {
 			switchVisibilityState(layer, element.checked, map)
 		}
 
-		// fit to clicked project, change Sidebar (left) info, fit
+		// fit to clicked project, change project info, fit
 		gotoBtn.onclick = () => {
-			setInitialState('initial')
+			setInitialState('initial', 3)
 			const idKml = indicadores[indicador]
 			const data = projetos.find(projeto => projeto.id === idKml)
 			const dataSheetitem = dataSheet.find(sheet => sheet.INDICADOR === indicador)
 			const colors = layerColors[indicador]
 			const images = getFiles(indicador, projetos, false, indicadores)
 
-			// uncheck all itens except the clicked one at Sidebar (right) 
+			// uncheck all itens except the clicked on tab list ('#projetos') 
 			const othersIds = listCreated.filter( idItem => idItem !== indicador )
 			othersIds.forEach(idItem => {
 				let checkEl = 'projeto-id_' + idItem
@@ -123,34 +144,27 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			})
 			switchVisibilityState(layer, true, map)
 
-			// hide panel Sidebar (right)
-			document.getElementById('panel').classList.remove('open')
-			document.getElementById('map').classList.remove('no-panel')
-
-			// fit to clicked project, change Sidebar (left) info
-			// createInfo(dataSheetitem, colors, images.hero)
+			// fit to clicked project, change project info ('#info')
 			const path = images => {
 				if(images.hero) return images.hero
 				if(!images.hero && images.images) return images.images[0].path
 				else return false
 			}
-
 			createInfo(dataSheetitem, colors, path(images))
-
-			toggleInfoClasses()
 			fitToId(view, layer, fitPadding)
 			displayKmlInfo(layer.values_)
 
 			// Setup commentBox 
 			if (!state.projectSelected) { // Create element and event only once
-				createCommentBox('info', false)
-				commentBoxEvents('info')
+				createCommentBox('infoComments', false)
+				commentBoxEvents('infoComments')
 			}
-			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener at every click
-			commentBoxSubmit('info', state.idConsulta, data.ID, data.NOME) // change listener attributes at every click
+			resetEventListener(document.getElementById('infoComments-submit')) // recreate the button to reset eventListener at every click
+			commentBoxSubmit('infoComments', state.idConsulta, data.ID, data.NOME) // change listener attributes at every click
 		}
 	})
 }
+
 /**
  * @param { Array } buttonsContentArray An array of objects
  * @param { String } query The query of que list to liten events
@@ -162,13 +176,14 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
  */
 function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseIndicadores, state) {
 	const buttons = [...document.querySelector(query).children] // [li, li ...]
-		.map(item => item.firstChild)
-
+		.map(item => item)
 	buttons.forEach(item => {
 		item.addEventListener('click', event => {
+			buttons.forEach(button => button.classList.remove('active'))
+			item.classList.add('active')
 			switchlayers(false, allLayers, olMap)
 
-			const id = parseInt(event.target.id.match(/\d+/g).map(Number))
+			const id = parseInt(event.target.offsetParent.id.match(/\d+/g).map(Number))
 			const content = buttonsContentArray.find(item => item.id === id)
 			let validLayers = []
 			let validIndicadores = []
@@ -191,6 +206,19 @@ function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseInd
 			resetEventListener(document.getElementById('mapInfoCommentbox-submit')) // recreate the button to reset eventListener at every click
 			commentBoxSubmit('mapInfoCommentbox', state.idConsulta, content.id, content.name) // change listener attributes at every click
 		})
+	})
+}
+
+/**
+* Add class 'hidden' to selected object information (obj) on click at button (btnId)
+* @param { String } obj The id of the object which will be closed [ #info for layers and #mapInfo for maps ]
+* @param { String } btnId The id of the button to click on to close the object [ #closeInfo for layers and #closeMapInfo for maps ]
+*/
+function closeObjectInfo(obj, btnId) {
+	const btn = document.getElementById(btnId)
+	const cont = document.getElementById(obj)
+	btn.addEventListener('click', () => {
+		cont.classList.add('hidden')
 	})
 }
 
@@ -233,25 +261,6 @@ function setErrors(event) {
 	else {
 		event.target.classList.add('error')
 	}
-}
-
-/**
-* Add event listeners to toggle 'open' class to an element to hide 
-* @param { HTMLElement } triggers The element from DOM to listen event click
-* @param { HTMLElement } toHide The element to hide 
-* @returns { EventListener }
-*/ 
-function menuEvents (triggers, toHide){
-	const normalizedHTMLArr = [...triggers]
-
-	normalizedHTMLArr[0].addEventListener('click', event =>{
-		toHide.classList.toggle('open')
-		normalizedHTMLArr[1].classList.remove('hide')
-	})
-	normalizedHTMLArr[1].addEventListener('click', event =>{
-		toHide.classList.toggle('open')
-		normalizedHTMLArr[0].classList.remove('hide')
-	})
 }
 
 /**
@@ -408,13 +417,15 @@ export {
 	commentBoxSubmit,
 	resetEventListener,
 	mapsBtnClickEvent,
+	toggleMapMobile, 
 	// onLayerChange,
 	fieldErrors, 
 	sidebarGoHome, 
-	sideBarToggleChildren,
+	sidebarNavigate, 
 	sideBarToggleFonte,
+	closeObjectInfo, 
 	mapObserver,
 	layersController,
-	menuEvents,
+	// menuEvents,
 	responseMessageListener
 }

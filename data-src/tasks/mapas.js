@@ -4,7 +4,7 @@ import * as GetSheetDone from 'get-sheet-done'
 import { createFile, parseNameToNumericalId } from './helpers'
 
 function mapas(){
-	GetSheetDone.labeledCols(config.google_sheet_id, 5) // Mapas
+	GetSheetDone.labeledCols(config.google_sheet_id, 4) // Mapas
 		.then(data => {
 			let output = []
 			let raw = data.data
@@ -34,13 +34,14 @@ function mapas(){
 		.then( mapsArrayNoNames => {
 			let outPutObject = {}
 
-			GetSheetDone.labeledCols(config.google_sheet_id, 6) // Mapas_nome
+			GetSheetDone.labeledCols(config.google_sheet_id, 5) // Mapas_nome
 				.then(data => {
 					data.data.forEach(item => {
 						const idNumber = parseNameToNumericalId(item.iddomapaqgis)
 						outPutObject[idNumber] = { 
 							name: item.nome,
-							legenda: item.legenda
+							legenda: item.legenda,
+							descricao: item.descricao
 						}
 					})
 
@@ -48,6 +49,7 @@ function mapas(){
 						.map(item =>{
 							item.name = outPutObject[item.id].name
 							item.legenda = 'data-src/legendas/' + outPutObject[item.id].legenda
+							item.descricao = outPutObject[item.id].descricao
 							return item
 						})
 					createFile(mapsArrayWithNames, './data-src/json/mapas.json')

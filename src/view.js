@@ -29,7 +29,6 @@ import {
 	createList,
 	createMapsBtns,
 	listCreated,
-	toggleInfoClasses,
 	createMapInfo,
 	switchlayers,
 	switchVisibilityState,
@@ -48,10 +47,12 @@ import {
 	commentBoxEvents,
 	commentBoxSubmit,
 	// resetEventListener,
+	toggleMapMobile, 
 	mapsBtnClickEvent,
 	sidebarGoHome, 
-	sideBarToggleChildren,
+	sidebarNavigate, 
 	sideBarToggleFonte,
+	closeObjectInfo, 
 	mapObserver,
 	// onLayerChange,
 	layersController,
@@ -216,7 +217,6 @@ docReady(() => {
 			createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
 			createList(allLayersData, cores)
 			createMapsBtns(mapaData, "#mapas", "mapas-")
-			document.getElementById('gohomeName').innerText = getProjectData(state.baseLayerObj.id, bases).NOME
 		},0)
 	})
 
@@ -249,18 +249,18 @@ docReady(() => {
 		setTimeout(() => {
 			try{
 				resolve(
-					// left sidebar
+					// sidebar
 					sidebarGoHome(allLayers, baseLayer, view, fitPadding, appmap),
-					sideBarToggleChildren(),
+					sidebarNavigate(), 
 					sideBarToggleFonte(),
+					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
+					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state),
+					closeObjectInfo('mapInfo', 'closeMapInfo'), 
+					closeObjectInfo('info', 'closeInfo'),
 
 					// map
-					mapObserver(isPortrait, appmap),
-
-					// right sidebar
-					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
-					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
-					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state)
+					toggleMapMobile(), 
+					mapObserver(isPortrait, appmap)
 				)
 			}
 			catch(error) { reject(error) }
@@ -292,6 +292,8 @@ docReady(() => {
 			createMapInfo(mapDataLocated)
 			createCommentBox("mapInfoCommentbox", state.mapSelected)
 			state.mapSelected = true
+			sidebarNavigate(2)
+			document.getElementById('mapas-' + mapDataLocated.id).classList.add('active')
 		}
 	})
 

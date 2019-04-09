@@ -4,7 +4,7 @@ import * as GetSheetDone from 'get-sheet-done'
 import { createFile } from './helpers'
 
 function complexo(){
-	GetSheetDone.labeledCols(config.google_sheet_id, 4) // KML_complexo
+	GetSheetDone.labeledCols(config.google_sheet_id, 3) // KML_complexo
 		.then((data) => {
 			const output = data.data
 			.map(projeto => {

@@ -49,7 +49,15 @@ function renderElement(template, query) {
 function createMapsBtns(buttonsContentArray, query, idPrefix){
 	let list = ''
 	buttonsContentArray.forEach(buttonObject => {
-		list += `<li><button id="${idPrefix}${buttonObject.id}">${buttonObject.name}</button></li>`
+		list += `
+			<li id="${idPrefix}${buttonObject.id}">
+				<button>
+					${buttonObject.name}
+					<span>${buttonObject.descricao}</span>
+				</button>
+				<img src="` + process.env.APP_URL + `/src/img/seta.svg" alt="Abrir">
+			</li>
+		`
 		}
 	)
 	renderElement(list, query)
@@ -83,10 +91,18 @@ function createList(allLayersData, layerColors){
 			listCreated.push(item.INDICADOR)
 
 			list += `
-				<li style='border-left-color:rgba(${r}, ${g}, ${b}, ${a})' id="${item.INDICADOR}">
-					<input type='checkbox' id='${projectId}'>
-					<label for=${projectId}>${item.NOME}</label>
-					<button id="${btnProjectId}">></button>
+				<li id="${item.INDICADOR}">
+					<label for='${projectId}' title='${item.NOME}'>
+						<label class="switch">
+							<input type='checkbox' id='${projectId}'>
+							<span class="slider"></span>
+						</label>
+						<div>
+							<span style='background-color: rgba(${r}, ${g}, ${b}, ${a});'></span>
+							<div class="nome">${item.NOME}</div>
+							<button id="${btnProjectId}"><span>i</span></button>
+						</div>
+					</label>
 				</li>
 			`
 
@@ -139,9 +155,9 @@ Switch layer
 function switchVisibilityState(layer, state, map) {
 	const indicador = layer.get("projectIndicador")
 	const input = document.getElementById('projeto-id_'+ indicador)
-	const button = document.getElementById('btn-projeto-id_' + indicador)
+	const wrapper = document.getElementById('btn-projeto-id_' + indicador).offsetParent
 	input.checked = state
-	state ? button.classList.add('selected') : button.classList.remove('selected')
+	state ? wrapper.classList.add('selected') : wrapper.classList.remove('selected')
 
 	return state ? map.addLayer(layer) : map.removeLayer(layer)
 }
@@ -230,35 +246,36 @@ function getFiles(indicador, projetos, baseId = false, indicadores = {}){
 	else {
 		const id = indicadores[indicador]
 		const projeto = projetos.find(projeto => projeto.id === id)
-
-		const files = projeto.children
-		const images = files.filter( file =>
-			file.extension === '.gif' ||
-			file.extension === '.png' ||
-			file.extension === '.jpg' ||
-			file.extension === '.jpeg' ||
-			file.extension === '.svg'
-		)
-
-		const hero = files.filter( hero => hero.name.includes(`hero${hero.extension}`))
-		
-		if(images.length > 0 && hero.length > 0){
-			return {
-				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
-				hero: hero[0].path
+		if (projeto) {
+			const files = projeto.children
+			const images = files.filter( file =>
+				file.extension === '.gif' ||
+				file.extension === '.png' ||
+				file.extension === '.jpg' ||
+				file.extension === '.jpeg' ||
+				file.extension === '.svg'
+			)
+			const hero = files.filter( hero => hero.name.includes(`hero${hero.extension}`))
+			if(images.length > 0 && hero.length > 0){
+				return {
+					images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+					hero: hero[0].path
+				}
 			}
-		}
-		if(images.length > 0){
-			return {
-				images: images.map(image => { return {"path": image.path, extension: image.extension} }),
-				hero: false
+			if(images.length > 0){
+				return {
+					images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+					hero: false
+				}
 			}
-		}
-		else { 
-			return {
-				images: false,
-				hero: false
+			else { 
+				return {
+					images: false,
+					hero: false
+				}
 			}
+		} else {
+			throw new Error('Projeto não encontrado')
 		}
 	}
 }
@@ -295,11 +312,22 @@ function createInfo(data, projectColor, path = false) {
 
 	concatenation += `<div class='info-legend' style='${concatColor}'></div>`
 	concatenation += "<div class='data' id='projectData'>"
+	function findLinks(str) {
+		// let links = []
+		// let newstr = ''
+		// links.push(str.substring(str.indexOf('', str.indexOf('http'))))
+		// // console.log(links)
+		// links.forEach(link => {
+		// 	newstr = str.replace(str.slice(str.indexOf('', str.indexOf('http'))), '<a href="' + link + '">este link</a>')
+		// // })
+		// // return newstr
+		return str
+	}
 	for(let val in data){
 		if(data[val] !== 0) {
 			switch(val) {
 				case 'NOME': concatenation += `<h4 class='project-title'>${data[val]}</h4>`; break
-				case 'DESCRIÇÃO': concatenation += `<p class='description'>${data[val]}</p>`; break
+				case 'DESCRIÇÃO': concatenation += `<p class='description'>` + findLinks(data[val]) + `</p>`; break
 				case 'ANO': concatenation += `<p class='ano'>Início <span>${data[val]}</span></p>`; break
 				case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${data[val]}</span></p>`; break
 				case 'STATUS': concatenation += `<p class='status'>Status <span>${data[val]}</span></p>`; break
@@ -310,6 +338,7 @@ function createInfo(data, projectColor, path = false) {
 	}
 	concatenation += "</div>"
 	renderElement(concatenation, "#infoCont")
+	document.getElementById('info').classList.remove('hidden')
 }
 
 /**
@@ -318,13 +347,20 @@ function createInfo(data, projectColor, path = false) {
  */
 function createMapInfo(mapData){
 	window.location.hash = mapData.id
+	document.getElementById('mapInfo').classList.remove('hidden')
 	let concatenation = ''
 	if(mapData.name === undefined && mapaData.legenda === undefined) { console.error(`${mapData}'s keys are undefined`) }
+	concatenation += `<h4 class="project-title">${mapData.name}</h4>`
+	concatenation += `<p class="project-description">${mapData.descricao}</p>`
 	if(mapaData) {
 		const coverImgPath = process.env.APP_URL + mapData.legenda
-		concatenation = `<img src="${coverImgPath}" alt="Legenda de ${mapData.name}">`
+		concatenation += `
+			<div class="legendaWrap">
+				<span>Legenda</span>
+				<img src="${coverImgPath}" alt="Legenda de ${mapData.name}">
+			</div>
+		`
 	}
-	concatenation += `<h4 class="project-title">${mapData.name}</h4>`
 	renderElement(concatenation, "#selectedMapInfo")
 }
 
@@ -427,50 +463,37 @@ function commentBoxDisplayErrors(query, errors) {
 }
 
 /**
-* Sidebar (left) -> Toggle classes of clicked project and the base project 
-* @param { Boolean } orientation Current window media orientation
-* @returns { HTMLDivElement } Changes #baseInfo, #gohome, #infowrap and #toggleHidden classes
-*/
-function toggleInfoClasses(orientation){
-	document.getElementById('baseInfo').classList.add('hidden') // classes' changes for clicks on map
-	document.getElementById('gohome').classList.remove('hidden')
-
-	if (orientation) {
-		document.getElementById('infowrap').classList.remove('hidden')
-		document.getElementById('toggleHidden').classList.add('rotate')
-	}
-	else {
-		document.getElementById('infowrap').classList.add('hidden')
-		document.getElementById('toggleHidden').classList.remove('rotate')
-	}
-}
-
-/**
 * Set initial state of app 
 * @param { String } stateStr 'error' or 'initial'
-* @returns initial classes to #info-kml, #info-error, #baseInfo, #info
+* @param { Int } if stateStr == 'initial' / tab - position of tab (first, second, third...)
+* @returns initial classes to #info-kml, #info-error, #baseInfo, #info, #mapInfo
 */ 
-function setInitialState(stateStr){
-	const infoError = document.getElementById('info-error')
+function setInitialState(stateStr, tab) {
 	const baseInfo = document.getElementById('baseInfo')
-	const gohome = document.getElementById('gohome')
 	const info = document.getElementById('info')
-
-	if(stateStr === 'initial'){
-		document.getElementById('panel').classList.remove('open')
-		infoError.classList.add('no-display')
-		baseInfo.classList.remove('no-display', 'hidden')
-		gohome.classList.add('hidden')
-		info.classList.remove('no-display')
-		info.classList.add('hidden')
+	const mapInfo = document.getElementById('mapInfo')
+	const infoError = document.getElementById('info-error')
+	function toggle(action, el) {
+		if (action === 'hide') {
+			el.classList.add('hidden')
+		} else if (action === 'show') {
+			el.classList.remove('hidden')
+		}
 	}
-	if(stateStr === 'error'){
-		gohome.classList.remove('hidden')
-		infoError.classList.remove('no-display')
-		baseInfo.classList.add('no-display')
-		info.classList.add('no-display')
+	if (stateStr === 'initial') {
+		document.getElementById('info-kml').classList.add('no-display')
+		toggle('hide', baseInfo)
+		toggle('hide', info)
+		toggle('hide', mapInfo)
+		toggle('hide', infoError)
+		switch (tab) {
+			case 1: toggle('show', baseInfo);
+			case 2: toggle('show', mapInfo);
+			case 3: toggle('show', info);
+		}
+	} else if (stateStr === 'error') {
+		toggle('show', infoError)
 	}
-	document.getElementById('info-kml').classList.add('no-display')
 }
 
 /**
@@ -539,7 +562,6 @@ export {
 	createList,
 	createMapsBtns,
 	listCreated,
-	toggleInfoClasses,
 	switchVisibilityState,
 	switchlayers,
 	fitToId,

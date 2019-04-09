@@ -5,7 +5,7 @@ import { createFile } from './helpers'
 
 function cores(){
 	let outputColors = {}
-	const tables =[3, 4] // 3 -> KML_simples; 4-> Complexo
+	const tables =[2, 3] // 2 -> KML_simples; 3 -> Complexo
 	let counter = 0
 
 	tables.forEach(table => {

@@ -4,7 +4,7 @@ import * as GetSheetDone from 'get-sheet-done'
 import { createFile } from './helpers'
 
 function simples(){
-	GetSheetDone.labeledCols(config.google_sheet_id, 3) // KML_simples
+	GetSheetDone.labeledCols(config.google_sheet_id, 2) // KML_simples
 		.then((data) => {
 			const simples = data.data
 			let output = simples

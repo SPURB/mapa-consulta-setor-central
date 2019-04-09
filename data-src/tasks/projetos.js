@@ -29,7 +29,7 @@ function getTree(input){
  * Return { indicador: id }
  * @param {Array} tables [Number, Number]
  */
-function createProjetos(tables, input){ //[3, 4] // 3 -> KML_simples; 4-> Complexo
+function createProjetos(tables, input){ //[2, 3] // 2 -> KML_simples; 3 -> Complexo
 	let ids = []
 	let indicadores = {}
 	let counter = 0
@@ -87,4 +87,4 @@ function createProjetos(tables, input){ //[3, 4] // 3 -> KML_simples; 4-> Comple
 	})
 }
 
-createProjetos([3,4], './data-src/projetos')
+createProjetos([2,3], './data-src/projetos')

@@ -27,24 +27,26 @@ function returnSimples(projetos, simples, app_url, cores){
 	let isFilled = filled => filledLayers.includes(filled)
 
 	validObjs.forEach(valid => {
-		const files = projetos.find(obj => parseNameToNumericalId(obj.name) === valid.id).children
-		files.forEach(file => {
-			if(file.extension === '.kml') {
-				const url = app_url + file.path
-				const rgba = cores[valid.indicador]
+		const files = projetos.find(obj => obj.id === valid.id)
+		if (files) {
+			files.children.forEach(file => {
+				if(file.extension === '.kml') {
+					const url = app_url + file.path
+					const rgba = cores[valid.indicador]
 
-				const customStyles = {
-					color: rgba
+					const customStyles = {
+						color: rgba
+					}
+
+					if(isFilled(valid.indicador)) customStyles.fillCollor = [rgba[0], rgba[1], rgba[2], 0.5]
+					if(isDashed(valid.indicador)) { customStyles.lineDash = [3]; customStyles.width = 1.5 }
+
+					kmlLayers.push({
+						layer: setLayer(valid.name, url, {id: valid.id, indicador: valid.indicador}, customStyles)
+					})
 				}
-
-				if(isFilled(valid.indicador)) customStyles.fillCollor = [rgba[0], rgba[1], rgba[2], 0.5]
-				if(isDashed(valid.indicador)) { customStyles.lineDash = [3]; customStyles.width = 1.5 }
-
-				kmlLayers.push({
-					layer: setLayer(valid.name, url, {id: valid.id, indicador: valid.indicador}, customStyles)
-				})
-			}
-		})
+			})
+		}
 	})
 	const layers = kmlLayers.map(vector => vector.layer)
 	return layers
