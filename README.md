@@ -33,7 +33,7 @@ http-server --cors
 ```
 npm run start
 ```
-Abra esta [localhost:1234](http://localhost:1234/) no seu browser.
+Abra [localhost:1234](http://localhost:1234/) no seu browser.
 
 
 ## Configure as suas variáveis de ambiente
