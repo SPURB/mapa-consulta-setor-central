@@ -487,9 +487,9 @@ function setInitialState(stateStr, tab) {
 		toggle('hide', mapInfo)
 		toggle('hide', infoError)
 		switch (tab) {
-			case 1: toggle('show', baseInfo);
-			case 2: toggle('show', mapInfo);
-			case 3: toggle('show', info);
+			case 1: toggle('show', baseInfo); break
+			case 2: toggle('show', mapInfo); break
+			case 3: toggle('show', info); break
 		}
 	} else if (stateStr === 'error') {
 		toggle('show', infoError)

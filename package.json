@@ -2,6 +2,26 @@
 	"name": "levantamento-operacao-urbana-centro",
 	"version": "1.0.0",
 	"description": "Levantamento de projetos no perímetro da Operação Urbana Centro",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/SPURB/levantamento-operacao-urbana-centro"
+	},
+	"bugs": "https://github.com/SPURB/levantamento-operacao-urbana-centro/issues",
+	"author": {
+		"name": "São Paulo Urbanismo",
+		"email": "desenvolvimento@spurbanismo.sp.gov.br"
+	},
+	"contributors": [
+		{
+			"name": "Thomas Yuba",
+			"email": "yubathom@gmail.com"
+		},
+		{
+			"name": "Davi Hosogiri",
+			"email": "hosogiri.davi@gmail.com"
+		}
+	],
 	"scripts": {
 		"start": "parcel ./index.html",
 		"watch": "parcel watch ./index.html",
@@ -17,11 +37,11 @@
 		"fs-extra": "7.0.1",
 		"node-sass": "4.11.0",
 		"ol": "5.3.1",
-		"parcel-bundler": "1.12.2"
-	},
-	"dependencies": {
-		"axios": "0.18.0",
+		"parcel-bundler": "^1.12.3",
 		"get-sheet-done": "^0.1.5",
 		"node-fetch": "^2.3.0"
+	},
+	"dependencies": {
+		"axios": "0.18.0"
 	}
 }

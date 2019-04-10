@@ -99,7 +99,7 @@ docReady(() => {
 	indicadoresBases.unshift(state.baseLayerObj.indicador)
 
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
-	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
+	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 0, 0, 50] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
 
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],

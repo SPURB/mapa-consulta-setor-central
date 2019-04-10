@@ -23,7 +23,7 @@ function simples(){
 					"FONTE": "SP Urbanismo" //fake input
 				}
 			})
-			.filter(projeto => projeto["ID"] > 0)
+			.filter(projeto => projeto.ID > 0)
 
 			let basesOutput = []
 			let simplesOutput = []
