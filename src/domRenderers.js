@@ -1,4 +1,4 @@
-import { isNumber } from 'util'
+// import { isNumber } from 'util'
 import { containsExtent } from 'ol/extent'
 import { responseMessageListener } from './eventListeners'
 import { mapaData } from './model';
@@ -55,7 +55,7 @@ function createMapsBtns(buttonsContentArray, query, idPrefix){
 					${buttonObject.name}
 					<span>${buttonObject.descricao}</span>
 				</button>
-				<img src="` + process.env.APP_URL + `/src/img/seta.svg" alt="Abrir">
+				<img src="` + process.env.APP_URL + `src/img/seta.svg" alt="Abrir">
 			</li>
 		`
 		}

@@ -1,7 +1,7 @@
 var fs = require("fs-extra");
  
 function copyPaste(source, destination) {
-	var destinationPath =  __dirname.replace('data-src', destination)
+	var destinationPath =  __dirname.replace('tasks', destination)
 
 	fs.copy(source, destinationPath, function (err) {
 		if (err){
@@ -12,5 +12,5 @@ function copyPaste(source, destination) {
 	})
 }
 
-copyPaste('data-src/projetos', 'dist/data-src/projetos');
-copyPaste('data-src/legendas', 'dist/data-src/legendas');
+copyPaste('data-src/projetos', '../dist/data-src/projetos');
+copyPaste('data-src/legendas', '../dist/data-src/legendas');

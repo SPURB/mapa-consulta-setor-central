@@ -3,11 +3,11 @@ import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { ScaleLine, ZoomSlider} from 'ol/control'
-import { pointerMove } from 'ol/events/condition'
-import Select from 'ol/interaction/Select.js'
-import Style from 'ol/style/Style'
-import Stroke from 'ol/style/Stroke'
-import Fill from 'ol/style/Fill'
+// import { pointerMove } from 'ol/events/condition'
+// import Select from 'ol/interaction/Select.js'
+// import Style from 'ol/style/Style'
+// import Stroke from 'ol/style/Stroke'
+// import Fill from 'ol/style/Fill'
 // import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
 import { getProjectData } from './layers/helpers'
 import { createBaseInfos, returnBases } from './layers/bases'
@@ -25,22 +25,22 @@ import {
 
 import {
 	// noBaseProjetos,
-	renderElement,
+	// renderElement,
 	createList,
 	createMapsBtns,
 	listCreated,
 	createMapInfo,
 	switchlayers,
-	switchVisibilityState,
+	// switchVisibilityState,
 	fitToId,
-	smallerExtent,
-	getFiles,
-	createInfo,
+	// smallerExtent,
+	// getFiles,
+	// createInfo,
 	// parseNameToNumericalId,
 	createBaseInfo,
-	setInitialState,
+	// setInitialState,
 	createCommentBox,
-	displayKmlInfo
+	// displayKmlInfo
 } from './domRenderers';
 
 import { 
@@ -56,7 +56,7 @@ import {
 	mapObserver,
 	// onLayerChange,
 	layersController,
-	menuEvents
+	// menuEvents
 } from './eventListeners'
 
 docReady(() => {

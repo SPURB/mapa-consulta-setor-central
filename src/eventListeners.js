@@ -1,5 +1,7 @@
-import { simples, projetos, indicadores, apiPost } from './model'
-import { getProjectData } from './layers/helpers'
+import { 
+	// simples, 
+	projetos, indicadores, apiPost } from './model'
+// import { getProjectData } from './layers/helpers'
 import { 
 	setInitialState,
 	fitToId,
