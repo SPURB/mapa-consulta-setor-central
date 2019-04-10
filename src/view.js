@@ -8,21 +8,35 @@ import Select from 'ol/interaction/Select.js'
 import Style from 'ol/style/Style'
 import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
-import { projetos, colocalizados, apiGet  } from './model'
-import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
-import { returnBases } from './layers/bases'
+// import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
+import { getProjectData } from './layers/helpers'
+import { createBaseInfos, returnBases } from './layers/bases'
+import { returnSimples } from './layers/simples'
+import { returnComplexos } from './layers/complexos'
+import { 
+	projetos,
+	mapaData,
+	simples,
+	complexos,
+	complexosIds,
+	cores,
+	bases
+} from './model'
+
 import {
-	baseObject,
-	noBaseProjetos,
+	// noBaseProjetos,
 	renderElement,
 	createList,
+	createMapsBtns,
 	listCreated,
-	toggleInfoClasses,
+	createMapInfo,
+	switchlayers,
 	switchVisibilityState,
 	fitToId,
 	smallerExtent,
 	getFiles,
 	createInfo,
+	// parseNameToNumericalId,
 	createBaseInfo,
 	setInitialState,
 	createCommentBox,
@@ -32,26 +46,60 @@ import {
 import { 
 	commentBoxEvents,
 	commentBoxSubmit,
-	resetEventListener,
+	// resetEventListener,
+	toggleMapMobile, 
+	mapsBtnClickEvent,
 	sidebarGoHome, 
-	sideBarToggleChildren,
+	sidebarNavigate, 
 	sideBarToggleFonte,
+	closeObjectInfo, 
 	mapObserver,
+	// onLayerChange,
 	layersController,
 	menuEvents
 } from './eventListeners'
 
 docReady(() => {
-	const baseLayers = returnBases(baseObject(projetos), process.env.APP_URL, false) // open layer's BASE's layers (bing maps and id === 0)
-	const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0) // open layer's BASE (id === 0)
-	const projectLayers = returnLayers(noBaseProjetos(projetos), process.env.APP_URL, colocalizados) // open layer's projects layers
-	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
-	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 150, 0, 300] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
 
 	let state = {
 		projectSelected: false, // project clicked at map or right sidebar?
-		idConsulta: 36
+		mapSelected: false,
+		idConsulta: 36,
+		baseLayerObj: {id: 201, indicador: 'A33' }, // project main layer id,
+		baseLayerObjects: [ 
+				{id: 202, indicador: 'A34'},
+				{id: 204, indicador:'A2'}, 
+				{id: 203, indicador:'A1'}, 
+				{id: 205, indicador:'A3'} ], // other bases
+		bing: false,
+		appUrl: process.env.APP_URL
 	}
+
+	const baseInfos = createBaseInfos(projetos, state.baseLayerObj.id, state.baseLayerObjects)
+	const baseLayers = returnBases({
+			info: baseInfos.info,
+			id: state.baseLayerObj.id,
+			indicador: state.baseLayerObj.indicador
+		}, 
+		baseInfos.infos,
+		state.appUrl,
+		cores,
+		state.bing
+	) // open layer's BASE's layers
+	const baseLayer = baseLayers.find(layer => layer.values_.projectIndicador === state.baseLayerObj.indicador)
+
+	const simplesLayers = returnSimples(projetos, simples, state.appUrl, cores)
+	const complexosLayers = returnComplexos(projetos, complexos.default, complexosIds, state.appUrl, cores)
+
+	const allLayers = [...simplesLayers, ...complexosLayers]
+	const allLayersData = [...simples.default, ...complexos.default]
+
+	let indicadoresBases = state.baseLayerObjects
+		.map(item => item.indicador )
+	indicadoresBases.unshift(state.baseLayerObj.indicador)
+
+	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
+	const fitPadding = isPortrait ? [0, 0, 0, 0] : [0, 0, 0, 50] // padding for fit(extent, { padding: fitPadding }) and fitToId(..,.., fitPadding)
 
 	let view = new View({
 		center: [ -5190695.271418285, -2696956.332871481 ],
@@ -63,7 +111,7 @@ docReady(() => {
 
 	let appmap = new Map({
 		title:'projetos',
-		layers: baseLayers, 
+		layers: baseLayers,
 		loadTilesWhileAnimating: true,
 		target: 'map',
 		view: view,
@@ -73,94 +121,102 @@ docReady(() => {
 	/*
 	* map events
 	*/
-	appmap.addInteraction(
-		new Select({
-			condition: pointerMove,
-			layers: projectLayers,
-			style: new Style({
-				stroke: new Stroke({
-					color: [0, 255, 0, 1],
-					width: 3
-				}),
-				fill: new Fill({
-					color: [255, 255, 255, 0.5]
-				})
-			}),
-			hitTolerance: 10
-		})
-	)
+	// appmap.addInteraction(
+	// 	new Select({
+	// 		condition: pointerMove,
+	// 		layers: simplesLayers, // filter interactables
+	// 		style: new Style({
+	// 			stroke: new Stroke({
+	// 				color: [0, 255, 0, 1],
+	// 				width: 3
+	// 			}),
+	// 			fill: new Fill({
+	// 				color: [255, 255, 255, 0.5]
+	// 			})
+	// 		}),
+	// 		hitTolerance: 10
+	// 	})
+	// )
 
-	appmap.on('singleclick', evt => {
-		setInitialState('initial')
+	// appmap.on('singleclick', evt => {
+	// 	setInitialState('initial')
 
-		let idAndextents = []
-		appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+	// 	let idAndextents = []
+	// 	appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
 
-			//reset visibilty
-			projectLayers.forEach( lyr => switchVisibilityState(lyr, true))
-			listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
+	// 		//reset visibilty
+	// 		simplesLayers.forEach( lyr => switchVisibilityState(lyr, true))
+	// 		listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
 
-			const projectjId = layer.values_.projectId
-			const kmlData = layer.values_
-			if(projectjId !== 0) { // exclude the base
-				idAndextents.push(
-				{
-					id: projectjId,
-					extent: layer.getSource().getExtent(),
-					kmlData: kmlData
-				})
-			}
-		})
-		if (idAndextents.length >= 1) {
+	// 		const projectjId = layer.values_.projectId
+	// 		const kmlData = layer.values_
 
-			document.getElementById('map').classList.remove('no-panel')
+	// 		const isBase = () => { // exclusion rules. Unclickable layers
+	// 			const bIds = state.baseLayerObjects.map(base => base.id)
+	
+	// 			if (projectjId === state.baseLayerObj.id) return true // project layer
+	// 			if (bIds.includes(projectjId)) return true // base layers
+	// 			else return false
+	// 		}
 
-			const smaller = smallerExtent(idAndextents) // resolve clicks in overlays, gets the smaller extent
-			view.fit(smaller.extent, { // fit to smaller extent 
-				padding: fitPadding
-			})
+	// 		if(!isBase()) {
+	// 			idAndextents.push({
+	// 				id: projectjId,
+	// 				extent: layer.getSource().getExtent(),
+	// 				kmlData: kmlData
+	// 			})
+	// 		}
+	// 	})
+	// 	if (idAndextents.length >= 1) {
 
-			const info = document.getElementById("info")
-			info.classList.remove("hidden")
+	// 		document.getElementById('map').classList.remove('no-panel')
 
-			const projectData = getProjectData(smaller.id, colocalizados) 
+	// 		const smaller = smallerExtent(idAndextents) // resolve clicks in overlays, gets the smaller extent
+	// 		view.fit(smaller.extent, { // fit to smaller extent 
+	// 			padding: fitPadding
+	// 		})
 
-			if (projectData) {
-				const images = getFiles(smaller.id, projetos)
-				const colors = layerColors[smaller.id]
+	// 		const info = document.getElementById("info")
+	// 		info.classList.remove("hidden")
 
-				displayKmlInfo(smaller.kmlData)
-				createInfo(projectData, colors, images)
-				toggleInfoClasses(isPortrait)
+	// 		const projectData = getProjectData(smaller.id, simples)
 
-				// Setup commentBox create element only once
-				if (!state.projectSelected) {
-					createCommentBox('info', false)
-					commentBoxEvents('info')
-				} // setup errors only once
+	// 		if (projectData) {
+	// 			const images = getFiles(smaller.id, projetos)
+	// 			const colors = cores[smaller.id]
 
-				resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
-				commentBoxSubmit('info', state.idConsulta, projectData.ID, projectData.NOME) // change listener attributes at every click
-				state.projectSelected = true // change state to run setup only once
-		}
-			else {
-					renderElement(`
-						<div class='erro'>Algo deu errado... 
-							<p class='info'>Projeto ID <span>${smaller.id}</span></p>
-						</div>`, "#info-error")
-					setInitialState('error')
-			}
-		}
-	})
+	// 			displayKmlInfo(smaller.kmlData)
+	// 			createInfo(projectData, colors, images.images[0])
+	// 			toggleInfoClasses(isPortrait)
+
+	// 			// Setup commentBox create element only once
+	// 			if (!state.projectSelected) {
+	// 				createCommentBox('info', false)
+	// 				commentBoxEvents('info')
+	// 			} // setup errors only once
+
+	// 			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
+	// 			commentBoxSubmit('info', state.idConsulta, projectData.ID, projectData.NOME) // change listener attributes at every click
+	// 			state.projectSelected = true // change state to run setup only once
+	// 	}
+	// 		else {
+	// 				renderElement(`
+	// 					<div class='erro'>Algo deu errado... 
+	// 						<p class='info'>Projeto ID <span>${smaller.id}</span></p>
+	// 					</div>`, "#info-error")
+	// 				setInitialState('error')
+	// 		}
+	// 	}
+	// })
 
 	/*
 	* Create DOM elements
 	*/
 	const addPannels = new Promise ( (resolve, reject) => {
 		setTimeout(() => {
-			createBaseInfo(getProjectData('BASE', colocalizados)) // sidebar first load
-			createList(colocalizados)
-			document.getElementById('gohomeName').innerText = getProjectData('BASE', colocalizados).NOME
+			createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
+			createList(allLayersData, cores)
+			createMapsBtns(mapaData, "#mapas", "mapas-")
 		},0)
 	})
 
@@ -193,17 +249,18 @@ docReady(() => {
 		setTimeout(() => {
 			try{
 				resolve(
-					// left sidebar
-					sidebarGoHome(projectLayers, baseLayer, listCreated, view, fitPadding),
-					sideBarToggleChildren(),
+					// sidebar
+					sidebarGoHome(allLayers, baseLayer, view, fitPadding, appmap),
+					sidebarNavigate(), 
 					sideBarToggleFonte(),
+					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
+					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state),
+					closeObjectInfo('mapInfo', 'closeMapInfo'), 
+					closeObjectInfo('info', 'closeInfo'),
 
 					// map
-					mapObserver(isPortrait, appmap),
-
-					// right sidebar
-					menuEvents(document.getElementsByClassName('menu-display'), document.getElementById("panel")),
-					layersController(listCreated, projectLayers, layerColors, view, fitPadding, state)
+					toggleMapMobile(), 
+					mapObserver(isPortrait, appmap)
 				)
 			}
 			catch(error) { reject(error) }
@@ -212,24 +269,32 @@ docReady(() => {
 	})
 
 	/*
-	* Fit the view to base layer
+	* Fit the view to base layer and run hash location map
 	*/
-	const fitToBaseLayer = new Promise( (resolve, reject) => {
-		const baseLayer = baseLayers.find( layer => layer.values_.projectId === 0)
+	const firstLoad = new Promise( (resolve, reject) => {
+		const baseLayer = baseLayers.find( layer => layer.values_.projectId === state.baseLayerObj.id)
 		setTimeout(() => {
 			try { resolve(fitToId(view, baseLayer, fitPadding)) }
 			catch (error) { reject(error) }
 		}, 1500 )
 	})
+	.then(() =>{
+		let hashLocation = window.location.hash.replace("#","")
+		hashLocation = Number(hashLocation)
+		const mapDataLocated = mapaData.find(data => data.id === hashLocation)
 
-	/*
-	* Add non base layers to the map
-	*/
-	const addProjectLayers = new Promise( (resolve, reject) => {
-		setTimeout(() => {
-			try { resolve(projectLayers.forEach(layer => appmap.addLayer(layer))) } // add project layers 
-			catch (error) { reject(error) }
-		}, 1)
+		if(mapDataLocated) {
+			const validLayers = mapDataLocated.layers
+				.map(indicador => allLayers.find(layer => layer.get("projectIndicador") === indicador))
+				.filter(layer => layer !== undefined)
+
+			switchlayers(true, validLayers, appmap)
+			createMapInfo(mapDataLocated)
+			createCommentBox("mapInfoCommentbox", state.mapSelected)
+			state.mapSelected = true
+			sidebarNavigate(2)
+			document.getElementById('mapas-' + mapDataLocated.id).classList.add('active')
+		}
 	})
 
 	const addControls = new Promise ( (resolve, reject) => {
@@ -257,8 +322,7 @@ docReady(() => {
 	/*
 	 * and map events
 	*/
-	.then( () => fitToBaseLayer )
-	.then( () => addProjectLayers )
+	.then( () => firstLoad )
 	.then( () => addControls )
 	// TODO: fetch comments of state.idConsulta
 	.catch( error => { 

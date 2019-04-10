@@ -1,56 +1,79 @@
-# Projetos da Operação Urbana Centro
+# Operação Urbana Centro
+Mapa interativo da consulta pública do Projeto de Intervenção Urbana Centro. 
 
-1. Instale as dependências
+## Pré-requisitos para desenvolvimento. 
+São necessárias as seguintes instalações globais para iniciar o desenvolvimento:
+* [git-fls](https://git-lfs.github.com/)
+* [nodejs e npm](https://nodejs.org/)
+* [http-server](https://github.com/indexzero/http-server)
+
+### Intruções
+
+1. Instale as dependências do projeto.
 ```
 npm install
 ```
 
-2. Renomeie o arquivo e `.env.sample` para `.env` e o altere incluindo a chave do bing maps e o host de publicação:
-```
-BING_API_KEY=chave-bing-mapas
-APP_URL=http://seu-host/levantamento-operacao-urbana-centro
-```
-> É necessário incluir data-src em um server http com cors liberado (ou no mesmo host). Sugestão para facilitar desenvolvimento: [http-server](https://github.com/indexzero/http-server). 
-> Para gerar uma chave no [bing maps](https://docs.microsoft.com/en-us/bingmaps/getting-started/bing-maps-dev-center-help/getting-a-bing-maps-key)
-
-3. Altere e renomeie `data-src/Colocalizados.sample.xlsx` para `data-src/Colocalizados.xlsx` e altere a tabela `output` com as informações do projeto.
-
-4. Inclua os arquivos em `data-src/projetos/id_nome-do-projeto`. Inclua ao menos um arquivo `.kml` em cada diretório criado.
-
-5. Rode o comando:
-
+2. Compile os dados da aplicação disponibilizados na [planilha do google docs](https://docs.google.com/spreadsheets/d/11W0_h0AcOxGvziGuZTolvEmdOS9VfNxP4WT-Sm_x80M/edit?usp=sharing
+):
 ```
 npm run files
 ```
 
-6. Inicie a aplicação para desenvolvimento
+3. Você precisará de duas janelas do terminal para desenvolver. Inicie o http-server com cors em `http://locahost:8080` para servir os arquivos kmls. Com o http-server instalado globalmente - `http-server i -g` - inicie o host dos kmls no terminal.
+```
+# instale http-server globalmente
+npm i -g http-server
+
+# inicie http-server com CORS liberado
+http-server --cors
+```
+
+4. Em uma nova janela do terminal inicie a aplicação para desenvolvimento em `http://locahost:1234`.
 ```
 npm run start
 ```
+Abra esta [localhost:1234](http://localhost:1234/) no seu browser.
 
-7. Publique o projeto no diretório `dist/`
+
+## Configure as suas variáveis de ambiente
+
+A partir do arquivo `.env` crie dois arquivos `.env.development.local` e `.env.production.local`. As variáveis seão trocadas de acordo com a tabela abaixo:
+
+| Comandos             | Variáveis                   |
+| -------------------- |:----------------------------|
+| `npm run start`      | `.env.development.local`    |
+| `npm run build`      | `.env.production.local`     |
+| `npm run files`      | não utiliza variáveis `.env`|
+
+As variáveis a serem configiraddas nos arquivo `*.env` são: 
+```
+BING_API_KEY=chave-da-api-do-bing-mapas
+APP_URL=http://seu.host.http/
+API_TOKEN=token-das-consulta-publicas
+```
+
+> Arquivos no padrão `env.*.local` são ingnorados pelo git. Cuidado para **não comitar**  estas variáveis em outros arquivos. Não comitar deleção ou alterações no arquivo `.env`.
+
+### Compile os arquivos para publicação
+Crie um arquivo `.env.production.local` com os mesmos parâmetros do arquivo `.env` e com valores do seu ambiente da publicação. 
+
+Compile os arquivos no diretório `dist/` com o comando.
 ``` 
 npm run build
 ```
 
-8. Personalize estilos em determinados kmls
-```
-# arquivo nome do arquivo .kml
-data-src/projetos/nome-do-projeto/arquivo-kml_custom-dashed.kml
+Publique os arquivos criados em `dist/` para endereço especificado em `.env.production.local`.
 
-# src/layers/projectsKmls.js aletere a constante customStyles 
-const customStyles = [...,'custom-dashed']
 
-```
-e crie o estilo 
-```projectsKmls.js
-if (file.extension === '.kml' && isCustom === 'custom-dashed') {
-    var style = new Style({
-        stroke: new Stroke({
-            color: [0, 0, 0, 1],
-            width: 1.5,
-            lineDash: [.1, 5]
-        })
-    })
-}
-```
+## Documentação de bugs
+Toda contribuição é bem vinda. Crie uma [issue](https://github.com/SPURB/levantamento-operacao-urbana-centro/issues).
+
+## Licença
+[GNU General Public License v3.0](https://github.com/SPURB/levantamento-operacao-urbana-centro/blob/master/LICENSE).
+
+## 
+> ### Nota
+Arquivos kmls na rede interna da São Paulo Urbanismo estão disponíveis em:
+`\\spurbsp01\Gestao_Projetos\Projetos\OUC_Centro_RevisaoLei12349_97\01_Projeto_Urbanistico\91_Entregas\PIU_Setor_Central_Consulta_2019_03\KML`
+

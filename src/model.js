@@ -1,17 +1,25 @@
 /**
- * Content from data-src/
- * to update data-src/projetos.json and colocalizados.json run -> 'npm run files'  
+ * to update run -> 'npm run files'
  */
-import { displayFetchingUI, displayResponseMessage } from './domRenderers.js'
-import { children as projetos } from '../data-src/projetos' 
-import * as colocalizados from  '../data-src/colocalizados'
 import axios from 'axios'
+import { displayFetchingUI, displayResponseMessage } from './domRenderers.js'
+import * as projetosObj from '../data-src/json/projetos'
+import * as indicadores from '../data-src/json/indicadores'
+import * as mapasObj from '../data-src/json/mapas'
+import * as simples from  '../data-src/json/simples'
+import * as complexos from '../data-src/json/complexos'
+import * as bases from  '../data-src/json/bases'
+import * as cores from  '../data-src/json/cores'
+import { ids as complexosIds } from '../data-src/json/complexosIds'
+
+const projetos = projetosObj.default
+const mapaData = mapasObj.default
 
 /**
  * Axios instance. Header setup
 */
 const api = axios.create({
-	baseURL: 'http://spurbcp13343:7080/consultas-publicas-backend/', //please check the docs: https://spurb.github.io/consultas-publicas-backend/
+	baseURL: 'http://spurbcp13343:7080/consultas-publicas-backend/', // please check the docs: https://spurb.github.io/consultas-publicas-backend/
 	timeout: 5000,
 	headers: {
 		'Content-Post': process.env.API_TOKEN,
@@ -59,4 +67,15 @@ function apiPost(table, data, idBase) {
 		})
 }
 
-export { projetos, colocalizados, apiPost, apiGet }
+export { 
+	projetos,
+	mapaData,
+	simples,
+	complexos,
+	complexosIds,
+	indicadores,
+	bases,
+	cores,
+	apiPost,
+	apiGet
+}
