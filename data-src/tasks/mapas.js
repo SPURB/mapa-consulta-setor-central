@@ -11,7 +11,7 @@ function mapas(){
 				.map(mapa => {
 					return {
 						"INDICADOR": mapa.indicador,
-						"ID": Number(mapa.iddomapaqgis)
+						"ID": Number(mapa.idmapaqgis)
 					}
 				})
 			
@@ -31,14 +31,14 @@ function mapas(){
 			})
 			return output
 		})
-		.then( mapsArrayNoNames => {
+		.then(mapsArrayNoNames => {
 			let outPutObject = {}
 
 			GetSheetDone.labeledCols(config.google_sheet_id, 5) // Mapas_nome
 				.then(data => {
 					data.data.forEach(item => {
-						const idNumber = parseNameToNumericalId(item.iddomapaqgis)
-						outPutObject[idNumber] = { 
+						const idNumber = parseNameToNumericalId(item.idmapaqgis)
+						outPutObject[idNumber] = {
 							name: item.nome,
 							legenda: item.legenda,
 							descricao: item.descricao
@@ -52,8 +52,9 @@ function mapas(){
 							item.descricao = outPutObject[item.id].descricao
 							return item
 						})
-					createFile(mapsArrayWithNames, './data-src/json/mapas.json')
+					return mapsArrayWithNames
 				})
+				.then(maps => createFile(maps, './data-src/json/mapas.json'))
 		})
 		.catch(err => console.error(err)
 	)

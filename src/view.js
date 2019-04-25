@@ -3,12 +3,6 @@ import docReady from 'document-ready'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { ScaleLine, ZoomSlider} from 'ol/control'
-// import { pointerMove } from 'ol/events/condition'
-// import Select from 'ol/interaction/Select.js'
-// import Style from 'ol/style/Style'
-// import Stroke from 'ol/style/Stroke'
-// import Fill from 'ol/style/Fill'
-// import { returnLayers, layerColors, getProjectData } from './layers/projectsKmls'
 import { getProjectData } from './layers/helpers'
 import { createBaseInfos, returnBases } from './layers/bases'
 import { returnSimples } from './layers/simples'
@@ -24,29 +18,19 @@ import {
 } from './model'
 
 import {
-	// noBaseProjetos,
-	// renderElement,
 	createList,
 	createMapsBtns,
 	listCreated,
 	createMapInfo,
 	switchlayers,
-	// switchVisibilityState,
 	fitToId,
-	// smallerExtent,
-	// getFiles,
-	// createInfo,
-	// parseNameToNumericalId,
 	createBaseInfo,
-	// setInitialState,
 	createCommentBox,
-	// displayKmlInfo
 } from './domRenderers';
 
 import { 
 	commentBoxEvents,
 	commentBoxSubmit,
-	// resetEventListener,
 	toggleMapMobile, 
 	mapsBtnClickEvent,
 	sidebarGoHome, 
@@ -54,9 +38,7 @@ import {
 	sideBarToggleFonte,
 	closeObjectInfo, 
 	mapObserver,
-	// onLayerChange,
 	layersController,
-	// menuEvents
 } from './eventListeners'
 
 docReady(() => {
@@ -117,97 +99,6 @@ docReady(() => {
 		view: view,
 		controls:[] // remove defaults (compass, +- zoom buttons, attribution)
 	})
-
-	/*
-	* map events
-	*/
-	// appmap.addInteraction(
-	// 	new Select({
-	// 		condition: pointerMove,
-	// 		layers: simplesLayers, // filter interactables
-	// 		style: new Style({
-	// 			stroke: new Stroke({
-	// 				color: [0, 255, 0, 1],
-	// 				width: 3
-	// 			}),
-	// 			fill: new Fill({
-	// 				color: [255, 255, 255, 0.5]
-	// 			})
-	// 		}),
-	// 		hitTolerance: 10
-	// 	})
-	// )
-
-	// appmap.on('singleclick', evt => {
-	// 	setInitialState('initial')
-
-	// 	let idAndextents = []
-	// 	appmap.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-
-	// 		//reset visibilty
-	// 		simplesLayers.forEach( lyr => switchVisibilityState(lyr, true))
-	// 		listCreated.forEach( liItem =>  document.getElementById('projeto-id_' + liItem ).checked = true )
-
-	// 		const projectjId = layer.values_.projectId
-	// 		const kmlData = layer.values_
-
-	// 		const isBase = () => { // exclusion rules. Unclickable layers
-	// 			const bIds = state.baseLayerObjects.map(base => base.id)
-	
-	// 			if (projectjId === state.baseLayerObj.id) return true // project layer
-	// 			if (bIds.includes(projectjId)) return true // base layers
-	// 			else return false
-	// 		}
-
-	// 		if(!isBase()) {
-	// 			idAndextents.push({
-	// 				id: projectjId,
-	// 				extent: layer.getSource().getExtent(),
-	// 				kmlData: kmlData
-	// 			})
-	// 		}
-	// 	})
-	// 	if (idAndextents.length >= 1) {
-
-	// 		document.getElementById('map').classList.remove('no-panel')
-
-	// 		const smaller = smallerExtent(idAndextents) // resolve clicks in overlays, gets the smaller extent
-	// 		view.fit(smaller.extent, { // fit to smaller extent 
-	// 			padding: fitPadding
-	// 		})
-
-	// 		const info = document.getElementById("info")
-	// 		info.classList.remove("hidden")
-
-	// 		const projectData = getProjectData(smaller.id, simples)
-
-	// 		if (projectData) {
-	// 			const images = getFiles(smaller.id, projetos)
-	// 			const colors = cores[smaller.id]
-
-	// 			displayKmlInfo(smaller.kmlData)
-	// 			createInfo(projectData, colors, images.images[0])
-	// 			toggleInfoClasses(isPortrait)
-
-	// 			// Setup commentBox create element only once
-	// 			if (!state.projectSelected) {
-	// 				createCommentBox('info', false)
-	// 				commentBoxEvents('info')
-	// 			} // setup errors only once
-
-	// 			resetEventListener(document.getElementById('info-submit')) // recreate the button to reset eventListener
-	// 			commentBoxSubmit('info', state.idConsulta, projectData.ID, projectData.NOME) // change listener attributes at every click
-	// 			state.projectSelected = true // change state to run setup only once
-	// 	}
-	// 		else {
-	// 				renderElement(`
-	// 					<div class='erro'>Algo deu errado... 
-	// 						<p class='info'>Projeto ID <span>${smaller.id}</span></p>
-	// 					</div>`, "#info-error")
-	// 				setInitialState('error')
-	// 		}
-	// 	}
-	// })
 
 	/*
 	* Create DOM elements

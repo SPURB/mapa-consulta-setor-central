@@ -11,6 +11,9 @@ yarn-error.log*
 Thumbs.db
 *.db
 
+# IDE
+.vscode
+
 # Runtime data
 pids
 *.pid
