@@ -372,10 +372,14 @@ function createMapInfo(mapData){
 function createBaseInfo(data, projetos) {
 	let concatenation = ''
 	const nome = data.NOME
-	const bgImgPath = process.env.APP_URL + getFiles(data.ID, projetos, data.ID)[0].children[0].path
+	const validImageExtensions = [ '.gif', '.jpg', '.jpeg', '.png', '.svg' ]
+	let isValidImage = image => validImageExtensions.includes(image)
+
+	const images = getFiles(data.ID, projetos, data.ID)
+		.find(file => isValidImage(file.extension))
 
 	concatenation += `<h1 class='baseInfo-title'>${nome}</h1>`
-	concatenation += `<div class='cover' style='background-image: url("${bgImgPath}");'></div>` 
+	if(images) concatenation += `<div class='cover' style='background-image: url("${images[0]}");'></div>` 
 
 	if (data.ANO || data.SECRETARIA || data.STATUS) {
 		concatenation += "<div class='dados'>"

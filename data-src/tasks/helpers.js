@@ -23,6 +23,7 @@ function parseNameToNumericalId(name){
 	let projectId = name.substring(0,7) // "1_a", "2_m", "05_"
 	projectId = projectId.replace(/[^\d]/g, '')  // "1", "2", "5"
 	projectId = parseInt(projectId) // 1, 2, 5
+
 	if (Number.isInteger(projectId)) return projectId
 	else { throw new Error('projectId must to be a Number') }
 }

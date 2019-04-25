@@ -23,8 +23,12 @@ function returnComplexos(projetos, complexos, ids, app_url, cores){
 			}
 		})
 
+	// console.log(ids)
+	// console.log(idsAndFiles)
+
 	const validIdAndKmls = ids
 		.map(id => idsAndFiles.find(el => el.id === id))
+		.filter(projeto => projeto !== undefined)
 		.map(projeto => {
 			const found = projeto.files.find(file => file.extension === '.kml')
 			const name = found.name
@@ -38,12 +42,18 @@ function returnComplexos(projetos, complexos, ids, app_url, cores){
 		})
 
 	complexos.forEach(complexo => {
-		const valid = validIdAndKmls.find(item => item.id === complexo.ID)
-		const name = complexo.NOME
-		const kml = valid.kml
-		const id = complexo.ID
-		
-		kmlLayers.push(setComplexLayer(name, kml, id, complexo.INDICADOR, cores[complexo.INDICADOR]))
+		const valid = validIdAndKmls
+			.find(item => item.id === complexo.ID)
+
+		if(valid) {
+			const name = complexo.NOME
+			const kml = valid.kml
+			const id = complexo.ID
+			kmlLayers.push(setComplexLayer(name, kml, id, complexo.INDICADOR, cores[complexo.INDICADOR]))
+		}
+		else {
+			throw new Error(`olar, Erro nesta camada. Veja o kml está no diretório com a id equivalente: ${complexo}`)
+		}
 	})
 	return kmlLayers
 }
