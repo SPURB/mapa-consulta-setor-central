@@ -23,8 +23,9 @@ function parseNameToNumericalId(name){
 	let projectId = name.substring(0,7) // "1_a", "2_m", "05_"
 	projectId = projectId.replace(/[^\d]/g, '')  // "1", "2", "5"
 	projectId = parseInt(projectId) // 1, 2, 5
-	if (Number.isInteger(projectId)) return projectId
-	else { throw new Error('projectId must to be a Number') }
+
+	if(!Number.isInteger(projectId)) throw new Error('projectId must to be a Number')
+	else return projectId
 }
 
 /**
@@ -34,7 +35,8 @@ function parseNameToNumericalId(name){
 */
 function renderElement(template, query) {
 	var node = document.querySelector(query)
-	if (!node) return
+
+	if (!node) throw new Error(`Error creating ${template}.\n\nThe querySelection of '${query}' is: ${node}`)
 	node.innerHTML = template
 }
 
@@ -281,6 +283,15 @@ function getFiles(indicador, projetos, baseId = false, indicadores = {}){
 }
 
 /**
+ * @param { String } id This element id
+ * @param { String } svg The icon svg as string
+ * @param { String } text The url text
+ */
+function createGoBackParticipe(id, svg, text) {
+	renderElement(`<a id=${id} class="go-back-participe"><img src='${svg}' alt='Voltar'>${text}</a>`, '#info-warnings')
+}
+
+/**
 * Create info box
 * @param { Object } data A dataset item 
 * @param { String } projectColor rgba color string
@@ -343,7 +354,7 @@ function createInfo(data, projectColor, path = false) {
 
 /**
  * Create a sidebar with map content in #selectedMapInfo
- * @param { Object } mapData An item from mapData array { id, name, legenda }
+ * @param { Object } mapData An item from mapData array { id, name, legenda, descricao }
  */
 function createMapInfo(mapData){
 	window.location.hash = mapData.id
@@ -569,7 +580,6 @@ export {
 	switchVisibilityState,
 	switchlayers,
 	fitToId,
-	// fitToNewId,
 	smallerExtent,
 	getFiles,
 	createInfo,
@@ -579,6 +589,7 @@ export {
 	parseNameToNumericalId,
 	setInitialState,
 	createCommentBox,
+	createGoBackParticipe,
 	commentBoxDisplayErrors, 
 	displayKmlInfo,
 	displayFetchingUI,

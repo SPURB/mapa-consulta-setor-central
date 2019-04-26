@@ -26,20 +26,23 @@ import {
 	fitToId,
 	createBaseInfo,
 	createCommentBox,
+	createGoBackParticipe
 } from './domRenderers';
 
 import { 
 	commentBoxEvents,
 	commentBoxSubmit,
-	toggleMapMobile, 
+	goBackParticipe,
+	toggleMapMobile,
 	mapsBtnClickEvent,
-	sidebarGoHome, 
-	sidebarNavigate, 
+	sidebarGoHome,
+	sidebarNavigate,
 	sideBarToggleFonte,
-	closeObjectInfo, 
+	closeObjectInfo,
 	mapObserver,
 	layersController,
 } from './eventListeners'
+import seta from './img/seta.svg'
 
 docReady(() => {
 
@@ -103,12 +106,18 @@ docReady(() => {
 	/*
 	* Create DOM elements
 	*/
-	const addPannels = new Promise ( (resolve, reject) => {
+	const addPannels = new Promise (resolve => {
 		setTimeout(() => {
-			createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos) // sidebar first load
-			createList(allLayersData, cores)
-			createMapsBtns(mapaData, "#mapas", "mapas-")
+			resolve(
+				createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos),// sidebar first load
+				createList(allLayersData, cores),
+				createMapsBtns(mapaData, "#mapas", "mapas-"),
+				createGoBackParticipe('go-back-participe', seta,'Texto da consulta')
+			)
 		},0)
+	})
+	.then(()=>{
+		goBackParticipe('go-back-participe', `${window.location.origin}/piu-setor-central-2`) // check participe's new route!!!
 	})
 
 	const addCommentBox = new Promise ((resolve, reject) => {

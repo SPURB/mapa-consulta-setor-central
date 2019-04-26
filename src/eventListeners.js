@@ -1,11 +1,7 @@
-import { 
-	// simples, 
-	projetos, indicadores, apiPost } from './model'
-// import { getProjectData } from './layers/helpers'
-import { 
+import { projetos, indicadores, apiPost } from './model'
+import {
 	setInitialState,
 	fitToId,
-	// fitToNewId,
 	switchVisibilityState,
 	switchlayers,
 	getFiles,
@@ -22,6 +18,7 @@ import {
 function sidebarGoHome (layers, baseLayer, view, fitPadding, map){
 	let gohome = document.getElementById('inicio')
 	gohome.addEventListener('click', () => {
+		window.location.hash = ''
 		setInitialState('initial')
 		fitToId(view, baseLayer, fitPadding)
 		switchlayers(false, layers, map)
@@ -83,6 +80,28 @@ function toggleMapMobile() {
 }
 
 /**
+ * Go back to back to referrer with redirect or go back to history.go(-1)
+ * @param {id} id
+ * @param {url} url
+ * @returns Window location redirect
+ */
+function goBackParticipe(id, url) {
+	let goBack = document.getElementById(id)
+	history.pushState({ initial: true }, url) // set initial state to the first load event
+
+	if(!goBack) throw new Error()
+
+	goBack.addEventListener('click', () => {
+		if(document.referrer === url){
+			window.history.go(-1)
+		}
+		else {
+			window.location = url
+		}
+	}, false)
+}
+
+/**
  * Observe if the map was deformed. Resets to the original proportion if changed
  * @param { Boolean } isPortrait The app window
  * @param { Object } map The Open Layers Map instance
@@ -120,6 +139,7 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 
 		// fit to clicked project, change project info, fit
 		gotoBtn.onclick = () => {
+			window.location.hash = ''
 			setInitialState('initial', 3)
 			const idKml = indicadores[indicador]
 			const data = projetos.find(projeto => projeto.id === idKml)
@@ -200,8 +220,7 @@ function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseInd
 				if(!output && !isBase) console.error(`nota para dev: checar ${indicador} na planilha.`)
 			})
 
-			const contentNoLayers = { id: content.id, name: content.name, legenda: content.legenda }
-			createMapInfo(contentNoLayers)
+			createMapInfo(content)
 			switchlayers(true, validLayers, olMap)
 
 			createCommentBox("mapInfoCommentbox", state.mapSelected)
@@ -417,10 +436,10 @@ function responseMessageListener(idBase, resType) {
 export { 
 	commentBoxEvents,
 	commentBoxSubmit,
+	goBackParticipe,
 	resetEventListener,
 	mapsBtnClickEvent,
 	toggleMapMobile, 
-	// onLayerChange,
 	fieldErrors, 
 	sidebarGoHome, 
 	sidebarNavigate, 
@@ -428,6 +447,5 @@ export {
 	closeObjectInfo, 
 	mapObserver,
 	layersController,
-	// menuEvents,
 	responseMessageListener
 }
