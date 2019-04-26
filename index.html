@@ -1,5 +1,15 @@
 <html>
 	<head>
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-113737634-8"></script> -->
+		<script>
+			// window.dataLayer = window.dataLayer || [];
+			// function gtag(){dataLayer.push(arguments);}
+			// gtag('js', new Date());
+
+			// gtag('config', 'UA-113737634-8');
+		</script>
+
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta http-equiv="Content-Language" content="pt-br">
 		<meta charset="utf-8">
@@ -24,7 +34,7 @@
 			</div>
 			<div id="info-error" class="hidden"></div>
 			<div id="info" class="hidden">
-				<button id="closeInfo" class="voltar"><img src="src/img/seta.svg">Voltar</button>
+				<button id="closeInfo" class="voltar"><img src="src/img/seta.svg">Outras camadas</button>
 				<div class="coverSec" id="coverSec">
 					<section id="coverSecSrc" class="fonte closed">
 						<button id="openFonte">i</button>
@@ -37,7 +47,7 @@
 				<div id="infoComments"></div>
 			</div>
 			<div id="mapInfo" class="hidden">
-				<button id="closeMapInfo" class="voltar"><img src="src/img/seta.svg">Voltar</button>
+				<button id="closeMapInfo" class="voltar"><img src="src/img/seta.svg">Outras mapas</button>
 				<div id="selectedMapInfo"></div>
 				<div id="mapInfoCommentbox"></div>
 			</div>
@@ -50,6 +60,7 @@
 			</button>
 			<div id="info-kml" class="no-display"></div>
 		</div>
+		<div id="info-warnings"></div>
 		<script src="src/view.js"></script>
 	</body>
 </html>
