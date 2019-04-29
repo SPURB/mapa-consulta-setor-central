@@ -14,7 +14,8 @@ import {
 	complexos,
 	complexosIds,
 	cores,
-	bases
+	bases,
+	apiGet
 } from './model'
 
 import {
@@ -29,18 +30,19 @@ import {
 	createGoBackParticipe
 } from './domRenderers';
 
-import { 
+import {
 	commentBoxEvents,
 	commentBoxSubmit,
 	goBackParticipe,
-	toggleMapMobile,
+	toggleMapMobile, 
 	mapsBtnClickEvent,
-	sidebarGoHome,
-	sidebarNavigate,
+	sidebarGoHome, 
+	sidebarNavigate, 
 	sideBarToggleFonte,
-	closeObjectInfo,
+	closeObjectInfo, 
 	mapObserver,
 	layersController,
+	tabsResetListeners
 } from './eventListeners'
 import seta from './img/seta.svg'
 
@@ -49,13 +51,14 @@ docReady(() => {
 	let state = {
 		projectSelected: false, // project clicked at map or right sidebar?
 		mapSelected: false,
-		idConsulta: 36,
+		idConsulta: 42,
+		consultaFetch: false, // the Consultas table data from fetch. This is setted by addCommentBox after first load
 		baseLayerObj: {id: 201, indicador: 'A33' }, // project main layer id,
 		baseLayerObjects: [ 
 				{id: 202, indicador: 'A34'},
-				{id: 204, indicador:'A2'}, 
-				{id: 203, indicador:'A1'}, 
-				{id: 205, indicador:'A3'} ], // other bases
+				{id: 204, indicador:'A2'},
+				{id: 203, indicador:'A1'},
+				{id: 205, indicador:'A3'} ],// other bases
 		bing: false,
 		appUrl: process.env.APP_URL
 	}
@@ -72,15 +75,13 @@ docReady(() => {
 		state.bing
 	) // open layer's BASE's layers
 	const baseLayer = baseLayers.find(layer => layer.values_.projectIndicador === state.baseLayerObj.indicador)
-
 	const simplesLayers = returnSimples(projetos, simples, state.appUrl, cores)
 	const complexosLayers = returnComplexos(projetos, complexos.default, complexosIds, state.appUrl, cores)
 
 	const allLayers = [...simplesLayers, ...complexosLayers]
 	const allLayersData = [...simples.default, ...complexos.default]
 
-	let indicadoresBases = state.baseLayerObjects
-		.map(item => item.indicador )
+	let indicadoresBases = state.baseLayerObjects.map(item => item.indicador )
 	indicadoresBases.unshift(state.baseLayerObj.indicador)
 
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth
@@ -120,27 +121,20 @@ docReady(() => {
 		goBackParticipe('go-back-participe', `${window.location.origin}/piu-setor-central-2`) // check participe's new route!!!
 	})
 
-	const addCommentBox = new Promise ((resolve, reject) => {
-		setTimeout(() => {
-			try { resolve ( createCommentBox("baseInfo", state.projectSelected) ) }
-			catch (error) { reject(error) }
-		}, 0)
-	})
-
-	/*
-	* Event listeners
-	*/
-	const commentBoxListeners = new Promise ((resolve, reject) => {
-		setTimeout(() => {
-			try {
-					resolve(
-						commentBoxEvents('baseInfo'),
-						commentBoxSubmit('baseInfo', state.idConsulta, 2, 'Mapa base')
-					)
-				}
-			catch(error) { reject(error) }
-		}, 1)
-	})
+	const addCommentBox = apiGet('consultas', state.idConsulta) //fetch from api
+		.then(consulta => {
+			const isOpen = Number(consulta.ativo) // consulta.ativo is '0' or '1'
+			state.consultaFetch = consulta
+			createCommentBox("baseInfo", state.projectSelected, isOpen)
+			return isOpen
+		})
+		.then(formState => {
+			if(formState) {
+				commentBoxEvents('baseInfo'),
+				commentBoxSubmit('baseInfo', state.idConsulta, 0, 'Mapa base')
+			}
+		})
+		.catch(error => error)
 
 	/*
 	* Create all other event listeners
@@ -151,10 +145,10 @@ docReady(() => {
 				resolve(
 					// sidebar
 					sidebarGoHome(allLayers, baseLayer, view, fitPadding, appmap),
-					sidebarNavigate(), 
-					sideBarToggleFonte(),
+					sidebarNavigate(0),
+					// sideBarToggleFonte(),
 					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
-					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state),
+					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state, baseLayer),
 					closeObjectInfo('mapInfo', 'closeMapInfo'), 
 					closeObjectInfo('info', 'closeInfo'),
 
@@ -178,7 +172,7 @@ docReady(() => {
 			catch (error) { reject(error) }
 		}, 1500 )
 	})
-	.then(() =>{
+	.then(() => {
 		let hashLocation = window.location.hash.replace("#","")
 		hashLocation = Number(hashLocation)
 		const mapDataLocated = mapaData.find(data => data.id === hashLocation)
@@ -190,11 +184,25 @@ docReady(() => {
 
 			switchlayers(true, validLayers, appmap)
 			createMapInfo(mapDataLocated)
+
+			// <form mapas>
 			createCommentBox("mapInfoCommentbox", state.mapSelected)
 			state.mapSelected = true
 			sidebarNavigate(2)
 			document.getElementById('mapas-' + mapDataLocated.id).classList.add('active')
 		}
+		return mapDataLocated
+	})
+	.then(data => {
+
+		tabsResetListeners(['baseInfo', 'legenda-projetos'], '#mapInfo')
+
+		if(state.consultaFetch.ativo === '1'){
+			// <form mapas>
+			commentBoxEvents('mapInfoCommentbox'),
+			commentBoxSubmit('mapInfoCommentbox', state.idConsulta, data.id, data.name)
+		}
+
 	})
 
 	const addControls = new Promise ( (resolve, reject) => {
@@ -218,14 +226,14 @@ docReady(() => {
 	* Then chain event listeners
 	*/
 	.then( () => pannelListeners )
-	.then( () => commentBoxListeners )
 	/*
 	 * and map events
 	*/
 	.then( () => firstLoad )
 	.then( () => addControls )
 	// TODO: fetch comments of state.idConsulta
-	.catch( error => { 
+	.catch( error => {
+		console.error(error)
 		throw new Error(error)
 	})
 })
