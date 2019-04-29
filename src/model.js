@@ -19,12 +19,8 @@ const mapaData = mapasObj.default
  * Axios instance. Header setup
 */
 const api = axios.create({
-	baseURL: 'http://spurbcp13343:7080/consultas-publicas-backend/', // please check the docs: https://spurb.github.io/consultas-publicas-backend/
-	timeout: 5000,
-	headers: {
-		'Content-Post': process.env.API_TOKEN,
-		'Content-Type': 'application/json'
-	}
+	baseURL: process.env.API_URL,
+	timeout: 5000
 })
 
 /**
@@ -33,10 +29,15 @@ const api = axios.create({
  * @param { Number } id The consulta id 
  */
 function apiGet (table, id){
-	const url = `/${table}_v1/${id.toString()}`
-	api.get(url)
-		.then(response => response.data)
-		.catch(error => error)
+	const url = `${table}/${id.toString()}`
+
+	return new Promise((resolve, reject) => {
+		api.get(url)
+		.then(response => {
+			resolve(response.data)
+		})
+		.catch(error => reject(error))
+	})
 }
 
 /**
@@ -46,7 +47,7 @@ function apiGet (table, id){
  * @param { String } idBase The base of id name
   */
 function apiPost(table, data, idBase) {
-	const url = `${table}_v1/`
+	const url = `${table}/`
 
 	displayFetchingUI(true, '.button') //display fecthing elements
 
@@ -58,13 +59,8 @@ function apiPost(table, data, idBase) {
 			}
 			else { return response.data }
 		})
-		.catch(error => {
-			displayResponseMessage('error', error, idBase) // add Comment response error page
-			// displayResponseMessage('success', false, idBase)
-		})
-		.then( () => {
-			displayFetchingUI(false, '.button') // remove submit button 'feching' class
-		})
+		.catch(error => displayResponseMessage('error', error, idBase))
+		.then( () => displayFetchingUI(false, '.button'))
 }
 
 export { 

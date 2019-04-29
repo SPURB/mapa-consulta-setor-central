@@ -1,7 +1,7 @@
-// import { isNumber } from 'util'
 import { containsExtent } from 'ol/extent'
 import { responseMessageListener } from './eventListeners'
-import { mapaData } from './model';
+import { mapaData } from './model'
+import seta from './img/seta.svg'
 
 /**
 * Filter projetos removing base layers
@@ -23,9 +23,8 @@ function parseNameToNumericalId(name){
 	let projectId = name.substring(0,7) // "1_a", "2_m", "05_"
 	projectId = projectId.replace(/[^\d]/g, '')  // "1", "2", "5"
 	projectId = parseInt(projectId) // 1, 2, 5
-
-	if(!Number.isInteger(projectId)) throw new Error('projectId must to be a Number')
-	else return projectId
+	if (Number.isInteger(projectId)) return projectId
+	else { throw new Error('projectId must to be a Number') }
 }
 
 /**
@@ -35,8 +34,7 @@ function parseNameToNumericalId(name){
 */
 function renderElement(template, query) {
 	var node = document.querySelector(query)
-
-	if (!node) throw new Error(`Error creating ${template}.\n\nThe querySelection of '${query}' is: ${node}`)
+	if (!node) return
 	node.innerHTML = template
 }
 
@@ -57,7 +55,7 @@ function createMapsBtns(buttonsContentArray, query, idPrefix){
 					${buttonObject.name}
 					<span>${buttonObject.descricao}</span>
 				</button>
-				<img src="` + process.env.APP_URL + `src/img/seta.svg" alt="Abrir">
+				<img src='${seta}' alt="Abrir">
 			</li>
 		`
 		}
@@ -133,21 +131,6 @@ function fitToId(view, layer, padding){
 	}
 }
 
-// function fitToNewId(appmap, indicador, padding, indicadorBase) {
-// 	const layers = appmap.getLayers().getArray()
-// 	const clickedLayer = layers.find(layer => layer.get('projectIndicador') === indicador)
-// 	const extent = clickedLayer.getSource().getExtent()
-
-// 	if(extent[0]!==Infinity) appmap.getView().fit(extent, { padding: padding })
-
-// 	else {
-// 		const baseLayer = layers.find(baseLay => baseLay.get('projectIndicador') === indicadorBase)
-// 		const baseExtent =  baseLayer.getSource().getExtent()
-// 		appmap.getView().fit(baseExtent, { padding: padding })
-// 		console.error(new Error())
-// 	}
-// }
-
 /** 
 Switch layer
 * @param  { Object } layer The layer to change the state
@@ -177,9 +160,10 @@ function switchlayers(state, layers, map){
 
 /** 
 * Create info-kml data
-* @param  { Object } kmlAttributes The kml attributes
+* @param  { Object } layer The kml attributes
 */
-function displayKmlInfo(kmlAttributes) {
+function displayKmlInfo(layer) {
+	const kmlAttributes = layer.values_
 	const exceptions = [
 		'SubClasses', 
 		'EntityHand', 
@@ -299,48 +283,23 @@ function createGoBackParticipe(id, svg, text) {
 * @returns { HTMLDivElement } Create the div#info of selected project
 */ 
 function createInfo(data, projectColor, path = false) {
-	let coverImg = document.getElementById('coverSec')
-	const concatColor = `background-color: rgba(${projectColor[0]}, ${projectColor[1]}, ${projectColor[2]}, ${projectColor[3]})`
 	let concatenation = ''
 
 	if (path) {
-		coverSec.style.display = "block"
-		const coverImgPath = process.env.APP_URL + path
-		coverImg.style.backgroundImage = `url("${coverImgPath}")`
-
-		let autorStr = `Autor <b>${data.AUTOR}</b>`
-		let fonteStr = ''
-		if (typeof(data.FONTE) === 'string' && data.FONTE.substring(0,4) === 'http') {
-			fonteStr += `Fonte <b><a href='${data.FONTE}' title='${data.FONTE}' target='_blank'>${data.FONTE}</a></b>`
-		}
-		else {
-			fonteStr += `Fonte <b>${data.FONTE}</b>`
-		}
-		renderElement(autorStr, '#fonteAutor')
-		renderElement(fonteStr, '#fonteFonte')
+		concatenation += `<div class='cover-section' style='background-color: rgba(${projectColor[0]}, ${projectColor[1]}, ${projectColor[2]}, 0.2)'>
+			<img class='cover-section-img' src='${ process.env.APP_URL}${path }' alt='${data.NOME}'>
+		</div>`
 	}
-	else { coverSec.style.display = "none" }
 
-	concatenation += `<div class='info-legend' style='${concatColor}'></div>`
+	concatenation += `<div class='info-legend' style='background-color: rgba(${projectColor[0]}, ${projectColor[1]}, ${projectColor[2]}, ${projectColor[3]})'></div>`
 	concatenation += "<div class='data' id='projectData'>"
-	function findLinks(str) {
-		// let links = []
-		// let newstr = ''
-		// links.push(str.substring(str.indexOf('', str.indexOf('http'))))
-		// // console.log(links)
-		// links.forEach(link => {
-		// 	newstr = str.replace(str.slice(str.indexOf('', str.indexOf('http'))), '<a href="' + link + '">este link</a>')
-		// // })
-		// // return newstr
-		return str
-	}
 	for(let val in data){
 		if(data[val] !== 0) {
 			switch(val) {
 				case 'NOME': concatenation += `<h4 class='project-title'>${data[val]}</h4>`; break
-				case 'DESCRIÇÃO': concatenation += `<p class='description'>` + findLinks(data[val]) + `</p>`; break
-				case 'ANO': concatenation += `<p class='ano'>Início <span>${data[val]}</span></p>`; break
-				case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${data[val]}</span></p>`; break
+				case 'DESCRIÇÃO': concatenation += `<p class='description'>${data[val]}`; break
+				// case 'ANO': concatenation += `<p class='ano'>Início <span>${data[val]}</span></p>`; break
+				// case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${data[val]}</span></p>`; break
 				case 'STATUS': concatenation += `<p class='status'>Status <span>${data[val]}</span></p>`; break
 				default: concatenation += ''
 			}
@@ -354,11 +313,12 @@ function createInfo(data, projectColor, path = false) {
 
 /**
  * Create a sidebar with map content in #selectedMapInfo
- * @param { Object } mapData An item from mapData array { id, name, legenda, descricao }
+ * @param { Object } mapData An item from mapData array { id, name, legenda }
  */
 function createMapInfo(mapData){
 	window.location.hash = mapData.id
 	document.getElementById('mapInfo').classList.remove('hidden')
+
 	let concatenation = ''
 	if(mapData.name === undefined && mapaData.legenda === undefined) { console.error(`${mapData}'s keys are undefined`) }
 	concatenation += `<h4 class="project-title">${mapData.name}</h4>`
@@ -379,18 +339,13 @@ function createMapInfo(mapData){
 * Create initial info (images, strings) box with data from the larger projectgetProjectData 
 * @param { Object } data colocalizados.json item (return from getProjectData())
 */
-
 function createBaseInfo(data, projetos) {
 	let concatenation = ''
 	const nome = data.NOME
-	const validImageExtensions = [ '.gif', '.jpg', '.jpeg', '.png', '.svg' ]
-	let isValidImage = image => validImageExtensions.includes(image)
-
-	const images = getFiles(data.ID, projetos, data.ID)
-		.find(file => isValidImage(file.extension))
+	const bgImgPath = process.env.APP_URL + getFiles(data.ID, projetos, data.ID)[0].children[0].path
 
 	concatenation += `<h1 class='baseInfo-title'>${nome}</h1>`
-	if(images) concatenation += `<div class='cover' style='background-image: url("${images[0]}");'></div>` 
+	concatenation += `<div class='cover' style='background-image: url("${bgImgPath}");'></div>` 
 
 	if (data.ANO || data.SECRETARIA || data.STATUS) {
 		concatenation += "<div class='dados'>"
@@ -398,8 +353,8 @@ function createBaseInfo(data, projetos) {
 			const dado = data[val]	
 			if(dado !== 0){
 				switch (val) {
-					case 'ANO': concatenation += `<p class='ano'>Início <span>${dado}</span></p>`; break
-					case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${dado}</span></p>`; break
+					// case 'ANO': concatenation += `<p class='ano'>Início <span>${dado}</span></p>`; break
+					// case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${dado}</span></p>`; break
 					case 'STATUS': concatenation += `<p class='status'>Status <span>${dado}</span></p>`; break
 					default: concatenation += ''
 				}
@@ -411,15 +366,16 @@ function createBaseInfo(data, projetos) {
 	renderElement(concatenation, "#baseInfo")
 }
 
+
 /**
 * Create commentable form
 * @param { String } query The element query selector to inject the form
 * @param { Boolean } isProject Project was selected? -> state.projectSelected
+* @param { Boolean } isOpen Is this form open?
 * @returns { HTMLDivElement } Them commentable box
 */
-function createCommentBox (query, isProject) {
-
-	if(isProject || document.body.contains(document.forms[query])) { return } // Stop function if project info box already created
+function createCommentBox (query, isProject, isOpen = true) {
+	if(!isOpen || isProject || document.body.contains(document.forms[query])) { return }
 
 	const emailPattern = "[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
 	const commentBox = `

@@ -67,7 +67,13 @@ p {
 		&.rotate { img { transform: rotate(90deg) translateY(-2px); } }
 	}
 	#tabs {
+		// new feature / aba fixa
+		position: absolute;
+		top:0;
+		left: 0;
+		width: 100%;
 		display: flex;
+		z-index: 3;
 		background-color: #333;
 		li {
 			color: #777;
@@ -91,9 +97,10 @@ p {
 	#tabContent {
 		display: flex;
 		flex-direction: row;
+		max-height: 100%;
 		& > div {
-			height: 100%;
-			max-height: calc(100vh - 40px);
+			max-height: calc(100% - 40px);
+			margin-top: 40px;
 			width: 100%;
 			transform: scale(1, 1);
 			transform-origin: center right;
@@ -129,7 +136,7 @@ p {
 		}
 		.cover {
 			width: 100%;
-			padding-top: calc(100% * 9/16);
+			padding-top: calc(100% * 12/16);
 			background-color: transparent;
 			background-size: cover;
 		}
@@ -163,7 +170,7 @@ p {
 				cursor: pointer;
 				button {
 					background: none;
-					padding: 1.25rem;
+					padding: 1.25rem 2.5rem 1.25rem 1.25rem;
 					border: none;
 					width: 100%;
 					cursor: pointer;
@@ -171,7 +178,8 @@ p {
 					text-align: left;
 					font-family: inherit;
 					color: inherit;
-					font-size: 1rem;
+					font-size: 1.2rem;
+					font-weight: bold;
 					span {
 						display: block;
 						font-size: 0.75rem;
@@ -179,6 +187,10 @@ p {
 						margin: 4px 0 0;
 						user-select: none;
 						-moz-user-select: none;
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+						font-weight: normal;
 					}
 				}
 				img {
@@ -374,13 +386,13 @@ p {
 			.project-title {
 				background-color: #777;
 				font-size: 2rem;
+				line-height: 1.2;
 				font-weight: bold;
 				color: #FFF;
 				padding: 1.25rem;
 			}
 			.project-description {
 				font-family: 'Georgia';
-				font-size: 1rem;
 				padding: 1.25rem;
 			}
 			.legendaWrap {
@@ -415,110 +427,24 @@ p {
 		overflow-x: hidden;
 		box-sizing: border-box;
 		transition: all ease-in-out .2s;
-		.coverSec {
-			width: 100%;
-			padding-top: calc(100% * 9/16);
-			background-color: grey;
-			background-size: cover;
-			position: relative;
-			.fonte {
-				position: absolute;
-				top: 8px;
-				right: 8px;
-				width: 100%;
-				height: 100%;
-				background-color: rgba(0, 0, 0, .72);
-				border-radius: 8px;
-				box-sizing: border-box;
-				transition: all ease-in-out .4s;
-				& > * { transition: all ease-in-out .4s; }
-				#openFonte {
-					position: absolute;
-					top: 0;
-					right: 0;
-					font-size: 10px;
-					display: inline-flex;
-					width: 16px;
-					height: 16px;
-					align-items: center;
-					justify-content: center;
-					border: 0;
-					border-radius: 100%;
-					font-weight: bold;
-					box-sizing: border-box;
-					transition: all ease-in .04s;
-					background-color: transparent;
-					color: #FFF;
-					&:hover {
-						color: #333;
-						cursor: pointer;
-					}
-				}
-				#closeFonte {
-					position: absolute;
-					right: 2px;
-					top: 2px;
-					padding: 0 0 3px 0;
-					font-size: 13px;
-					line-height: 10px;
-					width: 14px;
-					text-align: center;
-					border-radius: inherit;
-					border: 0;
-					color: #FFF;
-					background-color: rgba(255, 255, 255, .2);
-					box-sizing: border-box;
-					transition: all ease-in .04s;
-					&:hover {
-						background-color: #FFF;
-						color: #333;
-						cursor: pointer;
-					}
-				}
-				span {
-					display: block;
-					color: rgba(255, 255, 255, .6);
-					text-transform: uppercase;
-					font-size: x-small;
-					line-height: 160%;
-					&:not(:last-child) {
-						margin-bottom: 1rem;
-					}
-					b {
-						display: block;
-						color: #FFF;
-						text-transform: none;
-						font-size: small;
-						transition: all ease-in-out .4s;
-						a { color: inherit; text-decoration: none; &:hover { border-bottom: 1px solid rgba(255, 255, 255, .6); } }
-					}
-				}
-				&.open {
-					max-width: calc(100% - 16px);
-					max-height: calc(100% - 16px);
-					padding: 1rem 1.2rem;
-					#closeFonte { display: normal; }
-					#openFonte { display: none; }
-				}
-				&.closed {
-					max-width: 16px;
-					max-height: 16px;
-					overflow: hidden;
-					#closeFonte { display: none; }
-					#openFonte { display: normal; }
-					span, span > * {
-						color: rgba(255, 255, 255, 0); font-size: 0px;
-					}
-					&:hover {						
-						background-color: #FFF;
-					}
-				}
-			}
-		}
+		// .coverSec {
+		// 	width: 100%;
+		// 	padding-top: calc(100% * 12/16);
+		// 	background-color: grey;
+		// 	background-size: cover;
+		// 	position: relative;
+		// 	.fonte {
+		// 		display: none; // remove this and uncomment after autor and fonte setup is ok
+		// 	}
+		// }
 		#infoCont {
 			display: flex;
 			flex-flow: column nowrap;
 			transform: translateX(0);
+			.cover-section {
+				display: inherit;
+				justify-content: center
+			}
 			.info-legend{
 				min-height: 2rem;
 				background-color: #F5F5F5;
@@ -606,6 +532,7 @@ p {
 	button.voltar {
 		width: 100%;
 		border: 0;
+		margin-top: 40px;
 		padding: 1.25rem;
 		text-align: left;
 		font-family: inherit;
@@ -900,6 +827,39 @@ p {
 	.ol-scale-line { left: 8px }
 }
 
+#info-warnings{
+	position: absolute;
+	top: 2rem;
+	right: 2rem;
+	.go-back-participe {
+		display: block;
+		font-size: 1rem;
+		line-height: 3rem;
+		color: #FFF;
+		background-color: #EB5757;
+		padding: 0 1rem;
+		border-radius: 2rem;
+		box-shadow: 0 4px 4px rgba(0, 0, 0, .24);
+		cursor: pointer;
+		text-transform: uppercase;
+		transition: all ease-in .1s;
+		user-select: none;
+		-ms-user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		img {
+			height: 1rem;
+			width: 1rem;
+			vertical-align: middle;
+			filter: invert(1) contrast(2);
+			margin-right: 8px;
+		}
+		&:hover {
+			background-color: #b84444;
+		}
+	}
+}
+
 @media (orientation: portrait), (max-width: 800px) {
 	body {
 		font-size: 14px;
@@ -907,18 +867,19 @@ p {
 		max-height: 100vh;
 		#infowrap {
 			background-color: #FFF;
-			max-height: calc(100vh - 88px);
-			overflow: auto;
+			max-height: calc(100% - 128px);
+			overflow: hidden;
 			box-shadow: 0 4px 4px rgba(0, 0, 0, .24);
 			width: 100vw;
 			max-width: unset;
-			margin-top: 40px;
+			margin-top: 80px;
 			transition: all ease-in-out .4s;
+			z-index: 1;
 			#tabs {
 				position: fixed;
-				top: 0;
+				top: 40px;
 				left: 0;
-				width: 100%;
+				width: 100vw;
 				z-index: 1;
 				box-shadow: 0 2px 2px rgba(0, 0, 0, .24);
 			}
@@ -926,33 +887,50 @@ p {
 				max-height: 100%;
 				& > * {
 					max-height: 100%;
+					margin-top: 0;
 					& * {
 						max-width: 100vw;
+						width: 100%;
 						box-sizing: border-box;
 					}
 				}
 				#baseInfo, #legenda-mapas, #legenda-projetos {
-					max-height: calc(100% - 48px);
+					max-height: 100%;
 				}
-				#legenda-projetos #projetos li.selected label > div button span {
-					width: 24px;
-					height: 24px;
-					line-height: 24px;
-					font-size: 1rem;
+				#legenda-projetos #projetos {
+					li label div span {
+						max-width: 24px;
+					}
+					li.selected label > div button span {
+						width: 24px;
+						height: 24px;
+						line-height: 24px;
+						font-size: 1rem;
+					}
 				}
 			}
 			#info, #mapInfo {
 				position: fixed;
-				max-height: calc(100vh - 48px);
+				max-height: calc(100% - 88px);
+				margin-top: 40px;
 				overflow-y: scroll;
 				z-index: 2;
 				transition: all ease-in-out .4s;
+			}
+			#info-warnings{
+				margin: 0;
+				opacity: 1;
+			}
+			button.voltar{
+				margin: 0;
+				opacity: 1;
 			}
 		}
 		#map {
 			position: absolute;
 			top: 40vh;
 			bottom: 0;
+			z-index: 0;
 			&::after {
 				content: '';
 				position: absolute;
@@ -1017,15 +995,36 @@ p {
 				top: 0.5rem;
 				left: 0.5rem;
 				right: unset;
-				height: calc(60vh - 48px - 0.5rem);
+				height: calc(100% - 48px - 1rem);
 			}
+		}
+		#info-warnings {
+			width: 100vw;
+			top: 0;
+			left: 0;
+			z-index: 1;
+			.go-back-participe {
+				border-radius: 0;
+				font-size: small;
+				line-height: 40px;
+				box-shadow: inset 0 -4px 4px rgba(0, 0, 0, .12);
+				img {
+					vertical-align: -2px;
+					width: 12px;
+					height: 12px;
+					margin-right: 8px;
+				}
+			}
+		}
+		.response-message {
+			text-align: center;
 		}
 	}
 	body.mapLarge {
 		#infowrap {
-			height: calc(40vh - 40px);
+			height: calc(40vh - 80px);
 			#mapInfo, #info {
-				max-height: 40vh;
+				max-height: calc(100% - 60vh + 1rem);
 			}
 		}
 		#map {
@@ -1035,6 +1034,14 @@ p {
 			}
 			#toggleMapMobile {
 				max-width: 52px;
+				animation: pisca ease-in-out 1s;
+				animation-delay: .4s;
+				@keyframes pisca {
+					5% { opacity: 0; }
+					20% { opacity: 1; }
+					40% { opacity: 0; }
+					60% { opacity: 1; }
+				}
 				p {
 					letter-spacing: -6;
 					margin-left: 0;

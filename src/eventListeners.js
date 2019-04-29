@@ -1,5 +1,5 @@
 import { projetos, indicadores, apiPost } from './model'
-import {
+import { 
 	setInitialState,
 	fitToId,
 	switchVisibilityState,
@@ -18,7 +18,6 @@ import {
 function sidebarGoHome (layers, baseLayer, view, fitPadding, map){
 	let gohome = document.getElementById('inicio')
 	gohome.addEventListener('click', () => {
-		window.location.hash = ''
 		setInitialState('initial')
 		fitToId(view, baseLayer, fitPadding)
 		switchlayers(false, layers, map)
@@ -27,12 +26,14 @@ function sidebarGoHome (layers, baseLayer, view, fitPadding, map){
 
 /**
 * Sidebar -> navigate in tabs
-* @param { undefinded } - if no param is defined, navigate on clicks; if a number N is defined as param, the Nth child of '#tabContent' will be active
+* @param { Number } param - if no param is > 0, navigate on clicks; else a number N is defined as param, the Nth child of '#tabContent' will be active
+* @returns { EventListener } The menu #tabs eventListeners
 */
 function sidebarNavigate(param){
 	let tabs = document.getElementById('tabs')
 	let tabsArr = Array.from(tabs.children)
-	if (typeof(param) !== 'number') {
+
+	if (param === 0) {
 		tabs.addEventListener('click', (event) => {
 			tabsArr.map((index) => {
 				document.getElementById(index.getAttribute('data-id')).classList.add('hidden')
@@ -41,7 +42,7 @@ function sidebarNavigate(param){
 			document.getElementById(event.target.getAttribute('data-id')).classList.remove('hidden')
 			event.target.classList.add('active')
 		})
-	} else if (typeof(param) === 'number') {
+	} else if (param > 0) {
 		tabsArr.map((index) => {
 			index.classList.remove('active')
 			document.getElementById(index.getAttribute('data-id')).classList.add('hidden')
@@ -55,20 +56,20 @@ function sidebarNavigate(param){
 /*
 * Sidebar -> Project picture info events - toggle source box
 */
-function sideBarToggleFonte(){
-	let openFonteBt = document.getElementById('openFonte')
-	let closeFonteBt = document.getElementById('closeFonte')
+// function sideBarToggleFonte(){
+// 	let openFonteBt = document.getElementById('openFonte')
+// 	let closeFonteBt = document.getElementById('closeFonte')
 
-	openFonteBt.addEventListener('click', function(event) {
-		event.target.parentNode.classList.remove('closed')
-		event.target.parentNode.classList.add('open')
-	})
+// 	openFonteBt.addEventListener('click', function(event) {
+// 		event.target.parentNode.classList.remove('closed')
+// 		event.target.parentNode.classList.add('open')
+// 	})
 
-	closeFonteBt.addEventListener('click', function(event) {
-		event.target.parentNode.classList.remove('open')
-		event.target.parentNode.classList.add('closed')
-	})	
-}
+// 	closeFonteBt.addEventListener('click', function(event) {
+// 		event.target.parentNode.classList.remove('open')
+// 		event.target.parentNode.classList.add('closed')
+// 	})
+// }
 
 /**
 * For mobile devices, expand/contract the map height, toggling document body class '.mapLarge'
@@ -79,12 +80,6 @@ function toggleMapMobile() {
 	})
 }
 
-/**
- * Go back to back to referrer with redirect or go back to history.go(-1)
- * @param {id} id
- * @param {url} url
- * @returns Window location redirect
- */
 function goBackParticipe(id, url) {
 	let goBack = document.getElementById(id)
 	history.pushState({ initial: true }, url) // set initial state to the first load event
@@ -92,6 +87,9 @@ function goBackParticipe(id, url) {
 	if(!goBack) throw new Error()
 
 	goBack.addEventListener('click', () => {
+		// console.log(`referrer: ${document.referrer}`)
+		// console.log(`url: ${url}`)
+		// console.log(history.state)
 		if(document.referrer === url){
 			window.history.go(-1)
 		}
@@ -100,7 +98,6 @@ function goBackParticipe(id, url) {
 		}
 	}, false)
 }
-
 /**
  * Observe if the map was deformed. Resets to the original proportion if changed
  * @param { Boolean } isPortrait The app window
@@ -139,10 +136,9 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 
 		// fit to clicked project, change project info, fit
 		gotoBtn.onclick = () => {
-			window.location.hash = ''
 			setInitialState('initial', 3)
 			const idKml = indicadores[indicador]
-			const data = projetos.find(projeto => projeto.id === idKml)
+			// const data = projetos.find(projeto => projeto.id === idKml)
 			const dataSheetitem = dataSheet.find(sheet => sheet.INDICADOR === indicador)
 			const colors = layerColors[indicador]
 			const images = getFiles(indicador, projetos, false, indicadores)
@@ -173,16 +169,17 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 				else return false
 			}
 			createInfo(dataSheetitem, colors, path(images))
+			tabsResetListeners(['baseInfo', 'legenda-mapas'], '#info')
 			fitToId(view, layer, fitPadding)
-			displayKmlInfo(layer.values_)
+			displayKmlInfo(layer)
 
-			// Setup commentBox 
-			if (!state.projectSelected) { // Create element and event only once
+			if (!state.projectSelected && state.consultaFetch.ativo === '1') { // Create element and event only once if consulta is active
 				createCommentBox('infoComments', false)
 				commentBoxEvents('infoComments')
 			}
 			resetEventListener(document.getElementById('infoComments-submit')) // recreate the button to reset eventListener at every click
-			commentBoxSubmit('infoComments', state.idConsulta, data.ID, data.NOME) // change listener attributes at every click
+			
+			commentBoxSubmit('infoComments', state.idConsulta, dataSheetitem.ID, dataSheetitem.NOME) // change listener attributes at every click
 		}
 	})
 }
@@ -194,11 +191,12 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
  * @param { Array } allLayers An Array of open Layers new Layer instance
  * @param { Array } baseIndicadores An Array of strings
  * @param { Object } state One map was selected?
+ * @param { Object } baseLayer An Open layer instance
  * @returns { EventListener }
  */
-function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseIndicadores, state) {
+function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseIndicadores, state, baseLayer) {
 	const buttons = [...document.querySelector(query).children] // [li, li ...]
-		.map(item => item)
+
 	buttons.forEach(item => {
 		item.addEventListener('click', event => {
 			buttons.forEach(button => button.classList.remove('active'))
@@ -220,12 +218,32 @@ function mapsBtnClickEvent(buttonsContentArray, query, olMap, allLayers, baseInd
 				if(!output && !isBase) console.error(`nota para dev: checar ${indicador} na planilha.`)
 			})
 
-			createMapInfo(content)
-			switchlayers(true, validLayers, olMap)
+			const contentNoLayers = { id: content.id, name: content.name, legenda: content.legenda, descricao: content.descricao }
 
+			fitToId(olMap.getView(), baseLayer, state.fitPadding)
+			createMapInfo(contentNoLayers)
+			tabsResetListeners(['baseInfo', 'legenda-projetos'], '#mapInfo')
+			switchlayers(true, validLayers, olMap)
 			createCommentBox("mapInfoCommentbox", state.mapSelected)
 			resetEventListener(document.getElementById('mapInfoCommentbox-submit')) // recreate the button to reset eventListener at every click
 			commentBoxSubmit('mapInfoCommentbox', state.idConsulta, content.id, content.name) // change listener attributes at every click
+		})
+	})
+}
+
+/**
+ * 
+ * @param { Array } otherTabs The tab data-ids to add Event listener
+ * @param { String } elementToHide Some element to add 'hidden' class
+ * @returns { EventListener }
+ */
+function tabsResetListeners(otherTabs, elementToHide){
+	const inactiveTabs = otherTabs
+		.map(tab => document.querySelector(`[data-id=${tab}]`))
+		
+	inactiveTabs.forEach(inactiveTab => {
+		inactiveTab.addEventListener('click', () => {
+			document.querySelector(elementToHide).classList.add('hidden')
 		})
 	})
 }
@@ -302,6 +320,9 @@ function resetEventListener(element){
 * @returns { EventListener } Event listener to #idBase-submit button
 */
 function commentBoxSubmit(idBase, idConsulta, commentid, commentcontext) {
+	if(commentid === undefined) console.error(`commentid is ${commentid}`)
+	if(!commentcontext) console.error(`commentid is ${commentcontext}`)
+
 	let formErrors = []
 
 	const submitBtnId = `${idBase}-submit` 
@@ -384,7 +405,6 @@ function fieldErrors(field){
 
 	let message = field.title ? field.title : 'Campo inválido'
 
-	// console.log(validity)
 	// badInput, customError, patternMismatch, rangeOverflow, rangeUnderflow, stepMismatch, tooLong, tooShort, typeMismatch, valid, valueMissing
 	const messagesComplements = [
 		['badInput', 'Padrão inválido'],
@@ -439,13 +459,14 @@ export {
 	goBackParticipe,
 	resetEventListener,
 	mapsBtnClickEvent,
-	toggleMapMobile, 
-	fieldErrors, 
-	sidebarGoHome, 
-	sidebarNavigate, 
-	sideBarToggleFonte,
-	closeObjectInfo, 
+	toggleMapMobile,
+	fieldErrors,
+	sidebarGoHome,
+	sidebarNavigate,
+	// sideBarToggleFonte,
+	closeObjectInfo,
 	mapObserver,
 	layersController,
+	tabsResetListeners,
 	responseMessageListener
 }
