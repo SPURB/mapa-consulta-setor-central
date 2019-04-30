@@ -14,21 +14,25 @@ function mapas(){
 						"ID": Number(mapa.idmapaqgis)
 					}
 				})
-			
-			const unique = raw
-				.map(mapa => mapa.ID)
-				.filter((value, id, array) => array.indexOf(value) === id && id)
-			
+
+			const unique = [...new Set(raw.map(mapa => mapa.ID))] // return unique ids
+				// .map((value, id, array) => console.log(array.indexOf(value)))
+				// .filter((value, id, array) => array.indexOf(value) === id && id)
+				
+
+			// console.log(raw)
+			// console.log()
+
 			unique.forEach(id => {
 				const layers = raw
 					.filter(layer => layer.ID === id)
 					.map(layer => layer.INDICADOR)
 				output.push({
-					//'nome': nome,
 					'id': id,
 					'layers': layers
 				})
 			})
+
 			return output
 		})
 		.then(mapsArrayNoNames => {
@@ -40,8 +44,7 @@ function mapas(){
 						const idNumber = parseNameToNumericalId(item.idmapaqgis)
 						outPutObject[idNumber] = {
 							name: item.nome,
-							legenda: item.legenda,
-							descricao: item.descricao
+							legenda: item.legenda
 						}
 					})
 
@@ -49,7 +52,6 @@ function mapas(){
 						.map(item =>{
 							item.name = outPutObject[item.id].name
 							item.legenda = 'data-src/legendas/' + outPutObject[item.id].legenda
-							item.descricao = outPutObject[item.id].descricao
 							return item
 						})
 					return mapsArrayWithNames

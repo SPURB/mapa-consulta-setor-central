@@ -53,7 +53,6 @@ function createMapsBtns(buttonsContentArray, query, idPrefix){
 			<li id="${idPrefix}${buttonObject.id}">
 				<button>
 					${buttonObject.name}
-					<span>${buttonObject.descricao}</span>
 				</button>
 				<img src='${seta}' alt="Abrir">
 			</li>
@@ -72,6 +71,7 @@ function createMapsBtns(buttonsContentArray, query, idPrefix){
 function createList(allLayersData, layerColors){
 	let list = ""
 	allLayersData.forEach( item => {
+
 		if(layerColors[item.INDICADOR] === undefined){
 			list += `
 				<li>
@@ -298,8 +298,6 @@ function createInfo(data, projectColor, path = false) {
 			switch(val) {
 				case 'NOME': concatenation += `<h4 class='project-title'>${data[val]}</h4>`; break
 				case 'DESCRIÇÃO': concatenation += `<p class='description'>${data[val]}`; break
-				// case 'ANO': concatenation += `<p class='ano'>Início <span>${data[val]}</span></p>`; break
-				// case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${data[val]}</span></p>`; break
 				case 'STATUS': concatenation += `<p class='status'>Status <span>${data[val]}</span></p>`; break
 				default: concatenation += ''
 			}
@@ -322,7 +320,7 @@ function createMapInfo(mapData){
 	let concatenation = ''
 	if(mapData.name === undefined && mapaData.legenda === undefined) { console.error(`${mapData}'s keys are undefined`) }
 	concatenation += `<h4 class="project-title">${mapData.name}</h4>`
-	concatenation += `<p class="project-description">${mapData.descricao}</p>`
+	// concatenation += `<p class="project-description">${mapData.descricao}</p>`
 	if(mapaData) {
 		const coverImgPath = process.env.APP_URL + mapData.legenda
 		concatenation += `
@@ -347,14 +345,12 @@ function createBaseInfo(data, projetos) {
 	concatenation += `<h1 class='baseInfo-title'>${nome}</h1>`
 	concatenation += `<div class='cover' style='background-image: url("${bgImgPath}");'></div>` 
 
-	if (data.ANO || data.SECRETARIA || data.STATUS) {
+	if (data.STATUS) {
 		concatenation += "<div class='dados'>"
 		for (let val in data) {
 			const dado = data[val]	
 			if(dado !== 0){
 				switch (val) {
-					// case 'ANO': concatenation += `<p class='ano'>Início <span>${dado}</span></p>`; break
-					// case 'SECRETARIA': concatenation += `<p class='secretaria'>Responsável <span>${dado}</span></p>`; break
 					case 'STATUS': concatenation += `<p class='status'>Status <span>${dado}</span></p>`; break
 					default: concatenation += ''
 				}
@@ -493,7 +489,7 @@ function displayFetchingUI(state, query){
 		})
 	}
 	else {
-		return new Error(`Hey yow. Create some while fetching behavior to this ${query}`)
+		return new Error(`Hey wait a minute mr dev. Create some behavior while fetching this ${query}`)
 	}
 }
 

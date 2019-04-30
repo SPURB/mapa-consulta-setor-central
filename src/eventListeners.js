@@ -52,25 +52,6 @@ function sidebarNavigate(param){
 	}
 }
 
-
-/*
-* Sidebar -> Project picture info events - toggle source box
-*/
-// function sideBarToggleFonte(){
-// 	let openFonteBt = document.getElementById('openFonte')
-// 	let closeFonteBt = document.getElementById('closeFonte')
-
-// 	openFonteBt.addEventListener('click', function(event) {
-// 		event.target.parentNode.classList.remove('closed')
-// 		event.target.parentNode.classList.add('open')
-// 	})
-
-// 	closeFonteBt.addEventListener('click', function(event) {
-// 		event.target.parentNode.classList.remove('open')
-// 		event.target.parentNode.classList.add('closed')
-// 	})
-// }
-
 /**
 * For mobile devices, expand/contract the map height, toggling document body class '.mapLarge'
 */
@@ -87,9 +68,6 @@ function goBackParticipe(id, url) {
 	if(!goBack) throw new Error()
 
 	goBack.addEventListener('click', () => {
-		// console.log(`referrer: ${document.referrer}`)
-		// console.log(`url: ${url}`)
-		// console.log(history.state)
 		if(document.referrer === url){
 			window.history.go(-1)
 		}

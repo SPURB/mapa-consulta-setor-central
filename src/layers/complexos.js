@@ -52,7 +52,7 @@ function returnComplexos(projetos, complexos, ids, app_url, cores){
 			kmlLayers.push(setComplexLayer(name, kml, id, complexo.INDICADOR, cores[complexo.INDICADOR]))
 		}
 		else {
-			throw new Error(`olar, Erro nesta camada. Veja o kml está no diretório com a id equivalente: ${complexo}`)
+			throw new Error(`olar, Erro nesta camada. Veja o kml está no diretório com a id equivalente:`, complexo)
 		}
 	})
 	return kmlLayers
