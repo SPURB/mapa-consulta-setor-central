@@ -36,10 +36,9 @@ import {
 	goBackParticipe,
 	toggleMapMobile, 
 	mapsBtnClickEvent,
-	sidebarGoHome, 
-	sidebarNavigate, 
-	sideBarToggleFonte,
-	closeObjectInfo, 
+	sidebarGoHome,
+	sidebarNavigate,
+	closeObjectInfo,
 	mapObserver,
 	layersController,
 	tabsResetListeners
@@ -47,6 +46,7 @@ import {
 import seta from './img/seta.svg'
 
 docReady(() => {
+
 
 	let state = {
 		projectSelected: false, // project clicked at map or right sidebar?
