@@ -38,7 +38,6 @@ function renderElement(template, query) {
 	node.innerHTML = template
 }
 
-
 /**
  * Create maps buttons
  * @param { Array } buttonsContentArray An array of objects
