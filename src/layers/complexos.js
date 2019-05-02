@@ -14,6 +14,7 @@ import Style from 'ol/style/Style'
 * @return { Array } Array of new Layers's (from Open Layers) to create de base
 */
 function returnComplexos(projetos, complexos, ids, app_url, cores){
+
 	let kmlLayers = []
 	const idsAndFiles = projetos
 		.map(projeto => {
@@ -22,9 +23,6 @@ function returnComplexos(projetos, complexos, ids, app_url, cores){
 				files: projeto.children,
 			}
 		})
-
-	// console.log(ids)
-	// console.log(idsAndFiles)
 
 	const validIdAndKmls = ids
 		.map(id => idsAndFiles.find(el => el.id === id))
@@ -42,8 +40,7 @@ function returnComplexos(projetos, complexos, ids, app_url, cores){
 		})
 
 	complexos.forEach(complexo => {
-		const valid = validIdAndKmls
-			.find(item => item.id === complexo.ID)
+		const valid = validIdAndKmls.find(item => item.id === complexo.ID)
 
 		if(valid) {
 			const name = complexo.NOME
