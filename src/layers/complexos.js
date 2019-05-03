@@ -1,8 +1,5 @@
-import { setLayer, setComplexLayer } from './helpers'
+import { setComplexLayer, setComplexLineLayer } from './helpers'
 import { parseNameToNumericalId } from '../domRenderers'
-import Fill from 'ol/style/Fill'
-import Style from 'ol/style/Style'
-
 
 /**
 * Create complexos.json layers
@@ -39,14 +36,36 @@ function returnComplexos(projetos, complexos, ids, app_url, cores){
 			}
 		})
 
+	const lines = {
+		'B61': 'Layer',
+		'B64': 'Layer',
+		'B72': 'Layer',
+		'B73': 'Layer',
+		'B74': 'Layer',
+		'B22': 'TRANSITO1',
+		'B23': 'TRANSITO1',
+		'B24': 'TRANSITO1',
+		'B25': 'TRANSITO1',
+		'B26': 'TRANSITO1',
+		'B27': 'TRANSITO1',
+		'B28': 'TRANSITO1'
+	}
+
+	let isPattrnLine = indicador => Object.keys(lines).find(line => line === indicador)
+
 	complexos.forEach(complexo => {
 		const valid = validIdAndKmls.find(item => item.id === complexo.ID)
+		const isLine = isPattrnLine(complexo.INDICADOR)
 
 		if(valid) {
 			const name = complexo.NOME
 			const kml = valid.kml
 			const id = complexo.ID
-			kmlLayers.push(setComplexLayer(name, kml, id, complexo.INDICADOR, cores[complexo.INDICADOR]))
+
+			if(isLine) { 
+				kmlLayers.push(setComplexLineLayer(name, kml, id, complexo.INDICADOR, cores[complexo.INDICADOR], lines[complexo.INDICADOR]))
+			}
+			else { kmlLayers.push(setComplexLayer(name, kml, id, complexo.INDICADOR, cores[complexo.INDICADOR])) }
 		}
 		else {
 			throw new Error(`olar, Erro nesta camada. Veja o kml está no diretório com a id equivalente:`, complexo)

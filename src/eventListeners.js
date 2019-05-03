@@ -115,7 +115,7 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 		// fit to clicked project, change project info, fit
 		gotoBtn.onclick = () => {
 			setInitialState('initial', 3)
-			const idKml = indicadores[indicador]
+			// const idKml = indicadores[indicador]
 			// const data = projetos.find(projeto => projeto.id === idKml)
 			const dataSheetitem = dataSheet.find(sheet => sheet.INDICADOR === indicador)
 			const colors = layerColors[indicador]

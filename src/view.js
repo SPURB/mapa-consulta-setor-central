@@ -81,7 +81,7 @@ docReady(() => {
 	const allLayers = [...simplesLayers, ...complexosLayers]
 	const allLayersData = [...simples.default, ...complexos.default]
 
-	let indicadoresBases = state.baseLayerObjects.map(item => item.indicador )
+	let indicadoresBases = state.baseLayerObjects.map(item => item.indicador)
 	indicadoresBases.unshift(state.baseLayerObj.indicador)
 
 	const isPortrait = window.matchMedia("(orientation: portrait)").matches // Boolean -> innerHeight < innerWidth

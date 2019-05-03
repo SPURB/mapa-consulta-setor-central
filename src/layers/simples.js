@@ -1,8 +1,8 @@
 import { setLayer, setIconLayer, setPatternLayer } from './helpers'
-import { parseNameToNumericalId } from '../domRenderers'
 import cptm from '../img/cptm.svg'
 import onibus from '../img/onibus.svg'
 import metro from '../img/metro.svg'
+import tombado from '../img/tombado.svg'
 
 /**
 * Create all layers for app
@@ -25,8 +25,9 @@ function returnSimples(projetos, simples, app_url, cores){
 
 	const dashedLayers = [ 'A9', 'A13', 'A44', 'A45' ]
 	const filledLayers = [ 'A4', 'A10', 'A11', 'A12' ]
-	const biggerWidths = [ 'A6' ]
+	const biggerWidths = [ 'A6', 'A9', 'A13' ]
 	const iconLayers = [ 
+		{ indicador: 'A36', icon: tombado },
 		{ indicador: 'A41', icon: onibus },
 		{ indicador: 'A42', icon: cptm },
 		{ indicador: 'A43', icon: metro }
@@ -34,7 +35,6 @@ function returnSimples(projetos, simples, app_url, cores){
 	const patternLayers = [
 		{ indicador: 'A5', type:'lines-diagonal' }
 	]
-
 
 	let isDashed = dashed => dashedLayers.includes(dashed)
 	let isFilled = filled => filledLayers.includes(filled)
