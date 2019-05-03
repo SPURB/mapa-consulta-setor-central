@@ -6,7 +6,7 @@ import {
 	Style, 
 	Icon, 
 	Stroke, 
-	Fill 
+	Fill
 } from 'ol/style'
 
 
@@ -181,6 +181,68 @@ function setLayer(name, path, project, custom = false){
 }
 
 /**
+ * Return open layer source and file from kml file.
+ * @param { String } name Layer name
+ * @param { String } path kml path
+ * @param { Number } id kml folder id
+ * @param { String } indicador layer indicador
+ * @param { Array } rgba An array of color
+ * @param { String } The kml simplefield value to display
+ * @returns { Object } A vector layer
+*/
+function setComplexLineLayer(name, path, id, indicador, rgba, simplefield){
+
+	let styleCache = {}
+
+	let lineStyle = feature => {
+		let type = feature.get(simplefield)
+
+		const variator = val => {
+			if(indicador === 'B61' && val === 'Eixos Estratégicos') { return rgba }
+			if(indicador === 'B64' && val === 'Eixos Estratégicos com faixa de indução II') { return rgba }
+			if(indicador === 'B72' && val === 'Eixos de Transformação') { return rgba }
+			if(indicador === 'B73' && val === 'Eixos de Transformação da Orla Fluvial') { return rgba }
+			if(indicador === 'B74' && val === 'Eixos de Tranformação Elevado João Goulart') { return rgba }
+			if(indicador === 'B22' && val === 'cruzamento com faixa de pedestres') { return rgba }
+			if(indicador === 'B23' && val === 'faixa de pedestres') { return rgba }
+			if(indicador === 'B24' && val === 'ponte/passarela para pedestres') { return rgba }
+			if(indicador === 'B25' && val === 'ponte/viaduto compartilhada') { return rgba }
+			if(indicador === 'B26' && val === 'transposicao para pedestres por edificio') { return rgba }
+			if(indicador === 'B27' && val === 'ponte/viaduto para veiculos motorizados') { return rgba }
+			if(indicador === 'B28' && val === 'via compartilhada') { return rgba }
+			else { return 'rgba(0, 0, 0, 0)' }
+		}
+		
+		let styleFeature = styleCache[type]
+		if(!styleFeature) {
+
+			styleFeature = new Style({
+				stroke: new Stroke({
+					width: 2,
+					color: variator(type)
+				}),
+			})
+
+			styleCache[type] = styleFeature
+		}
+		return styleFeature
+	}
+
+	return new VectorLayer ({
+		title: name, 
+		source: new VectorSource({
+			url: path,
+			format: new KML({ extractStyles: false })
+		}),
+		style: lineStyle,
+		projectId: id, // !!! this is important !!!,
+		projectIndicador: indicador
+	})
+
+}
+
+
+/**
  * Return open layer source and file from kml file. These layers use common
  * @param { String } name Layer name
  * @param { String } path kml file complete path
@@ -203,14 +265,14 @@ function setComplexLayer(name, path, id, indicador, rgba){
 		'B3': 'Dens_const', 
 		'B4': 'ZONA',
 		'B5': 'ZONA',
-		'B6': 'ZONA'
+		'B6': 'ZONA',
+		'B21': 'name'
 	}
 
 	let styleCache = {}
 
 	let blockStyle = feature => {
 		let type = feature.get(quadras[indicador]) // types[indicador];
-
 		const variator = val => {
 			if(indicador === "B1" && type === "ZDE-1") return rgba
 			if(indicador === "B2") {
@@ -234,6 +296,8 @@ function setComplexLayer(name, path, id, indicador, rgba){
 			}
 			if(indicador === "B4" && type === "ZEIS-1") return rgba
 			if(indicador === "B5" && type === "ZEIS-3") return rgba
+			if(indicador === "B21" && type === 'Perimetro') return rgba
+	
 			else return [0,255,0, 0] // errors or setup needed
 		}
 
@@ -247,7 +311,7 @@ function setComplexLayer(name, path, id, indicador, rgba){
 				}),
 				stroke: new Stroke({
 					color: variator(type)
-				})
+				}), 
 			});
 			styleCache[type] = styleFeature 
 		}
@@ -287,5 +351,6 @@ export{
 	setLayer, 
 	setPatternLayer,
 	setComplexLayer,
-	getProjectData 
+	setComplexLineLayer,
+	getProjectData
 }

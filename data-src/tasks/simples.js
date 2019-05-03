@@ -18,7 +18,7 @@ function simples(){
 					// "CORES": rgba,
 					// "ANO": 2019, //fake input
 					// "SECRETARIA": "MSP", //fake input
-					"STATUS": 0, //fake input
+					// "STATUS": 0, //fake input
 					// "AUTOR": "SP Urbanismo", //fake input
 					// "FONTE": "SP Urbanismo" //fake input
 				}
