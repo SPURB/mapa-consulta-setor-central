@@ -47,11 +47,10 @@ import seta from './img/seta.svg'
 
 docReady(() => {
 
-
 	let state = {
 		projectSelected: false, // project clicked at map or right sidebar?
 		mapSelected: false,
-		idConsulta: 42,
+		idConsulta: 43,
 		consultaFetch: false, // the Consultas table data from fetch. This is setted by addCommentBox after first load
 		baseLayerObj: {id: 201, indicador: 'A33' }, // project main layer id,
 		baseLayerObjects: [ 
@@ -59,7 +58,7 @@ docReady(() => {
 				{id: 204, indicador:'A2'},
 				{id: 203, indicador:'A1'},
 				{id: 205, indicador:'A3'} ],// other bases
-		bing: false,
+		bing: true,
 		appUrl: process.env.APP_URL
 	}
 
@@ -149,7 +148,7 @@ docReady(() => {
 					// sideBarToggleFonte(),
 					layersController(listCreated, allLayers, cores, view, fitPadding, state, appmap, allLayersData),
 					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state, baseLayer),
-					closeObjectInfo('mapInfo', 'closeMapInfo'), 
+					closeObjectInfo('mapInfo', 'closeMapInfo'),
 					closeObjectInfo('info', 'closeInfo'),
 
 					// map
