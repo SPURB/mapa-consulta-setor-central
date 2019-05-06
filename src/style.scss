@@ -91,6 +91,7 @@ p {
 			&.active {
 				color: #FFF;
 				background-color: rgba(255, 255, 255, .04);
+				cursor: unset
 			}
 		}
 	}
@@ -131,7 +132,7 @@ p {
 			font-size: 2rem;
 			font-weight: 700;
 			line-height: 1.2;
-			padding: 1.25rem;
+			padding: 1.25rem 1.25rem 0 1.25rem;
 			background-color: #FFF;
 		}
 		.cover {
@@ -389,7 +390,7 @@ p {
 				line-height: 1.2;
 				font-weight: bold;
 				color: #FFF;
-				padding: 1.25rem;
+				padding: 1.25rem 1.25rem 0; 
 			}
 			.project-description {
 				font-family: 'Georgia';
@@ -427,16 +428,6 @@ p {
 		overflow-x: hidden;
 		box-sizing: border-box;
 		transition: all ease-in-out .2s;
-		// .coverSec {
-		// 	width: 100%;
-		// 	padding-top: calc(100% * 12/16);
-		// 	background-color: grey;
-		// 	background-size: cover;
-		// 	position: relative;
-		// 	.fonte {
-		// 		display: none; // remove this and uncomment after autor and fonte setup is ok
-		// 	}
-		// }
 		#infoCont {
 			display: flex;
 			flex-flow: column nowrap;
@@ -456,7 +447,7 @@ p {
 				line-height: 1.2;
 				order: 1;
 				background-color: #FFF;
-				padding: 1.25rem;
+				padding: 1.25rem 1.25rem 0;
 			}
 			.ano {
 				order: 2;
@@ -779,10 +770,15 @@ p {
 		grid-gap: 0.25rem;
 		will-change: contents, height;
 		color: #FFF;
-		p {
-		}
 		span {
 			opacity: .8;
+		}
+		p {
+			display: flex;
+			align-items: center
+		}
+		a {
+			color: #FFF
 		}
 	}
 

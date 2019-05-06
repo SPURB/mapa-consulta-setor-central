@@ -162,6 +162,8 @@ function switchlayers(state, layers, map){
 * @param  { Object } layer The kml attributes
 */
 function displayKmlInfo(layer) {
+	// console.log()
+
 	const kmlAttributes = layer.values_
 	const exceptions = [
 		'SubClasses', 
@@ -184,9 +186,7 @@ function displayKmlInfo(layer) {
 
 	let concatenation = ''
 
-	if(info.classList.contains('no-display')) {	
-		info.classList.remove('no-display')
-	}
+	if(info.classList.contains('no-display')) { info.classList.remove('no-display') }
 
 	for (let key in kmlAttributes) {
 		if(exceptions.includes(key) === false){
@@ -195,6 +195,9 @@ function displayKmlInfo(layer) {
  			concatenation += `<span>${keyTitle}</span><p>${kmlAttributes[key]}</p>`
 		}
 	}
+
+	const url = layer.values_.source.url_
+	if (url) { concatenation += `<span>Arquivo vetorial:</span><p><a href='${url}' download>KML</a></p>` }
 
 	if ( concatenation!=='' ){ info.innerHTML = concatenation }
 	else { info.classList.add('no-display') }

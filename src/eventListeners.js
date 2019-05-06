@@ -35,6 +35,13 @@ function sidebarNavigate(param){
 
 	if (param === 0) {
 		tabs.addEventListener('click', (event) => {
+
+			// reset kml-info
+			document.getElementById('info-kml').classList.add('no-display')
+
+			// reset map hash location
+			window.location.hash = ''
+
 			tabsArr.map((index) => {
 				document.getElementById(index.getAttribute('data-id')).classList.add('hidden')
 				index.classList.remove('active')
@@ -112,11 +119,13 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			switchVisibilityState(layer, element.checked, map)
 		}
 
-		// fit to clicked project, change project info, fit
+		//  reset hash location, fit to clicked project, change project info
 		gotoBtn.onclick = () => {
+
+			// reset map hash location
+			window.location.hash = ''
+
 			setInitialState('initial', 3)
-			// const idKml = indicadores[indicador]
-			// const data = projetos.find(projeto => projeto.id === idKml)
 			const dataSheetitem = dataSheet.find(sheet => sheet.INDICADOR === indicador)
 			const colors = layerColors[indicador]
 			const images = getFiles(indicador, projetos, false, indicadores)
@@ -441,7 +450,6 @@ export {
 	fieldErrors,
 	sidebarGoHome,
 	sidebarNavigate,
-	// sideBarToggleFonte,
 	closeObjectInfo,
 	mapObserver,
 	layersController,
