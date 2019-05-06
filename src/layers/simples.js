@@ -24,8 +24,9 @@ function returnSimples(projetos, simples, app_url, cores){
 	} })
 
 	const dashedLayers = [ 'A9', 'A13', 'A44', 'A45' ]
-	const filledLayers = [ 'A4', 'A10', 'A11', 'A12' ]
-	const biggerWidths = [ 'A6', 'A9', 'A13' ]
+	const filledLayers = [ 'A4', 'A10', 'A11', 'A12', 'A39', 'A40' ]
+	const biggerDashedWidths = [ 'A6', 'A9', 'A13' ]
+	const biggerWidths = [ 'A14', 'A15', 'A16', 'A17', 'A18', 'A38' ]
 	const iconLayers = [ 
 		{ indicador: 'A36', icon: tombado },
 		{ indicador: 'A41', icon: onibus },
@@ -33,12 +34,15 @@ function returnSimples(projetos, simples, app_url, cores){
 		{ indicador: 'A43', icon: metro }
 	]
 	const patternLayers = [
-		{ indicador: 'A5', type:'lines-diagonal' }
+		{ indicador: 'A5', type:'lines-diagonal' },
+		{ indicador: 'A37', type: 'lines-diagonal', fill: [ 255, 116, 255, 0.5 ] }
 	]
 
 	let isDashed = dashed => dashedLayers.includes(dashed)
 	let isFilled = filled => filledLayers.includes(filled)
-	let isBigWid = bigger => biggerWidths.includes(bigger)
+	let isBigDashedWidth = bigger => biggerDashedWidths.includes(bigger)
+	let isBigWidth = bigWidth => biggerWidths.includes(bigWidth)
+
 	let isIconUs = icon => iconLayers.find(object => object.indicador === icon)
 	let isPattrn = pattern => patternLayers.find(object => object.indicador === pattern)
 
@@ -59,10 +63,11 @@ function returnSimples(projetos, simples, app_url, cores){
 
 					if(isFilled(indicador)) customStyles.fillCollor = [rgba[0], rgba[1], rgba[2], rgba[3]]
 					if(isDashed(indicador)) { customStyles.lineDash = [4]; customStyles.width = 1 }
-					if(isBigWid(indicador)) { customStyles.width = 4; customStyles.lineDash = [4, 6] }
+					if(isBigDashedWidth(indicador)) { customStyles.width = 4; customStyles.lineDash = [4, 6] }
+					if(isBigWidth(indicador)) { customStyles.width = 4 }
 
 					if(icon) kmlLayers.push(setIconLayer(name, url, projeto, icon.icon))
-					if(pattern) kmlLayers.push(setPatternLayer(name, url, projeto, pattern.type, [255, 255, 255, 0.1]))
+					if(pattern) kmlLayers.push(setPatternLayer(name, url, projeto, pattern.type, pattern.fill ? pattern.fill : [255, 255, 255, 0.1]))
 					if(!icon || !pattern) kmlLayers.push(setLayer(name, url, projeto, customStyles))
 				}
 			})

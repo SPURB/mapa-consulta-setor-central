@@ -115,7 +115,7 @@ function setPatternLayer(name, path, project, type, fillStyle = [0, 0, 0, 1]){
 		let style = new Style({
 			stroke: new Stroke({
 				color: `rgba(0, 0, 0, 0.5)`,
-				width: 1,
+				width: 1
 			}),
 			fill: new Fill({
 				color: pattern
@@ -193,10 +193,10 @@ function setLayer(name, path, project, custom = false){
 function setComplexLineLayer(name, path, id, indicador, rgba, simplefield){
 
 	let styleCache = {}
+	let isDashed = false
 
 	let lineStyle = feature => {
 		let type = feature.get(simplefield)
-
 		const variator = val => {
 			if(indicador === 'B61' && val === 'Eixos Estratégicos') { return rgba }
 			if(indicador === 'B64' && val === 'Eixos Estratégicos com faixa de indução II') { return rgba }
@@ -210,6 +210,35 @@ function setComplexLineLayer(name, path, id, indicador, rgba, simplefield){
 			if(indicador === 'B26' && val === 'transposicao para pedestres por edificio') { return rgba }
 			if(indicador === 'B27' && val === 'ponte/viaduto para veiculos motorizados') { return rgba }
 			if(indicador === 'B28' && val === 'via compartilhada') { return rgba }
+			if(indicador === 'B29' && val === 'Acesso existente a requalificar - rampas e escadarias') { return rgba }
+			if(indicador === 'B30' && val === 'Ampliação de passeio e instalação de piso drenante') { return rgba }
+			if(indicador === 'B31' && val === 'Ampliação e melhoria de passeios existentes') { return rgba }
+			if(indicador === 'B32' && val === 'Calçadão novo') { return rgba }
+			if(indicador === 'B33' && val === 'Ciclopassarela aérea') { return rgba }
+			if(indicador === 'B34' && val === 'Galeria ciclopassarela') { return rgba }
+			if(indicador === 'B35' && val === 'Lajão sobre rio, via ou ferrovia') { return rgba }
+			if(indicador === 'B36' && val === 'Requalificação de calçadão') { return rgba }
+			if(indicador === 'B37' && val === 'Requalificação parcial de calçada') { return rgba }
+			if(indicador === 'B38' && val === 'Requalificação total de calçada') { return rgba }
+			if(indicador === 'B41' && val === 'existente') { return rgba }
+			if(indicador === 'B42' && val === 'proposta') { 
+				isDashed = true
+				return rgba 
+			}
+			if(indicador === 'B45' && val === 'Caminho verde a qualificar') { return rgba }
+			if(indicador === 'B46' && val === 'Caminho verde existente') { return rgba }
+			if(indicador === 'B47' && val === 'Caminho verde novo') { return rgba }
+			if(indicador === 'B68' && val === 'Eixos de Ordenamento da Paisagem 1') { return rgba }
+			if(indicador === 'B69' && val === 'Eixos de Ordenamento da Paisagem 2') { return rgba }
+			if(indicador === 'B70' && val === 'Eixos de Ordenamento da Paisagem 3') { return rgba }
+			if(indicador === 'B71' && val === 'Eixos de Ordenamento da Paisagem 4') { return rgba }
+			if(indicador === 'B87' && val === 'Vigente') { return rgba }
+			if(indicador === 'B88' && val === 'Revogar') {
+				isDashed = true
+				return rgba
+			}
+			if(indicador === 'B89' && val === 'Proposto') { return rgba }
+
 			else { return 'rgba(0, 0, 0, 0)' }
 		}
 		
@@ -219,10 +248,11 @@ function setComplexLineLayer(name, path, id, indicador, rgba, simplefield){
 			styleFeature = new Style({
 				stroke: new Stroke({
 					width: 2,
-					color: variator(type)
-				}),
+					color: variator(type),
+					lineDash: isDashed ? [4] : false
+				})
 			})
-
+			
 			styleCache[type] = styleFeature
 		}
 		return styleFeature
@@ -266,7 +296,21 @@ function setComplexLayer(name, path, id, indicador, rgba){
 		'B4': 'ZONA',
 		'B5': 'ZONA',
 		'B6': 'ZONA',
-		'B21': 'name'
+		'B21': 'name',
+		'B48': 'Tipo',
+		'B49': 'Tipo',
+		'B75': 'classif',
+		'B76': 'classif',
+		'B77': 'classif',
+		'B78': 'classif',
+		'B79': 'classif',
+		'B80': 'classif',
+		'B81': 'classif',
+		'B82': 'classif',
+		'B83': 'classif',
+		'B84': 'classif',
+		'B85': 'classif',
+		'B86': 'classif',
 	}
 
 	let styleCache = {}
@@ -274,7 +318,6 @@ function setComplexLayer(name, path, id, indicador, rgba){
 	let blockStyle = feature => {
 		let type = feature.get(quadras[indicador]) // types[indicador];
 		const variator = val => {
-			if(indicador === "B1" && type === "ZDE-1") return rgba
 			if(indicador === "B2") {
 				if(!val) return
 				const normalized = val/100
@@ -294,11 +337,26 @@ function setComplexLayer(name, path, id, indicador, rgba){
 				if(val > 1) return [ 215, 231, 246, 1 ]
 				else return [ 247, 250, 255, 1 ]
 			}
+			if(indicador === "B1" && type === "ZDE-1") return rgba
 			if(indicador === "B4" && type === "ZEIS-1") return rgba
 			if(indicador === "B5" && type === "ZEIS-3") return rgba
+			if(indicador === "B6" && type === "ZEIS-5") return rgba
 			if(indicador === "B21" && type === 'Perimetro') return rgba
-	
-			else return [0,255,0, 0] // errors or setup needed
+			if(indicador === 'B48' && type === 'Encosta') return rgba
+			if(indicador === 'B49' && type === 'Varzea') return rgba
+			if(indicador === 'B75' && type === 'P1') return rgba
+			if(indicador === 'B76' && type === 'P2') return rgba
+			if(indicador === 'B77' && type === 'P5') return rgba
+			if(indicador === 'B78' && type === 'Q2') return rgba
+			if(indicador === 'B79' && type === 'Q4') return rgba
+			if(indicador === 'B80' && type === 'Q5') return rgba
+			if(indicador === 'B81' && type === 'Q6') return rgba
+			if(indicador === 'B82' && type === 'Q7') return rgba
+			if(indicador === 'B83' && type === 'Q8') return rgba
+			if(indicador === 'B84' && type === 'T2') return rgba
+			if(indicador === 'B85' && type === 'T2c') return rgba
+			if(indicador === 'B86' && type === 'T5') return rgba
+			else return [0, 255, 0, 0] // errors or setup needed
 		}
 
 		let styleFeature = styleCache[type]
