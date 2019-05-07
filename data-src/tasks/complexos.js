@@ -14,11 +14,7 @@ function complexo(){
 					"NOME": projeto.titulodacamadanomapainterativo,
 					"DESCRIÇÃO": projeto.descricaodacamada,
 					"VALORES": [ projeto.nomedacoluna, projeto.valorvisivel ],
-					// "ANO": 2019, //fake input
-					// "SECRETARIA": "MSP", //fake input
-					// "STATUS": 0, //fake input
-					// "AUTOR": "SP Urbanismo", //fake input
-					// "FONTE": "SP Urbanismo" //fake input
+					"IMAGEM": projeto.iddaimagem
 				}
 			})
 

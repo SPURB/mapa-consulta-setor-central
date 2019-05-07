@@ -117,7 +117,7 @@ docReady(() => {
 		},0)
 	})
 	.then(()=>{
-		goBackParticipe('go-back-participe', `${window.location.origin}/piu-setor-central-2`) // check participe's new route!!!
+		goBackParticipe('go-back-participe', `${window.location.origin}/setor-central-2`) // check participe's new route!!!
 	})
 
 	const addCommentBox = apiGet('consultas', state.idConsulta) //fetch from api
