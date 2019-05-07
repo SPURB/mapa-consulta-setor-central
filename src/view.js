@@ -106,34 +106,38 @@ docReady(() => {
 	/*
 	* Create DOM elements
 	*/
-	const addPannels = new Promise (resolve => {
+	const addPannels = new Promise (() => {
 		setTimeout(() => {
-			resolve(
 				createBaseInfo(getProjectData(state.baseLayerObj.id, bases), projetos),// sidebar first load
 				createList(allLayersData, cores),
 				createMapsBtns(mapaData, "#mapas", "mapas-"),
 				createGoBackParticipe('go-back-participe', seta,'Texto da consulta')
-			)
 		},0)
 	})
-	.then(()=>{
+	.then(() => {
 		goBackParticipe('go-back-participe', `${window.location.origin}/setor-central-2`) // check participe's new route!!!
 	})
+	.catch(error => error)
 
 	const addCommentBox = apiGet('consultas', state.idConsulta) //fetch from api
 		.then(consulta => {
-			const isOpen = Number(consulta.ativo) // consulta.ativo is '0' or '1'
 			state.consultaFetch = consulta
-			createCommentBox("baseInfo", state.projectSelected, isOpen)
-			return isOpen
+			return consulta
 		})
-		.then(formState => {
-			if(formState) {
+		.then(consulta => {
+			setTimeout(() => {
+				const isOpen = Number(consulta.ativo) // consulta.ativo is '0' or '1'
+				createCommentBox("baseInfo", state.projectSelected, isOpen)
+			},0)
+		})
+		.then( () => {
+			if(Number(consulta.ativo)) {
 				commentBoxEvents('baseInfo'),
 				commentBoxSubmit('baseInfo', state.idConsulta, 0, 'Mapa base')
 			}
 		})
 		.catch(error => error)
+
 
 	/*
 	* Create all other event listeners
@@ -184,20 +188,24 @@ docReady(() => {
 			switchlayers(true, validLayers, appmap)
 			createMapInfo(mapDataLocated)
 
-			// <form mapas>
-			createCommentBox("mapInfoCommentbox", state.mapSelected)
-			state.mapSelected = true
+
 			sidebarNavigate(2)
 			document.getElementById('mapas-' + mapDataLocated.id).classList.add('active')
 		}
 		return mapDataLocated
 	})
 	.then(data => {
-
+		if(state.consultaFetch.ativo === '1' && data){
+			createCommentBox("mapInfoCommentbox", state.mapSelected)
+			state.mapSelected = true
+		}
+	
+		return data
+	})
+	.then(data => {
 		tabsResetListeners(['baseInfo', 'legenda-projetos'], '#mapInfo')
 
-		if(state.consultaFetch.ativo === '1'){
-			// <form mapas>
+		if(state.consultaFetch.ativo === '1' && data){
 			commentBoxEvents('mapInfoCommentbox'),
 			commentBoxSubmit('mapInfoCommentbox', state.idConsulta, data.id, data.name)
 		}
