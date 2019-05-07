@@ -221,13 +221,13 @@ function smallerExtent(extents) {
 
 
 /**
-* Return the files from each projetos.json
+* Return the files from each projeto
 * @param { Number } indicador The project indicador
-* @param { Object } projetos The projetos.json data
+* @param { Object } projetos The projetos data
 * @return { Object } { hero, images }
 */
 function getFiles(indicador, projetos, baseId = false, indicadores = {}){
-	if (indicador === baseId) { // base id is 201
+	if (indicador === baseId) {
 		let baseproject = projetos.filter(projeto => projeto.id === indicador)
 		return baseproject
 	}
@@ -243,16 +243,18 @@ function getFiles(indicador, projetos, baseId = false, indicadores = {}){
 				file.extension === '.jpeg' ||
 				file.extension === '.svg'
 			)
+
 			const hero = files.filter( hero => hero.name.includes(`hero${hero.extension}`))
+
 			if(images.length > 0 && hero.length > 0){
 				return {
-					images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+					images: images.map(image => { return {"path": image.path, extension: image.extension, name: image.name } }),
 					hero: hero[0].path
 				}
 			}
 			if(images.length > 0){
 				return {
-					images: images.map(image => { return {"path": image.path, extension: image.extension} }),
+					images: images.map(image => { return {"path": image.path, extension: image.extension, name: image.name } }),
 					hero: false
 				}
 			}
@@ -289,7 +291,7 @@ function createInfo(data, projectColor, path = false) {
 
 	if (path) {
 		concatenation += `<div class='cover-section' style='background-color: rgba(${projectColor[0]}, ${projectColor[1]}, ${projectColor[2]}, 0.2)'>
-			<img class='cover-section-img' src='${ process.env.APP_URL}${path }' alt='${data.NOME}'>
+			<img class='cover-section-img' src='${ process.env.APP_URL}${path}' alt='${data.NOME}'>
 		</div>`
 	}
 

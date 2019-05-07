@@ -128,7 +128,7 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			setInitialState('initial', 3)
 			const dataSheetitem = dataSheet.find(sheet => sheet.INDICADOR === indicador)
 			const colors = layerColors[indicador]
-			const images = getFiles(indicador, projetos, false, indicadores)
+			const files = getFiles(indicador, projetos, false, indicadores)
 
 			// uncheck all itens except the clicked on tab list ('#projetos') 
 			const othersIds = listCreated.filter( idItem => idItem !== indicador )
@@ -149,13 +149,21 @@ function layersController(listCreated, projectLayers, layerColors, view, fitPadd
 			})
 			switchVisibilityState(layer, true, map)
 
-			// fit to clicked project, change project info ('#info')
-			const path = images => {
-				if(images.hero) return images.hero
-				if(!images.hero && images.images) return images.images[0].path
+			// add indicador.IMAGEM if the file exists in projetos/id_projeto-name
+			const champs = files => {
+				if(files.images) {
+					return files.images.find(image => image.name === dataSheetitem['IMAGEM'])
+				}
+				else { return false }
+			}
+
+			const path = files => {
+				if(champs(files)) return champs(files).path
+				if(files.hero) return files.hero
+				if(!files.hero && files.images) return files.images[0].path
 				else return false
 			}
-			createInfo(dataSheetitem, colors, path(images))
+			createInfo(dataSheetitem, colors, path(files))
 			tabsResetListeners(['baseInfo', 'legenda-mapas'], '#info')
 			fitToId(view, layer, fitPadding)
 			displayKmlInfo(layer)
