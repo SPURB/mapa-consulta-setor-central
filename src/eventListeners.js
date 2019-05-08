@@ -69,12 +69,17 @@ function toggleMapMobile() {
 }
 
 function goBackParticipe(id, url) {
+
 	let goBack = document.getElementById(id)
 	history.pushState({ initial: true }, url) // set initial state to the first load event
 
 	if(!goBack) throw new Error()
 
 	goBack.addEventListener('click', () => {
+
+		console.log(id)
+		console.log(url)
+
 		if(document.referrer === url){
 			window.history.go(-1)
 		}

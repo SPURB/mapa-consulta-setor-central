@@ -162,8 +162,6 @@ function switchlayers(state, layers, map){
 * @param  { Object } layer The kml attributes
 */
 function displayKmlInfo(layer) {
-	// console.log()
-
 	const kmlAttributes = layer.values_
 	const exceptions = [
 		'SubClasses', 
@@ -198,7 +196,6 @@ function displayKmlInfo(layer) {
 
 	const url = layer.values_.source.url_
 	if (url) { concatenation += `<span>Arquivo vetorial:</span><p><a href='${url}' download>KML</a></p>` }
-
 	if ( concatenation!=='' ){ info.innerHTML = concatenation }
 	else { info.classList.add('no-display') }
 }
@@ -276,7 +273,7 @@ function getFiles(indicador, projetos, baseId = false, indicadores = {}){
  * @param { String } text The url text
  */
 function createGoBackParticipe(id, svg, text) {
-	renderElement(`<a id=${id} class="go-back-participe"><img src='${svg}' alt='Voltar'>${text}</a>`, '#info-warnings')
+	renderElement(`<a id=${id} class="go-back-participe" href='https://participe.gestaourbana.prefeitura.sp.gov.br/setor-central'><img src='${svg}' alt='Voltar'>${text}</a>`, '#info-warnings')
 }
 
 /**

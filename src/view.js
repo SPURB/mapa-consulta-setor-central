@@ -33,7 +33,7 @@ import {
 import {
 	commentBoxEvents,
 	commentBoxSubmit,
-	goBackParticipe,
+	// goBackParticipe,
 	toggleMapMobile, 
 	mapsBtnClickEvent,
 	sidebarGoHome,
@@ -114,9 +114,6 @@ docReady(() => {
 				createGoBackParticipe('go-back-participe', seta,'Texto da consulta')
 		},0)
 	})
-	.then(() => {
-		goBackParticipe('go-back-participe', `${window.location.origin}/setor-central-2`) // check participe's new route!!!
-	})
 	.catch(error => error)
 
 	const addCommentBox = apiGet('consultas', state.idConsulta) //fetch from api
@@ -154,6 +151,7 @@ docReady(() => {
 					mapsBtnClickEvent(mapaData,"#mapas", appmap, allLayers, indicadoresBases, state, baseLayer),
 					closeObjectInfo('mapInfo', 'closeMapInfo'),
 					closeObjectInfo('info', 'closeInfo'),
+
 
 					// map
 					toggleMapMobile(), 
@@ -212,12 +210,25 @@ docReady(() => {
 
 	})
 
-	const addControls = new Promise ( (resolve, reject) => {
+	const addControls = new Promise (() => {
 		setTimeout(() => {
-			try { resolve(appmap.addControl(new ScaleLine()), appmap.addControl(new ZoomSlider())) }
-			catch (error) { reject(error) }
+			appmap.addControl(new ScaleLine()), appmap.addControl(new ZoomSlider())
 		}, 1)
 	})
+
+
+	// const mapInteractions = new Promise (() => {
+	// 	let pointerCache = []
+	// 	setTimeout(() => {
+	// 		appmap.on('pointermove', event => {
+	// 			if(event.dragging) { return }
+	// 			const pixel = appmap.getEventPixel(event.originalEvent)
+	// 			const feature = appmap.getFeaturesAtPixel(pixel)
+	// 			if(feature.length > 1) { console.log(feature) }
+	// 		})
+	// 	}, 1)
+	// })
+
 
 	/*
 	* Ordered app initiation chain. This is done just once
@@ -238,7 +249,7 @@ docReady(() => {
 	*/
 	.then( () => firstLoad )
 	.then( () => addControls )
-	// TODO: fetch comments of state.idConsulta
+	// .then( () => mapInteractions )
 	.catch( error => {
 		console.error(error)
 		throw new Error(error)
