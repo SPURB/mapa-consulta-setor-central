@@ -194,6 +194,7 @@ function setComplexLineLayer(name, path, id, indicador, rgba, simplefield){
 
 	let styleCache = {}
 	let isDashed = false
+	let isBiggerWidth = false
 
 	let lineStyle = feature => {
 		let type = feature.get(simplefield)
@@ -214,9 +215,18 @@ function setComplexLineLayer(name, path, id, indicador, rgba, simplefield){
 			if(indicador === 'B30' && val === 'Ampliação de passeio e instalação de piso drenante') { return rgba }
 			if(indicador === 'B31' && val === 'Ampliação e melhoria de passeios existentes') { return rgba }
 			if(indicador === 'B32' && val === 'Calçadão novo') { return rgba }
-			if(indicador === 'B33' && val === 'Ciclopassarela aérea') { return rgba }
-			if(indicador === 'B34' && val === 'Galeria ciclopassarela') { return rgba }
-			if(indicador === 'B35' && val === 'Lajão sobre rio, via ou ferrovia') { return rgba }
+			if(indicador === 'B33' && val === 'Ciclopassarela aérea') { 
+				isBiggerWidth = true
+				return rgba
+			}
+			if(indicador === 'B34' && val === 'Galeria ciclopassarela') { 
+				isBiggerWidth =  true
+				return rgba
+			}
+			if(indicador === 'B35' && val === 'Lajão sobre rio, via ou ferrovia') { 
+				isBiggerWidth =  true
+				return rgba
+			}
 			if(indicador === 'B36' && val === 'Requalificação de calçadão') { return rgba }
 			if(indicador === 'B37' && val === 'Requalificação parcial de calçada') { return rgba }
 			if(indicador === 'B38' && val === 'Requalificação total de calçada') { return rgba }
@@ -247,9 +257,9 @@ function setComplexLineLayer(name, path, id, indicador, rgba, simplefield){
 
 			styleFeature = new Style({
 				stroke: new Stroke({
-					width: 2,
 					color: variator(type),
-					lineDash: isDashed ? [4] : false
+					width: isBiggerWidth ? 6 : 3,
+					lineDash: isDashed ? [4] : false,
 				})
 			})
 			
