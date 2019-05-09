@@ -46,14 +46,13 @@ APP_URL=http://localhost:8080/
 API_TOKEN=sampletoken
 API_URL=http://localhost/consulta-publicas-backend/
 ```
-> Se no seu ambiente o `http-server` criar um ambiente em um local diferente de localhost:8080 altere o parâmetro http://localhost:8080/
+> Se no seu ambiente o `http-server` criar um ambiente em um local diferente de localhost:8080 altere o parâmetro `APP_URL`.
 
 > Arquivos no padrão `env.*.local` são ignorados pelo git. Cuidado para **não comitar**  estas variáveis em outros arquivos. Não comitar deleção ou alterações no arquivo `.env`.
 
 
 ## Atualize os dados da planilha do google sheet
-O comando irá baixar os dados disponibilizados na [planilha do google docs](https://docs.google.com/spreadsheets/d/11W0_h0AcOxGvziGuZTolvEmdOS9VfNxP4WT-Sm_x80M/edit?usp=sharing em formato json no diretório `data-src/json/`
-):
+O comando abaixo irá baixar os dados disponibilizados na [planilha do google docs](https://docs.google.com/spreadsheets/d/11W0_h0AcOxGvziGuZTolvEmdOS9VfNxP4WT-Sm_x80M/edit?usp=sharing) em formato json no diretório `data-src/json/`:
 ```
 npm run files
 ```
