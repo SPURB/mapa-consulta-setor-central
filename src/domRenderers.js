@@ -273,7 +273,7 @@ function getFiles(indicador, projetos, baseId = false, indicadores = {}){
  * @param { String } text The url text
  */
 function createGoBackParticipe(id, svg, text) {
-	renderElement(`<a id=${id} class="go-back-participe" href='https://participe.gestaourbana.prefeitura.sp.gov.br/setor-central'><img src='${svg}' alt='Voltar'>${text}</a>`, '#info-warnings')
+	renderElement(`<a id=${id} class="go-back-participe" href='https://participe.gestaourbana.prefeitura.sp.gov.br/setor-central-2'><img src='${svg}' alt='Voltar'>${text}</a>`, '#info-warnings')
 }
 
 /**
