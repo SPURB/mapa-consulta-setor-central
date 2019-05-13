@@ -16,13 +16,7 @@ function mapas(){
 				})
 
 			const unique = [...new Set(raw.map(mapa => mapa.ID))] // return unique ids
-				// .map((value, id, array) => console.log(array.indexOf(value)))
-				// .filter((value, id, array) => array.indexOf(value) === id && id)
-				
-
-			// console.log(raw)
-			// console.log()
-
+	
 			unique.forEach(id => {
 				const layers = raw
 					.filter(layer => layer.ID === id)
@@ -32,7 +26,6 @@ function mapas(){
 					'layers': layers
 				})
 			})
-
 			return output
 		})
 		.then(mapsArrayNoNames => {
@@ -40,11 +33,14 @@ function mapas(){
 
 			GetSheetDone.labeledCols(config.google_sheet_id, 5) // Mapas_nome
 				.then(data => {
-					data.data.forEach(item => {
-						const idNumber = parseNameToNumericalId(item.idmapaqgis)
-						outPutObject[idNumber] = {
-							name: item.nome,
-							legenda: item.legenda
+
+					data.data
+						.forEach(item => {
+							const idNumber = parseNameToNumericalId(item.idmapaqgis)
+							outPutObject[idNumber] = {
+								name: item.nome,
+								legenda: item.legenda,
+								ordem: item.ordem
 						}
 					})
 
@@ -52,8 +48,11 @@ function mapas(){
 						.map(item =>{
 							item.name = outPutObject[item.id].name
 							item.legenda = 'data-src/legendas/' + outPutObject[item.id].legenda
+							item.ordem = outPutObject[item.id].ordem
 							return item
 						})
+						.sort((a, b) => parseInt(a.ordem) - parseInt(b.ordem))
+					
 					return mapsArrayWithNames
 				})
 				.then(maps => createFile(maps, './data-src/json/mapas.json'))
